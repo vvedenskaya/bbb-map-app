@@ -1,0 +1,39 @@
+# macOS
+.DS_Store
+
+# Editors
+.idea/
+.vscode/
+
+# Node / frontend
+node_modules/
+.pnpm-store/
+.npm/
+
+# Build output
+.next/
+dist/
+build/
+out/
+coverage/
+
+# Local env
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local databases and uploads
+*.db
+*.sqlite
+*.sqlite3
+uploads/
+tmp/
