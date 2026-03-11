@@ -44,6 +44,21 @@ The current 2024 map presentation is visually dense, icon-led, and poster-like. 
 
 - Sprintboard roadmap: [docs/sprintboard-roadmap.md](/Users/vincentnaples/Documents/github/bbb_festival-app/docs/sprintboard-roadmap.md)
 
+## Current Prototype
+
+The repository now includes a runnable Next.js prototype with:
+
+- layered Bombay Beach map artwork using the provided base assets
+- seeded venue pins with hover preview and sidebar inspect state
+- Friday/Saturday/Sunday schedule filtering
+- event detail modal flow
+
+## Local Development
+
+- `pnpm dev`
+- `pnpm build`
+- `pnpm lint`
+
 ## Status
 
-Repository initialized. Planning is in place. Application scaffolding is intentionally deferred to the next step.
+Repository initialized. Planning is in place. First-pass frontend scaffolding is running locally, with persistence and admin CRUD still to come.
