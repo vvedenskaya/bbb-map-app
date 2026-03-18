@@ -106,8 +106,8 @@ export function FestivalMapApp({ venues, events, dataSourceLabel }: FestivalMapA
             <div className="map-stage">
               <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""}>
                 <Map
-                  defaultCenter={{ lat: 33.352, lng: -115.731 }}
-                  defaultZoom={16}
+                  defaultCenter={{ lat: 33.352, lng: -115.729 }}
+                  defaultZoom={17}
                   mapId="2f9f04bb8e9c458045b99a65"
                   mapTypeId="satellite"
                   disableDefaultUI={true}
