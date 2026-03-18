@@ -34,10 +34,15 @@ function parseCoordinates(urlOrString?: string): { lat: number; lng: number } | 
 
 function parseEventType(value: string): FestivalEvent["type"] {
   const normalized = value.trim().toLowerCase();
-  if (normalized === "music") return "music";
-  if (normalized === "performance") return "performance";
-  if (normalized === "installation") return "installation";
-  if (normalized === "lecture") return "lecture";
+  if (normalized.includes("music")) return "music";
+  if (normalized.includes("performance")) return "performance";
+  if (normalized.includes("installation")) return "installation";
+  if (normalized.includes("lecture")) return "lecture";
+  if (normalized.includes("object")) return "object";
+  if (normalized.includes("experience") || normalized.includes("facilitated")) return "experience";
+  if (normalized.includes("dj")) return "dj";
+  if (normalized.includes("venue")) return "venue";
+  if (normalized.includes("food")) return "food";
   return "community";
 }
 
@@ -132,6 +137,8 @@ async function loadCsvEvents(): Promise<FestivalEvent[] | null> {
             thumbnailUrl: "/map-layers/image_BB_map.jpg",
             lat: coords?.lat,
             lng: coords?.lng,
+            hasLocation: !!coords,
+            permanence: yearOrPermanent || "",
           } as unknown as FestivalEvent;
         }
 

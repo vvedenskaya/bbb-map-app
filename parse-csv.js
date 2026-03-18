@@ -90,8 +90,11 @@ try {
 
       const gpsData = row['GPS Coordinates/Link (from Location NEW)'];
       let coords = extractCoordinates(gpsData);
+      const hasLocation = !!coords;
       
       // Keep only items that have coords, or assign a random spread if none provided
+      // So they still appear on the map for now. Wait, the user asked for a "No Location" toggle.
+      // We will still place them centrally so they CAN be seen if toggled on, but mark them.
       if (!coords) {
          coords = {
              lat: 33.352 + (Math.random() - 0.5) * 0.005,
@@ -99,20 +102,32 @@ try {
          };
       }
       
-      let typeLabel = row['Project Type'] ? row['Project Type'].trim() : 'Installation';
+      const rawType = row['Project Type'] ? row['Project Type'].toLowerCase() : '';
+      let typeId = 'installation';
+      let accent = '#1e3a8a'; // installation dark blue
+      
+      if (rawType.includes('performance')) { typeId = 'performance'; accent = '#86efac'; }
+      else if (rawType.includes('object')) { typeId = 'object'; accent = '#7dd3fc'; }
+      else if (rawType.includes('experience') || rawType.includes('facilitated')) { typeId = 'experience'; accent = '#a855f7'; }
+      else if (rawType.includes('dj')) { typeId = 'dj'; accent = '#fef08a'; }
+      else if (rawType.includes('music')) { typeId = 'music'; accent = '#166534'; }
+      else if (rawType.includes('venue')) { typeId = 'venue'; accent = '#8b5cf6'; }
+      else if (rawType.includes('food')) { typeId = 'food'; accent = '#d8b4fe'; }
       
       parsedVenues.push({
           id: `art-${venueIdCounter++}`,
           name: row['Project Name'] ? row['Project Name'].trim() : (row['Artist Name'] || 'Untitled'),
-          label: typeLabel,
+          label: row['Project Type'] || 'Installation', // Original label
           shortDescription: `By ${row['Artist Name'] || 'Unknown Artist'}`,
           description: row['Abridged Project Text'] || '',
           lat: coords.lat,
           lng: coords.lng,
+          hasLocation: hasLocation,
+          permanence: row['Year or Permanent'] || '',
           x: 0, 
           y: 0,
           thumbnailUrl: "/map-layers/image_BB_map.jpg",
-          accent: "#bc5c2d" 
+          accent: accent
       });
   });
 

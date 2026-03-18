@@ -7,9 +7,14 @@
   --line: rgba(56, 38, 17, 0.18);
   --accent: #bc5c2d;
   --accent-soft: rgba(188, 92, 45, 0.16);
-  --music: #9f2f63;
-  --performance: #3c5fb1;
-  --installation: #5b7a24;
+  --music: #166534; /* dark green */
+  --performance: #86efac; /* light green */
+  --installation: #1e3a8a; /* dark blue */
+  --object: #7dd3fc; /* light blue */
+  --experience: #a855f7; /* purple */
+  --dj: #fef08a; /* yellow */
+  --venue: #8b5cf6; /* violet */
+  --food: #d8b4fe; /* lavender */
   --lecture: #af6a00;
   --community: #22726f;
   --shadow: 0 24px 80px rgba(62, 35, 12, 0.14);
@@ -224,45 +229,59 @@ a {
 
 .pin-button {
   position: absolute;
+  /* Remove transform: translate(-50%, -50%) - it causes jitter with dynamic width */
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* Label expands to the right */
   gap: 0;
-  padding: 6px;
+  padding: 0;
   border: 0;
   border-radius: 999px;
   background: rgba(255, 249, 236, 0.94);
   color: var(--ink);
   box-shadow: 0 10px 25px rgba(50, 31, 12, 0.12);
-  transform: translate(-50%, -50%);
   cursor: pointer;
-  transition: all 240ms cubic-bezier(0.19, 1, 0.22, 1);
+  transition: all 260ms cubic-bezier(0.19, 1, 0.22, 1);
   white-space: nowrap;
-  max-width: 28px;
+  
+  /* Initial state: just a dot */
+  width: 28px;
+  height: 28px;
   overflow: hidden;
+  
+  /* Center the button itself by offsetting left/top half its initial size */
+  margin-left: -14px;
+  margin-top: -14px;
 }
 
 .pin-button:hover,
 .pin-button.is-selected {
   gap: 8px;
-  padding: 8px 14px 8px 10px;
+  padding: 0 14px 0 0; /* Keep the dot on the far left */
+  width: auto;
   max-width: 240px;
+  height: 34px;
+  margin-top: -17px; /* Re-center vertically for new height */
   background: rgba(255, 249, 236, 0.98);
   box-shadow: 0 14px 30px rgba(50, 31, 12, 0.24);
-  z-index: 10;
+  z-index: 100;
 }
 
 .pin-button.is-selected {
   background: rgba(29, 22, 16, 0.96);
   color: #fff7e9;
+  z-index: 101;
 }
 
 .pin-dot {
-  width: 14px;
-  height: 14px;
+  width: 28px; /* Match button width in initial state */
+  height: 28px;
   border-radius: 999px;
   border: 2px solid rgba(255, 255, 255, 0.75);
   background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex: 0 0 auto;
 }
 
@@ -271,7 +290,7 @@ a {
   font-weight: 700;
   letter-spacing: 0.02em;
   opacity: 0;
-  transform: translateX(-10px);
+  transform: translateX(-5px);
   transition: all 200ms ease;
   pointer-events: none;
 }
@@ -366,6 +385,29 @@ a {
 
 .type-community {
   background: var(--community);
+}
+
+.type-object {
+  background: var(--object);
+  color: var(--ink); /* since it's light */
+}
+
+.type-experience {
+  background: var(--experience);
+}
+
+.type-dj {
+  background: var(--dj);
+  color: var(--ink); /* since it's light */
+}
+
+.type-venue {
+  background: var(--venue);
+}
+
+.type-food {
+  background: var(--food);
+  color: var(--ink); /* since it's light */
 }
 
 .solid-button,

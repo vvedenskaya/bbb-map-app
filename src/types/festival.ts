@@ -5,7 +5,12 @@ export type EventType =
   | "performance"
   | "installation"
   | "lecture"
-  | "community";
+  | "community"
+  | "object"
+  | "experience"
+  | "dj"
+  | "venue"
+  | "food";
 
 export type Venue = {
   id: string;
@@ -17,6 +22,8 @@ export type Venue = {
   y: number;
   lat?: number;
   lng?: number;
+  hasLocation?: boolean;
+  permanence?: string;
   thumbnailUrl: string;
   accent: string;
 };
@@ -34,4 +41,6 @@ export type FestivalEvent = {
   thumbnailUrl: string;
   lat?: number;
   lng?: number;
+  hasLocation?: boolean;
+  permanence?: string;
 };

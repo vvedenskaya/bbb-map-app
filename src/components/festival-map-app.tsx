@@ -34,16 +34,24 @@ export function FestivalMapApp({ venues, events, dataSourceLabel }: FestivalMapA
   const [activeDays, setActiveDays] = useState<FestivalDay[]>(ALL_DAYS);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [layers, setLayers] = useState<LayerState>(initialLayers);
+  const [showNoLocation, setShowNoLocation] = useState<boolean>(true);
 
   const selectedVenue = venues.find((venue) => venue.id === selectedVenueId) ?? null;
   const hoveredVenue = venues.find((venue) => venue.id === hoveredVenueId) ?? null;
   const selectedEvent = events.find((event) => event.id === selectedEventId) ?? null;
 
-  const visibleEvents = events.filter((event) => {
-    const matchesDay = activeDays.includes(event.day);
-    const matchesVenue = selectedVenueId ? event.venueId === selectedVenueId : true;
-    return matchesDay && matchesVenue;
+  const visibleVenues = venues.filter((venue) => {
+    return showNoLocation ? true : venue.hasLocation !== false;
   });
+
+  const visibleEvents = events
+    .filter((event) => {
+      const matchesDay = activeDays.includes(event.day);
+      const matchesVenue = selectedVenueId ? event.venueId === selectedVenueId : true;
+      const matchesLocation = showNoLocation ? true : event.hasLocation !== false;
+      return matchesDay && matchesVenue && matchesLocation;
+    })
+    .sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""));
 
   function toggleDay(day: FestivalDay) {
     setActiveDays((current) =>
@@ -98,6 +106,13 @@ export function FestivalMapApp({ venues, events, dataSourceLabel }: FestivalMapA
                     {layer}
                   </button>
                 ))}
+                <button
+                  className={`layer-toggle ${showNoLocation ? "active" : ""}`}
+                  type="button"
+                  onClick={() => setShowNoLocation(!showNoLocation)}
+                >
+                  Unplaced / No Location
+                </button>
               </div>
             </div>
           </header>
@@ -111,9 +126,11 @@ export function FestivalMapApp({ venues, events, dataSourceLabel }: FestivalMapA
                   mapId="2f9f04bb8e9c458045b99a65"
                   mapTypeId="satellite"
                   disableDefaultUI={true}
+                  zoomControl={true}
+                  gestureHandling="greedy"
                   style={{ width: "100%", height: "100%" }}
                 >
-                  {venues.map((venue) => (
+                  {visibleVenues.map((venue) => (
                     <AdvancedMarker
                       key={venue.id}
                       position={{ lat: venue.lat || 33.351, lng: venue.lng || -115.731 }}
@@ -256,6 +273,9 @@ export function FestivalMapApp({ venues, events, dataSourceLabel }: FestivalMapA
                         <div className="event-meta">
                           <span className="meta-chip">{venue?.name ?? "Unknown venue"}</span>
                           <span className="meta-chip">Host: {event.host}</span>
+                          {event.permanence ? (
+                            <span className="meta-chip">{event.permanence}</span>
+                          ) : null}
                         </div>
 
                         <p>{event.description}</p>
@@ -319,6 +339,9 @@ export function FestivalMapApp({ venues, events, dataSourceLabel }: FestivalMapA
                   {selectedEvent.startTime} - {selectedEvent.endTime}
                 </span>
                 <span className="meta-chip">Host: {selectedEvent.host}</span>
+                {selectedEvent.permanence ? (
+                  <span className="meta-chip">{selectedEvent.permanence}</span>
+                ) : null}
               </div>
               <p>{selectedEvent.description}</p>
             </div>
