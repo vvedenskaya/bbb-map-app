@@ -123,10 +123,11 @@ export function FestivalMapApp({ venues, events, dataSourceLabel }: FestivalMapA
                       <button
                         className={`pin-button ${selectedVenueId === venue.id ? "is-selected" : ""}`}
                         type="button"
-                        style={{ position: "relative", transform: "translate(-50%, -50%)" }}
                       >
                         <span className="pin-dot" style={{ background: venue.accent }} />
-                        <span className="pin-label">{venue.label}</span>
+                        <span className="pin-label">
+                          {venue.name.length > 20 ? venue.name.substring(0, 20) + "..." : venue.name}
+                        </span>
                       </button>
                     </AdvancedMarker>
                   ))}

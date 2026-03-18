@@ -226,19 +226,34 @@ a {
   position: absolute;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px 8px 9px;
+  justify-content: center;
+  gap: 0;
+  padding: 6px;
   border: 0;
   border-radius: 999px;
   background: rgba(255, 249, 236, 0.94);
   color: var(--ink);
-  box-shadow: 0 14px 30px rgba(50, 31, 12, 0.16);
+  box-shadow: 0 10px 25px rgba(50, 31, 12, 0.12);
   transform: translate(-50%, -50%);
   cursor: pointer;
+  transition: all 240ms cubic-bezier(0.19, 1, 0.22, 1);
+  white-space: nowrap;
+  max-width: 28px;
+  overflow: hidden;
+}
+
+.pin-button:hover,
+.pin-button.is-selected {
+  gap: 8px;
+  padding: 8px 14px 8px 10px;
+  max-width: 240px;
+  background: rgba(255, 249, 236, 0.98);
+  box-shadow: 0 14px 30px rgba(50, 31, 12, 0.24);
+  z-index: 10;
 }
 
 .pin-button.is-selected {
-  background: rgba(29, 22, 16, 0.94);
+  background: rgba(29, 22, 16, 0.96);
   color: #fff7e9;
 }
 
@@ -255,7 +270,16 @@ a {
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 200ms ease;
+  pointer-events: none;
+}
+
+.pin-button:hover .pin-label,
+.pin-button.is-selected .pin-label {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .hover-card {
