@@ -42,7 +42,7 @@ The current 2024 map presentation is visually dense, icon-led, and poster-like. 
 
 ## Planning Docs
 
-- Sprintboard roadmap: [docs/sprintboard-roadmap.md](/Users/vincentnaples/Documents/github/bbb_festival-app/docs/sprintboard-roadmap.md)
+- Sprintboard roadmap: [docs/sprintboard-roadmap.md](docs/sprintboard-roadmap.md)
 
 ## Current Prototype
 
@@ -58,6 +58,45 @@ The repository now includes a runnable Next.js prototype with:
 - `pnpm dev`
 - `pnpm build`
 - `pnpm lint`
+
+## MVP Data Pipeline (CSV -> Airtable)
+
+The prototype can now load schedule events from:
+
+- `csv` (default): `data/airtable-schedule.csv`
+- `airtable`: live fetch from Airtable API
+- `seed`: fallback hardcoded events in `src/data/festival.ts`
+
+### CSV workflow
+
+1. Export your Airtable view to CSV.
+2. Replace `data/airtable-schedule.csv` with your export.
+3. Keep `FESTIVAL_DATA_SOURCE=csv` in `.env.local`.
+
+Expected CSV headers:
+
+- `id`
+- `title`
+- `venue_id`
+- `day` (`Fri`, `Sat`, `Sun` or full names)
+- `start_time`
+- `end_time`
+- `type` (`music`, `performance`, `installation`, `lecture`, `community`)
+- `host`
+- `description`
+- `thumbnail_url`
+
+### Airtable API workflow
+
+Set the following in `.env.local` and switch source to Airtable:
+
+- `FESTIVAL_DATA_SOURCE=airtable`
+- `AIRTABLE_TOKEN=...`
+- `AIRTABLE_BASE_ID=...`
+- `AIRTABLE_TABLE_NAME=...`
+- `AIRTABLE_VIEW=...` (optional)
+
+If Airtable fetch fails or has no usable records, the app falls back to CSV, then seed data.
 
 ## Status
 

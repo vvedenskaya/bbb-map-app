@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { dayLabels, eventTypeLabels, events, MAP_DIMENSIONS, venues } from "@/data/festival";
-import { FestivalDay } from "@/types/festival";
+import { APIProvider, Map, AdvancedMarker } from "@vis.gl/react-google-maps";
+import { dayLabels, eventTypeLabels, MAP_DIMENSIONS } from "@/data/festival";
+import { FestivalDay, FestivalEvent, Venue } from "@/types/festival";
 
 const ALL_DAYS: FestivalDay[] = ["fri", "sat", "sun"];
 
@@ -21,7 +22,13 @@ const initialLayers: LayerState = {
   houses: true,
 };
 
-export function FestivalMapApp() {
+type FestivalMapAppProps = {
+  venues: Venue[];
+  events: FestivalEvent[];
+  dataSourceLabel?: string;
+};
+
+export function FestivalMapApp({ venues, events, dataSourceLabel }: FestivalMapAppProps) {
   const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
   const [hoveredVenueId, setHoveredVenueId] = useState<string | null>(venues[0]?.id ?? null);
   const [activeDays, setActiveDays] = useState<FestivalDay[]>(ALL_DAYS);
@@ -61,8 +68,9 @@ export function FestivalMapApp() {
               <h1>Map, venue, and schedule scaffold.</h1>
               <p>
                 First pass on the interactive core: layered town map, inspectable venues,
-                and a day-driven schedule sidebar built on seed data.
+                and a day-driven schedule sidebar wired to importable data.
               </p>
+              {dataSourceLabel ? <p className="eyebrow">Data source: {dataSourceLabel}</p> : null}
             </div>
 
             <div className="map-controls">
@@ -96,112 +104,34 @@ export function FestivalMapApp() {
 
           <div className="map-stage-wrap">
             <div className="map-stage">
-              <svg
-                className="map-artwork"
-                viewBox={`0 0 ${MAP_DIMENSIONS.width} ${MAP_DIMENSIONS.height}`}
-                role="img"
-                aria-label="Bombay Beach festival map prototype"
-              >
-                <rect width={MAP_DIMENSIONS.width} height={MAP_DIMENSIONS.height} fill="#eadcc0" />
-                {layers.imagery ? (
-                  <image
-                    href="/map-layers/image_BB_map.jpg"
-                    x="0"
-                    y="0"
-                    width={MAP_DIMENSIONS.width}
-                    height={MAP_DIMENSIONS.height}
-                    preserveAspectRatio="none"
-                    opacity="0.92"
-                  />
-                ) : null}
-                {layers.lots ? (
-                  <image
-                    href="/map-layers/lots_BB_map.svg"
-                    x="0"
-                    y="0"
-                    width={MAP_DIMENSIONS.width}
-                    height={MAP_DIMENSIONS.height}
-                    preserveAspectRatio="none"
-                    opacity="0.6"
-                  />
-                ) : null}
-                {layers.houses ? (
-                  <image
-                    href="/map-layers/houses_BB_map.svg"
-                    x="0"
-                    y="0"
-                    width={MAP_DIMENSIONS.width}
-                    height={MAP_DIMENSIONS.height}
-                    preserveAspectRatio="none"
-                    opacity="0.42"
-                  />
-                ) : null}
-                {layers.roads ? (
-                  <image
-                    href="/map-layers/roads_BB_map.svg"
-                    x="0"
-                    y="0"
-                    width={MAP_DIMENSIONS.width}
-                    height={MAP_DIMENSIONS.height}
-                    preserveAspectRatio="none"
-                    opacity="0.7"
-                  />
-                ) : null}
-              </svg>
-
-              <div className="pin-layer">
-                {venues.map((venue) => (
-                  <button
-                    key={venue.id}
-                    className={`pin-button ${selectedVenueId === venue.id ? "is-selected" : ""}`}
-                    type="button"
-                    style={{
-                      left: `${(venue.x / MAP_DIMENSIONS.width) * 100}%`,
-                      top: `${(venue.y / MAP_DIMENSIONS.height) * 100}%`,
-                    }}
-                    onMouseEnter={() => setHoveredVenueId(venue.id)}
-                    onFocus={() => setHoveredVenueId(venue.id)}
-                    onClick={() => setSelectedVenueId(venue.id)}
-                  >
-                    <span className="pin-dot" style={{ background: venue.accent }} />
-                    <span className="pin-label">{venue.label}</span>
-                  </button>
-                ))}
-              </div>
-
-              {hoveredVenue ? (
-                <article className="hover-card">
-                  <div className="hover-image">
-                    <Image
-                      src={hoveredVenue.thumbnailUrl}
-                      alt={`${hoveredVenue.name} preview`}
-                      fill
-                      sizes="340px"
-                      style={{ objectFit: "cover" }}
-                    />
-                  </div>
-                  <div className="hover-copy">
-                    <span className="eyebrow">Venue Preview</span>
-                    <h2>{hoveredVenue.name}</h2>
-                    <p>{hoveredVenue.shortDescription}</p>
-                    <div className="hover-meta">
-                      <span className="meta-chip">
-                        {events.filter((event) => event.venueId === hoveredVenue.id).length} events
-                      </span>
-                      <span className="meta-chip">Front-end seed data</span>
-                    </div>
-                    <div>
+              <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""}>
+                <Map
+                  defaultCenter={{ lat: 33.352, lng: -115.731 }}
+                  defaultZoom={16}
+                  mapId="2f9f04bb8e9c458045b99a65"
+                  mapTypeId="satellite"
+                  disableDefaultUI={true}
+                  style={{ width: "100%", height: "100%" }}
+                >
+                  {venues.map((venue) => (
+                    <AdvancedMarker
+                      key={venue.id}
+                      position={{ lat: venue.lat || 33.351, lng: venue.lng || -115.731 }}
+                      onClick={() => setSelectedVenueId(venue.id)}
+                      onMouseEnter={() => setHoveredVenueId(venue.id)}
+                    >
                       <button
-                        className="solid-button"
+                        className={`pin-button ${selectedVenueId === venue.id ? "is-selected" : ""}`}
                         type="button"
-                        onClick={() => setSelectedVenueId(hoveredVenue.id)}
+                        style={{ position: "relative", transform: "translate(-50%, -50%)" }}
                       >
-                        Inspect venue
+                        <span className="pin-dot" style={{ background: venue.accent }} />
+                        <span className="pin-label">{venue.label}</span>
                       </button>
-                    </div>
-                  </div>
-                </article>
-              ) : null}
+                    </AdvancedMarker>
+                  ))}
+                </Map>
+              </APIProvider>
 
               <div className="map-fade" />
             </div>

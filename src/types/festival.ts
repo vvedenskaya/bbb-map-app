@@ -15,6 +15,8 @@ export type Venue = {
   description: string;
   x: number;
   y: number;
+  lat?: number;
+  lng?: number;
   thumbnailUrl: string;
   accent: string;
 };
@@ -30,4 +32,6 @@ export type FestivalEvent = {
   endTime: string;
   type: EventType;
   thumbnailUrl: string;
+  lat?: number;
+  lng?: number;
 };
