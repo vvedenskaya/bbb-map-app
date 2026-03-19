@@ -34,22 +34,39 @@ export function FestivalMapApp({ venues, events, dataSourceLabel }: FestivalMapA
   const [activeDays, setActiveDays] = useState<FestivalDay[]>(ALL_DAYS);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [layers, setLayers] = useState<LayerState>(initialLayers);
-  const [showNoLocation, setShowNoLocation] = useState<boolean>(true);
+  const [locationFilter, setLocationFilter] = useState<"all" | "placed" | "unplaced">("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const selectedVenue = venues.find((venue) => venue.id === selectedVenueId) ?? null;
   const hoveredVenue = venues.find((venue) => venue.id === hoveredVenueId) ?? null;
   const selectedEvent = events.find((event) => event.id === selectedEventId) ?? null;
 
+  const lowerQuery = searchQuery.toLowerCase();
+
   const visibleVenues = venues.filter((venue) => {
-    return showNoLocation ? true : venue.hasLocation !== false;
+    let matchesLocation = true;
+    if (locationFilter === "placed") matchesLocation = venue.hasLocation !== false;
+    if (locationFilter === "unplaced") matchesLocation = venue.hasLocation === false;
+    
+    const matchesSearch = lowerQuery ? venue.name.toLowerCase().includes(lowerQuery) : true;
+    return matchesLocation && matchesSearch;
   });
 
   const visibleEvents = events
     .filter((event) => {
       const matchesDay = activeDays.includes(event.day);
       const matchesVenue = selectedVenueId ? event.venueId === selectedVenueId : true;
-      const matchesLocation = showNoLocation ? true : event.hasLocation !== false;
-      return matchesDay && matchesVenue && matchesLocation;
+      
+      let matchesLocation = true;
+      if (locationFilter === "placed") matchesLocation = event.hasLocation !== false;
+      if (locationFilter === "unplaced") matchesLocation = event.hasLocation === false;
+
+      const matchesSearch = lowerQuery
+        ? event.title.toLowerCase().includes(lowerQuery) ||
+          event.host.toLowerCase().includes(lowerQuery) ||
+          (event.description || "").toLowerCase().includes(lowerQuery)
+        : true;
+      return matchesDay && matchesVenue && matchesLocation && matchesSearch;
     })
     .sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""));
 
@@ -107,11 +124,25 @@ export function FestivalMapApp({ venues, events, dataSourceLabel }: FestivalMapA
                   </button>
                 ))}
                 <button
-                  className={`layer-toggle ${showNoLocation ? "active" : ""}`}
+                  className={`layer-toggle ${locationFilter === "all" ? "active" : ""}`}
                   type="button"
-                  onClick={() => setShowNoLocation(!showNoLocation)}
+                  onClick={() => setLocationFilter("all")}
                 >
-                  Unplaced / No Location
+                  All Locations
+                </button>
+                <button
+                  className={`layer-toggle ${locationFilter === "placed" ? "active" : ""}`}
+                  type="button"
+                  onClick={() => setLocationFilter("placed")}
+                >
+                  Mapped Only
+                </button>
+                <button
+                  className={`layer-toggle ${locationFilter === "unplaced" ? "active" : ""}`}
+                  type="button"
+                  onClick={() => setLocationFilter("unplaced")}
+                >
+                  Missing Coordinates
                 </button>
               </div>
             </div>
@@ -127,6 +158,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel }: FestivalMapA
                   mapTypeId="satellite"
                   disableDefaultUI={true}
                   zoomControl={true}
+                  mapTypeControl={true}
                   gestureHandling="greedy"
                   style={{ width: "100%", height: "100%" }}
                 >
@@ -171,6 +203,23 @@ export function FestivalMapApp({ venues, events, dataSourceLabel }: FestivalMapA
           <div className="sidebar-body">
             <section className="sidebar-section">
               <div className="filter-grid">
+                <input
+                  type="search"
+                  placeholder="Search venues or events..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    gridColumn: "1 / -1",
+                    padding: "10px 14px",
+                    borderRadius: "99px",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    background: "rgba(0,0,0,0.5)",
+                    color: "white",
+                    marginBottom: "8px",
+                    fontSize: "14px",
+                    outline: "none",
+                  }}
+                />
                 <button
                   className={`pill ${selectedVenueId === null ? "active" : ""}`}
                   type="button"

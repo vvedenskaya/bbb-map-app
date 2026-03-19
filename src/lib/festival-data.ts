@@ -2,10 +2,11 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { events as seedEvents, venues } from "@/data/festival";
 import { FestivalDay, FestivalEvent, Venue } from "@/types/festival";
-import { fetchAirtableEvents } from "@/lib/airtable";
+import { fetchAirtableInstallations } from "@/lib/airtable";
 import { parseCsv } from "@/lib/csv";
 
-const CSV_FILE_PATH = path.join(process.cwd(), "data", "airtable-schedule.csv");
+const CSV_FILE_PATH = path.join(process.cwd(), "data", "Installations_Art Pieces-BBB '26 Digital Data.csv");
+const PARSED_LOCATIONS_PATH = path.join(process.cwd(), "data", "parsed_locations_output.csv");
 
 type DataSource = "csv" | "airtable" | "seed";
 
@@ -46,6 +47,19 @@ function parseEventType(value: string): FestivalEvent["type"] {
   return "community";
 }
 
+function getEventAccentColor(type: string): string {
+  switch (type) {
+    case 'performance': return '#86efac';
+    case 'object': return '#7dd3fc';
+    case 'experience': return '#a855f7';
+    case 'dj': return '#fef08a';
+    case 'music': return '#166534';
+    case 'venue': return '#8b5cf6';
+    case 'food': return '#d8b4fe';
+    default: return '#1e3a8a';
+  }
+}
+
 function buildVenueLookup() {
   const byId = new Map<string, string>();
   const byName = new Map<string, string>();
@@ -62,9 +76,28 @@ function buildVenueLookup() {
 async function loadCsvEvents(): Promise<FestivalEvent[] | null> {
   try {
     const text = await readFile(CSV_FILE_PATH, "utf-8");
-    const rows = parseCsv(text);
+    // Handle potential BOM issue by cleaning first character if it's BOM
+    const cleanText = text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
+    const rows = parseCsv(cleanText);
     if (rows.length === 0) {
       return null;
+    }
+
+    const locationMap = new Map<string, { lat: number; lng: number }>();
+    try {
+      const locText = await readFile(PARSED_LOCATIONS_PATH, "utf-8");
+      const cleanLocText = locText.charCodeAt(0) === 0xFEFF ? locText.slice(1) : locText;
+      const parsedLocs = parseCsv(cleanLocText);
+      for (const loc of parsedLocs) {
+        if (loc.project_name && loc.latitude && loc.longitude && loc.latitude !== "not found") {
+          locationMap.set(loc.project_name.trim().toLowerCase(), {
+            lat: parseFloat(loc.latitude),
+            lng: parseFloat(loc.longitude)
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("Could not load parsed locations file:", e);
     }
 
     const venueLookup = buildVenueLookup();
@@ -118,13 +151,17 @@ async function loadCsvEvents(): Promise<FestivalEvent[] | null> {
           if (artistName) hostPieces.push(artistName);
           if (additionalArtists) hostPieces.push(additionalArtists);
 
-          const coords = parseCoordinates(gps);
+          // Get coords strictly and ONLY from parsed_locations_output.csv map!
+          const coords = locationMap.get(title.trim().toLowerCase());
+          let lat = coords?.lat;
+          let lng = coords?.lng;
 
+          const eventId = row.id || `csv-installation-${index + 1}`;
+          
           return {
-            id: row.id || `csv-installation-${index + 1}`,
-            // We do not yet have a structured venue table for these;
-            // keep a stable synthetic venue id and show the human location in the description.
-            venueId: "installations",
+            id: eventId,
+            // Draw this installation as its own pin on the map by mapping the venueId to its own ID
+            venueId: eventId,
             title,
             host: hostPieces.join(" — ") || "TBD",
             description:
@@ -135,9 +172,9 @@ async function loadCsvEvents(): Promise<FestivalEvent[] | null> {
             endTime: duration || "TBD",
             type: parseEventType(projectType || ""),
             thumbnailUrl: "/map-layers/image_BB_map.jpg",
-            lat: coords?.lat,
-            lng: coords?.lng,
-            hasLocation: !!coords,
+            lat: lat,
+            lng: lng,
+            hasLocation: (lat !== undefined && lng !== undefined),
             permanence: yearOrPermanent || "",
           } as unknown as FestivalEvent;
         }
@@ -189,11 +226,11 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
   const source = getSourcePreference();
 
   if (source === "airtable") {
-    const airtableEvents = await fetchAirtableEvents();
-    if (airtableEvents && airtableEvents.length > 0) {
+    const airtableData = await fetchAirtableInstallations();
+    if (airtableData && airtableData.venues.length > 0) {
       return {
-        venues,
-        events: airtableEvents,
+        venues: airtableData.venues,
+        events: airtableData.events,
         sourceLabel: "Airtable API",
       };
     }
@@ -202,8 +239,30 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
   if (source === "csv" || source === "airtable") {
     const csvEvents = await loadCsvEvents();
     if (csvEvents && csvEvents.length > 0) {
+      
+      // Generate dynamic venues for the CSV installations so they appear on the map
+      const csvVenues = csvEvents.map(ev => {
+        return {
+          id: ev.venueId,
+          name: ev.title,
+          label: ev.type,
+          shortDescription: `By ${ev.host}`,
+          description: ev.description,
+          lat: ev.lat !== undefined ? ev.lat : 33.351000,
+          lng: ev.lng !== undefined ? ev.lng : -115.731000,
+          hasLocation: ev.hasLocation,
+          permanence: ev.permanence,
+          x: 0,
+          y: 0,
+          thumbnailUrl: ev.thumbnailUrl || "/map-layers/image_BB_map.jpg",
+          accent: getEventAccentColor(ev.type)
+        } as Venue;
+      });
+
+      // We only return csvVenues now because the original 'venues' array was just the same set
+      // of art pieces with old scattered coordinates! We don't want to duplicate all 266 locations.
       return {
-        venues,
+        venues: csvVenues,
         events: csvEvents,
         sourceLabel: "CSV import",
       };
