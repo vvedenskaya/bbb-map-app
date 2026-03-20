@@ -1,261 +1,154 @@
-# Sprintboard Roadmap
+# Sprintboard Roadmap (Build on Top Legacy)
 
-## Festival Context
+## Decision: Build on top, not rewrite
 
-The **Bombay Beach Biennale** is a town-wide arts and culture festival across the small **5×8 block footprint** of Bombay Beach, CA. It includes:
+Based on the legacy repo and currently running map:
 
-- **Performances** — music, opera, theater
-- **Lectures & presentations** — philosophy, sustainability, poetry
-- **Art installations** — 24/7 passive experiences, viewable on demand, or scheduled exhibitions in venues with public hours
-- **Unscheduled / impromptu** — if-you-know-you-know activities that may or may not appear on the master calendar
+- Legacy codebase: [binx/bombay-mapbox](https://github.com/binx/bombay-mapbox)
+- Existing live map: [bombaybeachmap.com](https://bombaybeachmap.com/)
 
-The app supports **decentralized coordination**: event producers and artists/presenters get the tools and autonomy to self-manage and update their own events.
-
----
-
-## Vision Notes
-
-Reference reviewed: [Bombay Beach Biennale 2024 map](https://www.bombaybeachbiennale.org/map2024)
-
-Observed qualities to preserve:
-
-- strong local personality and festival-specific visual language
-- venue-first wayfinding
-- all-at-once sense of the town footprint
-- category cues through icons and labels
-
-Observed issues to improve:
-
-- dense labeling hurts scanability
-- schedule context is disconnected from the map
-- hover, search, and filtering workflows are limited
-- mobile interaction is likely constrained by poster-style composition
+Recommended approach is **incremental migration on top of existing work**, not full rewrite.  
+Reason: you already have usable map behavior, domain data, and real-world interaction patterns to preserve.
 
 ---
 
-## Product Strategy
+## Product Scope (2026)
 
-Build the smallest useful system first, with boundaries that scale:
+Core outcomes for this project:
 
-- **Interactive digital map web app** of Bombay Beach Biennale with venues and schedule
-- **No-auth access** for guests (view only); **auth for admin panel** to edit and manage comms; **artist-editable permissions** for submitting description, timing, photos, etc.
-- **Admin dashboard** — create pinned, labeled locations with description, photo, and schedule per venue/event
-- **Master festival schedule** — Day view, venue checkboxes, color coding by event type (music, performance, installation, lecture, etc.)
-- **Artists / contributors portal** — edit event inputs, place on map, attach media, description, time
-- **Clean Notion kit** for FAQ and artist/volunteer information
-
----
-
-## Sprintboard
-
-| Lane | Items |
-|------|--------|
-| **Now** | Define technical architecture, scaffold app shell, choose map stack, choose data model, stand up local persistence |
-| **Sprint 1** | Hello world app shell, base layout, map canvas, static Bombay Beach map asset, seed venue data, sidebar shell |
-| **Sprint 2** | Venue CRUD for admins, persistent venue storage, pin rendering, hover card, sidebar venue inspect flow |
-| **Sprint 3** | Event model, Friday/Saturday/Sunday schedule UI, event filtering by day and venue, event detail modal, color coding by event type |
-| **Sprint 4** | Auth for admins, asset upload flow, validation, audit-friendly admin UX, mobile polish |
-| **Sprint 5** | Search, map layers, richer filters, performance passes, production deployment pipeline |
-| **Second pass** | Artist/contributor portal (self-edit events, map placement, media, description, time); guest view remains no-auth; admin panel for comms and management |
-| **Later** | User accounts and personal schedule (favorited events, “my schedule” view); Google Calendar or Notion calendar sync; Notion kit for FAQ and artist/volunteer info |
-| **Stretch** | AI-powered data structuring in the platform; AI image generation; role-specific content operations; segmented communications |
+- Public no-auth interactive map (wayfinding + schedule).
+- Master schedule with day view and filters (venue + event type).
+- Category color system (music/performance/installation/lecture/etc.).
+- Admin panel for organizers (manage venues/events/media/descriptions).
+- Contributor portal with scoped edit permissions.
+- Role model: guest (public), contributor (scoped edit), admin (full control).
 
 ---
 
-## Second Pass (Post-MVP)
+## Architecture Baseline
 
-The second pass turns the app into a **coordination platform** instead of a static map + schedule.
+### Frontend
 
-### Access model
+- Keep current Next.js app as the main product shell.
+- Build map as isolated module (`MapCanvas`, `MapPins`, `MapLegend`, `MapFilters`).
+- New UI theme should be token-based (colors/spacing/typography in one place).
 
-| Role | Access | Capabilities |
-|------|--------|--------------|
-| **Guest** | No auth | View map, schedule, venue/event details only |
-| **Admin** | Auth required | Full CRUD on venues, events, comms; manage permissions; audit |
-| **Artist / contributor** | Auth, scoped | Edit own events: description, timing, photos, map placement; submit for review or auto-publish per policy |
+### Map stack
 
-### Second-pass deliverables
+- Use **Google Maps JavaScript API** via `@vis.gl/react-google-maps`.
+- Default map style: **`mapTypeId="satellite"`**.
+- Keep marker rendering stable with fixed anchor + non-reflowing pin geometry.
 
-1. **Artist / contributor portal**
-   - Claim or create events linked to venues
-   - Edit title, description, time, media, place-on-map (or venue assignment)
-   - Permissions: admin grants “editor” per event or per venue; optional self-service request flow
+### Data source
 
-2. **Admin dashboard**
-   - Create/edit pinned labeled locations (venue or event-level pins)
-   - Description, photo, schedule per venue/event
-   - Manage artist permissions and review submissions
-   - Comms and content management (copy, announcements)
+- Airtable as editable source for operations team.
+- Add a server-side sync layer (`Airtable -> normalized DTO -> app model`).
+- Introduce cache + revalidation strategy to avoid rate-limit issues.
 
-3. **Master festival schedule**
-   - Day view (e.g. Friday / Saturday / Sunday)
-   - Checkboxes (or filters) for venues
-   - Color coding by event type: music, performance, installation, lecture, etc.
-   - Optional: “unscheduled” or “impromptu” bucket for items that don’t have a fixed slot
+### Auth and permissions
 
-4. **Notion kit**
-   - Clean, public-facing FAQ
-   - Artist and volunteer information (how to submit, who to contact, deadlines)
-   - Can be embedded or linked; single source of truth for non-map, non-schedule content
-
-### Stretch (second pass)
-
-- **AI-powered data structuring** — e.g. suggest event type, time slots, or venue from description
-- **Calendar sync** — export or sync to Google Calendar or Notion calendar
-- **AI image generation** — placeholder or promotional imagery (with clear moderation and rights policy)
-- **User accounts and personal schedule** — favorited events, “my schedule” view for attendees
+- Public pages: no auth.
+- Admin pages: auth required.
+- Contributor pages: auth + row-level permission checks by venue/event ownership.
 
 ---
 
-## Milestones
+## Conflict-Safe Migration Plan
 
-### Milestone 0: Architecture Lock
+### Phase 0 - Stabilize foundation (1 week)
 
-**Outcome:** Decide framework, deployment target, auth approach, ORM/data layer, and map rendering strategy.
+- Lock map interaction bugs (marker click stability, mobile gestures).
+- Freeze current data model contracts (`Venue`, `Event`, `Asset`, `Role`).
+- Add smoke tests for map click/select/filter flows.
 
-**Exit criteria:**
+**Exit criteria**
+- Map no longer jumps during pin selection.
+- Existing views keep functioning after refactors.
+- Baseline test suite passes in CI.
 
-- one-page architecture decision record
-- agreed entity model for `Venue`, `Event`, `Asset`, `UserRole`
-- agreed MVP non-goals
+### Phase 1 - UI redesign without behavior rewrite (1-2 weeks)
 
-### Milestone 1: Functional Hello World
+- Replace visual layer only (layout/components/tokens), preserve feature behavior.
+- Introduce new shell sections: map, schedule rail, detail pane.
+- Keep data plumbing unchanged during this phase.
 
-**Outcome:** Running app with map area plus sidebar.
+**Exit criteria**
+- New interface live, old flows still functional.
+- No regressions in pin selection, filters, and modal behavior.
 
-**Exit criteria:**
+### Phase 2 - Google Satellite map hardening (1 week)
 
-- project boots locally
-- static map asset renders
-- sample venue pins render from seeded data
-- selecting a pin updates the sidebar
+- Standardize Google map config (center, zoom bounds, gesture policy).
+- Implement marker/popup primitives that do not alter anchor position.
+- Add optional layer toggles and map presets (default, satellite focus, event view).
 
-### Milestone 2: Venue Management MVP
+**Exit criteria**
+- Stable click targeting across desktop/mobile.
+- Predictable zoom/pan behavior.
 
-**Outcome:** Admins can create and edit venues in-app and persist them.
+### Phase 3 - Airtable integration (1-2 weeks)
 
-**Exit criteria:**
+- Define Airtable schema mapping:
+  - `Venues`
+  - `Events`
+  - `Contributors`
+  - `Media`
+- Build import adapter and validation.
+- Add reconciliation reports (missing coordinates, bad time windows, orphan events).
 
-- venue form: name, short/long description, coordinates, label, thumbnail
-- create/edit/delete venue actions persist between reloads
-- hover and click behavior matches the desired inspection flow
+**Exit criteria**
+- Data renders from Airtable in public map/schedule.
+- Validation catches broken records before publish.
 
-### Milestone 3: Schedule MVP
+### Phase 4 - Admin panel MVP (2 weeks)
 
-**Outcome:** Users can browse festival programming by day and venue.
+- Authenticated admin routes.
+- CRUD for venues/events.
+- Media upload/linking and publish state.
+- Basic audit trail (`updatedBy`, `updatedAt`, change reason optional).
 
-**Exit criteria:**
+**Exit criteria**
+- Organizer can fully manage festival content without code changes.
 
-- Friday, Saturday, Sunday filters work
-- events are color-coded by type (music, performance, installation, lecture, etc.)
-- selecting a venue scopes events
-- selecting an event opens a detail modal
+### Phase 5 - Contributor portal + role rules (2 weeks)
 
-### Milestone 4: MVP Stabilization
+- Contributor dashboard for own records only.
+- Editable fields: description, timing, media, map placement request.
+- Approval workflow (auto-publish toggle per role).
 
-**Outcome:** Admin access is protected; app is ready for wider iteration.
-
-**Exit criteria:**
-
-- authenticated admin routes
-- basic upload handling
-- form validation and error states
-- mobile-responsive map and sidebar behavior
-
-### Milestone 5: Second Pass — Artist Portal & Permissions
-
-**Outcome:** Artists/contributors can edit their own events; guests remain no-auth; admin retains full control.
-
-**Exit criteria:**
-
-- role model supports Guest, Admin, Artist/Contributor
-- artist-editable fields (description, timing, media, placement) with permission checks
-- admin dashboard: pinned locations, descriptions, photos, schedule; comms tooling
-- master schedule: day view, venue checkboxes, event-type color coding
-
-### Milestone 6: Second Pass — Notion & Optional Extras
-
-**Outcome:** FAQ and artist/volunteer info in a clean Notion kit; optional calendar sync and user schedules.
-
-**Exit criteria:**
-
-- Notion kit (or equivalent) for FAQ and artist/volunteer information linked or embedded
-- (Stretch) Calendar sync to Google or Notion
-- (Stretch) User accounts and personal schedule (favorites, “my schedule” view)
+**Exit criteria**
+- Contributor edits are scoped and secure.
+- Admin can approve/reject/override.
 
 ---
 
-## Recommended Backlog Shape
+## Sprintboard (Practical)
 
-### Epic A: Core Platform
-
-- app shell and routing
-- shared design tokens and layout primitives
-- environment configuration
-- deployment and CI setup
-
-### Epic B: Map System
-
-- base map asset pipeline
-- coordinate system and pin placement rules
-- layer toggles
-- pin rendering states
-
-### Epic C: Venue CMS
-
-- venue schema
-- admin CRUD flows
-- image asset association
-- published vs draft state
-
-### Epic D: Schedule Engine
-
-- event schema
-- day filters
-- venue–event linkage
-- event modal and type tagging (music, performance, installation, lecture, etc.)
-
-### Epic E: Identity and Permissions
-
-- admin auth
-- artist/contributor roles and scoped editing
-- auditability for edits
-
-### Epic F: Artist / Contributor Portal (Second Pass)
-
-- claim or create events; edit description, timing, media, placement
-- permission model (admin-granted or self-service request)
-- review/workflow for submissions (if not auto-publish)
-
-### Epic G: Notion & External Content (Second Pass)
-
-- Notion kit for FAQ and artist/volunteer information
-- (Stretch) Calendar sync (Google, Notion)
-- (Stretch) User accounts and personal schedule
-
-### Epic H: Stretch
-
-- AI-powered data structuring
-- AI image generation
-- role-specific content operations; segmented communications
+| Sprint | Focus | Deliverables |
+|------|--------|--------|
+| **Now** | Architecture lock | ADR, schema freeze, map bug baseline |
+| **Sprint 1** | UI refactor shell | New layout/tokens/components; no feature regressions |
+| **Sprint 2** | Google Satellite hardening | Stable markers, map controls, mobile gesture tuning |
+| **Sprint 3** | Airtable data integration | Read pipeline, validation, sync diagnostics |
+| **Sprint 4** | Admin MVP | Auth + venue/event CRUD + publish workflow |
+| **Sprint 5** | Contributor portal | Scoped edits, review flow, permission rules |
+| **Sprint 6** | Performance and launch | Caching, QA, analytics, production stabilization |
 
 ---
 
-## Data Model Starting Point
+## Data Contracts (Minimum)
 
 ### Venue
 
 - `id`
 - `name`
 - `slug`
-- `label`
-- `shortDescription`
+- `lat`, `lng`
 - `description`
-- `x`
-- `y`
-- `thumbnailAssetId`
+- `thumbnailUrl`
+- `category`
 - `published`
-- timestamps
+- `updatedAt`
 
 ### Event
 
@@ -264,60 +157,47 @@ The second pass turns the app into a **coordination platform** instead of a stat
 - `title`
 - `host`
 - `description`
-- `day`
-- `startTime`
-- `endTime`
-- `eventType` (e.g. music, performance, installation, lecture, impromptu)
-- `thumbnailAssetId`
+- `day` (`fri|sat|sun`)
+- `startTime`, `endTime`
+- `type` (music, performance, installation, lecture, food, community, etc.)
+- `thumbnailUrl`
 - `published`
-- timestamps
+- `updatedAt`
 
-### Asset
+### Permission model
 
-- `id`
-- `kind`
-- `url`
-- `altText`
-- metadata
-
-### User / Role (for second pass)
-
-- `id`
-- role: admin | artist | guest (or inferred by no account)
-- scoped permissions (e.g. eventIds or venueIds editable by artist)
+- `role`: `guest | contributor | admin`
+- `editableVenueIds[]`
+- `editableEventIds[]`
 
 ---
 
-## Architectural Guardrails
+## Guardrails to avoid conflicts
 
-- Do not couple map pin rendering directly to raw CMS form state.
-- Do not encode schedule logic only in UI components; keep it in reusable selectors/services.
-- Do not optimize for every stretch goal in MVP, but keep schemas additive.
-- Prefer boring, well-supported infrastructure for auth, database, and storage.
-- Keep the initial map implementation compatible with later geospatial enrichment, even if MVP uses simple image coordinates.
-- Keep guest experience no-auth; reserve auth for admin and artist/contributor flows.
-
----
-
-## MVP Non-Goals
-
-- personalized attendee accounts
-- full volunteer or artist portal
-- automated Google Calendar sync
-- mass email tooling
-- AI-generated content workflows
-- Notion kit (defer to second pass)
+- Do not migrate map engine and redesign UI in the same PR.
+- Do not couple UI state directly to Airtable payload shape.
+- Keep adapters between external data and internal typed models.
+- Keep public and admin/contributor routes physically separated.
+- Enforce role checks on server side, not only in client UI.
+- Add feature flags for risky changes (`new_ui`, `airtable_live`, `contributor_portal`).
 
 ---
 
-## Next-Step Question Themes
+## Definition of done for your request
 
-For the next step, the architecture discussion should resolve:
+For your exact goal ("new UI + Google satellite + Airtable + roles") this plan is successful when:
 
-- frontend framework and hosting preference
-- database and ORM preference
-- whether MVP uses image-coordinate mapping or true geospatial tiles
-- admin auth provider and role model (and later, artist role model)
-- image upload/storage approach
-- whether event data entry happens only in-app at first or imports from spreadsheets/calendar feeds
-- how Notion will be used (embed, link, or sync) for FAQ and artist/volunteer info
+- Public users see a fast no-auth map + schedule with stable interaction.
+- Admins can maintain all content without developer involvement.
+- Contributors can update only permitted records.
+- Migration happens gradually, without breaking the already working map experience.
+
+---
+
+## Immediate next implementation steps
+
+1. Finalize Airtable table/field contract and naming.
+2. Add `MapCanvas` abstraction with stable marker anchor behavior.
+3. Move current UI into tokenized component system.
+4. Enable feature flags and release changes incrementally.
+5. Start admin auth + CRUD on top of normalized models.
