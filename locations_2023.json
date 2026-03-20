@@ -1,0 +1,992 @@
+[
+  {
+    "Name": "The Ski Inn",
+    "Category": "Local Business",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3535831,
+    "Long": -115.7335035
+  },
+  {
+    "Name": "American Legion",
+    "Category": "Local Business",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3547378,
+    "Long": -115.725771
+  },
+  {
+    "Name": "Chow Market",
+    "Category": "Local Business",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3526499,
+    "Long": -115.7337213
+  },
+  {
+    "Name": "The Bombay Beach Institute of Particle Physics, Metaphysics & International Relations",
+    "Category": "Community Hub",
+    "Openness": "Private, unless invited",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3491567,
+    "Long": -115.7266481
+  },
+  {
+    "Name": "Zig Zag Plaza",
+    "Category": "Community Hub",
+    "Openness": "Private, unless invited",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.34906278,
+    "Long": -115.726117
+  },
+  {
+    "Name": "BBAC Center Bombay Beach Arts & Culture Center",
+    "Category": "Community Hub",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3532565,
+    "Long": -115.7305994
+  },
+  {
+    "Name": "The Cult of Reality's Grhastha Matha",
+    "Category": "Community Hub",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.352326,
+    "Long": -115.7269848
+  },
+  {
+    "Name": "Orange Plaza",
+    "Category": "Community Hub",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3497553,
+    "Long": -115.7265627
+  },
+  {
+    "Name": "The Beach",
+    "Category": "Venue",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.34747263,
+    "Long": -115.7296055
+  },
+  {
+    "Name": "Department of Redundancy Dept. (The Dord)",
+    "Category": "Venue",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3489844,
+    "Long": -115.7279718
+  },
+  {
+    "Name": "No Shoes",
+    "Category": "Venue",
+    "Openness": "Private",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3490894,
+    "Long": -115.7269388
+  },
+  {
+    "Name": "Kamar-Taj",
+    "Category": "Venue",
+    "Openness": "Private",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.35355222,
+    "Long": -115.7287069
+  },
+  {
+    "Name": "The Bombay Beach Drive-In",
+    "Category": "Venue",
+    "Openness": "Public",
+    "Artist(s)": "Stefan Ashkenazy",
+    "Artist Website": "",
+    "Lat": 33.3517231,
+    "Long": -115.7297369
+  },
+  {
+    "Name": "Museum of Unwanted Architecture",
+    "Category": "Venue",
+    "Openness": "Private, unless invited",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.34965,
+    "Long": -115.726501
+  },
+  {
+    "Name": "Cafe Bosna",
+    "Category": "Venue",
+    "Openness": "Public",
+    "Artist(s)": "Adisa Ziric, Dmytro Bershadskyy, Tah Rei",
+    "Artist Website": "https://cafebosna.cargo.site/",
+    "Lat": 33.34928635,
+    "Long": -115.7280227
+  },
+  {
+    "Name": "The Sub Club",
+    "Category": "Venue",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.34825936,
+    "Long": -115.7293901
+  },
+  {
+    "Name": "Club 86",
+    "Category": "Venue",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.34736236,
+    "Long": -115.7294533
+  },
+  {
+    "Name": "The Opera House",
+    "Category": "Venue",
+    "Openness": "Private",
+    "Artist(s)": "Stefan Ashkenazy",
+    "Artist Website": "",
+    "Lat": 33.349746,
+    "Long": -115.7298048
+  },
+  {
+    "Name": "Atlantis Inn Collective",
+    "Category": "Venue",
+    "Openness": "Public",
+    "Artist(s)": "Marco Walker",
+    "Artist Website": "",
+    "Lat": 33.3489563,
+    "Long": -115.73096
+  },
+  {
+    "Name": "Paradise",
+    "Category": "Venue",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.34894822,
+    "Long": -115.7301016
+  },
+  {
+    "Name": "BBBBistro",
+    "Category": "Venue",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.34911149,
+    "Long": -115.7336359
+  },
+  {
+    "Name": "Blauhaus",
+    "Category": "Venue",
+    "Openness": "Private",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.35316124,
+    "Long": -115.7311178
+  },
+  {
+    "Name": "Saturn",
+    "Category": "Venue",
+    "Openness": "Private",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.35320877,
+    "Long": -115.7313477
+  },
+  {
+    "Name": "Drakkar Noir",
+    "Category": "Venue",
+    "Openness": "Private",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.35132793,
+    "Long": -115.726207
+  },
+  {
+    "Name": "The Tiki House",
+    "Category": "Venue",
+    "Openness": "Private",
+    "Artist(s)": "Derek & Aya",
+    "Artist Website": "",
+    "Lat": 33.349887,
+    "Long": -115.729751
+  },
+  {
+    "Name": "The Low Bar",
+    "Category": "Venue",
+    "Openness": "Private",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3495512,
+    "Long": -115.7315413
+  },
+  {
+    "Name": "The Electric Lounge",
+    "Category": "Venue",
+    "Openness": "Private",
+    "Artist(s)": "Anderson / Daniela",
+    "Artist Website": "",
+    "Lat": 33.3521261,
+    "Long": -115.7299241
+  },
+  {
+    "Name": "Pythia",
+    "Category": "Venue",
+    "Openness": "Private",
+    "Artist(s)": "Danielle Ackeroy",
+    "Artist Website": "",
+    "Lat": 33.352717,
+    "Long": -115.7286839
+  },
+  {
+    "Name": "Yacht Club",
+    "Category": "Venue",
+    "Openness": "Private",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3531109,
+    "Long": -115.7265341
+  },
+  {
+    "Name": "Bombay Soleil",
+    "Category": "Venue",
+    "Openness": "Private, with public photo classes and tours",
+    "Artist(s)": "Sandi Wheaton",
+    "Artist Website": "",
+    "Lat": 33.3537679,
+    "Long": -115.7276783
+  },
+  {
+    "Name": "Bombay Beach Cinematheque and Archery",
+    "Category": "Venue",
+    "Openness": "Private",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.349178,
+    "Long": -115.725734
+  },
+  {
+    "Name": "Temple to the Scientific Method",
+    "Category": "Gallery",
+    "Openness": "Private",
+    "Artist(s)": "Dadaonysous",
+    "Artist Website": "",
+    "Lat": 33.35263116,
+    "Long": -115.7280142
+  },
+  {
+    "Name": "The Poetry House",
+    "Category": "Gallery",
+    "Openness": "Public",
+    "Artist(s)": "Pharaoh",
+    "Artist Website": "https://www.patreon.com/reginavictor",
+    "Lat": 33.349535,
+    "Long": -115.726539
+  },
+  {
+    "Name": "Polaroid Museum",
+    "Category": "Gallery",
+    "Openness": "Private",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.35316389,
+    "Long": -115.7289723
+  },
+  {
+    "Name": "Foundation Foundation",
+    "Category": "Gallery",
+    "Openness": "Private",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3500821,
+    "Long": -115.7294487
+  },
+  {
+    "Name": "The Ford House",
+    "Category": "Gallery",
+    "Openness": "Private",
+    "Artist(s)": "Joe Regan",
+    "Artist Website": "",
+    "Lat": 33.35047728,
+    "Long": -115.7336854
+  },
+  {
+    "Name": "Machine Inspired Art",
+    "Category": "Gallery",
+    "Openness": "Private",
+    "Artist(s)": "Behn Samareh",
+    "Artist Website": "http://machineinspiredart.com/",
+    "Lat": 33.34942099,
+    "Long": -115.7310088
+  },
+  {
+    "Name": "The Bombay Beach Estates",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Stefan Ashkenazy",
+    "Artist Website": "",
+    "Lat": 33.3489844,
+    "Long": -115.7279718
+  },
+  {
+    "Name": "The Portal",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Marc Vinciguerra",
+    "Artist Website": "",
+    "Lat": 33.349284,
+    "Long": -115.727051
+  },
+  {
+    "Name": "Dollhouse Theater",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Melody",
+    "Artist Website": "",
+    "Lat": 33.34925573,
+    "Long": -115.7272744
+  },
+  {
+    "Name": "Salt & Desert Reading Room",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.35293286,
+    "Long": -115.7303969
+  },
+  {
+    "Name": "Laryngopharyngeal Reflux",
+    "Category": "Art Installation",
+    "Openness": "Public - evenings until Thurs, then at Ave E location",
+    "Artist(s)": "",
+    "Artist Website": "http://www.houseofpain.org/LPR",
+    "Lat": 33.34985,
+    "Long": -115.7309111
+  },
+  {
+    "Name": "Laryngopharyngeal Reflux 2",
+    "Category": "Art Installation",
+    "Openness": "Public - evenings from Thursday on, also see Ave D location",
+    "Artist(s)": "",
+    "Artist Website": "http://www.houseofpain.org/LPR",
+    "Lat": 33.3498516,
+    "Long": -115.7294547
+  },
+  {
+    "Name": "Sotheby's Real Estate Office",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Jay Fella",
+    "Artist Website": "",
+    "Lat": 33.3495519,
+    "Long": -115.7270889
+  },
+  {
+    "Name": "The Egg",
+    "Category": "Art Installation",
+    "Openness": "Private, but viewable from the street",
+    "Artist(s)": "Tao Ruspoli",
+    "Artist Website": "",
+    "Lat": 33.34999916,
+    "Long": -115.7266109
+  },
+  {
+    "Name": "Salton Civilization Archeological Site",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3527071,
+    "Long": -115.7312304
+  },
+  {
+    "Name": "Angler Grove",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Randy Polumbo",
+    "Artist Website": "",
+    "Lat": 33.3517046,
+    "Long": -115.7260541
+  },
+  {
+    "Name": "Showtown",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3476,
+    "Long": -115.73329
+  },
+  {
+    "Name": "Shig's Steps",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Shig",
+    "Artist Website": "",
+    "Lat": 33.3453987,
+    "Long": -115.7264068
+  },
+  {
+    "Name": "Tesseract",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.34837,
+    "Long": -115.7294
+  },
+  {
+    "Name": "The Tile House",
+    "Category": "Art Installation",
+    "Openness": "Private",
+    "Artist(s)": "Anderson / Daniela",
+    "Artist Website": "",
+    "Lat": 33.3511362,
+    "Long": -115.7277005
+  },
+  {
+    "Name": "The Last Resort",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.35415658,
+    "Long": -115.733772
+  },
+  {
+    "Name": "Dead Sea Forest",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.34584,
+    "Long": -115.731181
+  },
+  {
+    "Name": "Butterfly House",
+    "Category": "Art Installation",
+    "Openness": "Private, but viewable from the street",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3499838,
+    "Long": -115.7294351
+  },
+  {
+    "Name": "Bombay Boom",
+    "Category": "Art Installation",
+    "Openness": "Private, but viewable from the street",
+    "Artist(s)": "Kenny Scharf",
+    "Artist Website": "",
+    "Lat": 33.3527779,
+    "Long": -115.7271038
+  },
+  {
+    "Name": "Series of Cubes",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Shig",
+    "Artist Website": "",
+    "Lat": "",
+    "Long": ""
+  },
+  {
+    "Name": "Park Place",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3490766,
+    "Long": -115.7256358
+  },
+  {
+    "Name": "Transmutation House",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Jeff Frost",
+    "Artist Website": "https://www.frostjeff.com/",
+    "Lat": 33.3502778,
+    "Long": -115.7303713
+  },
+  {
+    "Name": "Bombay Beach TVs",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3507758,
+    "Long": -115.7268262
+  },
+  {
+    "Name": "Bombay Beach International Space Station (previously Lodestar)",
+    "Category": "Art Installation",
+    "Openness": "Private, but viewable from the street",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.354147,
+    "Long": -115.726214
+  },
+  {
+    "Name": "Temple Of Optimism",
+    "Category": "Art Installation",
+    "Openness": "Private",
+    "Artist(s)": "David Corcoran",
+    "Artist Website": "https://dvdcor.wixsite.com/davidcorcoranartwork",
+    "Lat": 33.3491745,
+    "Long": -115.7272471
+  },
+  {
+    "Name": "I Forget I’m a Memory",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "MIDABI",
+    "Artist Website": "",
+    "Lat": 33.3489677,
+    "Long": -115.7276285
+  },
+  {
+    "Name": "Bombay Beach Metro Station",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.34825936,
+    "Long": -115.7293901
+  },
+  {
+    "Name": "The Windmill House",
+    "Category": "Art Installation",
+    "Openness": "Private, but viewable from the street",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.34963185,
+    "Long": -115.7292108
+  },
+  {
+    "Name": "da Vinci Fish",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Sean Guerrero",
+    "Artist Website": "https://www.chromesean.com/",
+    "Lat": 33.35318,
+    "Long": -115.73053
+  },
+  {
+    "Name": "El Barco de La Muerte",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Sean Guerrero",
+    "Artist Website": "https://www.chromesean.com/",
+    "Lat": 33.34812,
+    "Long": -115.7294
+  },
+  {
+    "Name": "The Lighthouse",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Shig",
+    "Artist Website": "",
+    "Lat": 33.3475925,
+    "Long": -115.7294454
+  },
+  {
+    "Name": "Bombay Beach Boat",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3474346,
+    "Long": -115.7292345
+  },
+  {
+    "Name": "Confessional",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3471103,
+    "Long": -115.729491
+  },
+  {
+    "Name": "Free Love Phone Booth",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3465515,
+    "Long": -115.7298715
+  },
+  {
+    "Name": "The Swing",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Damon & Ssippi",
+    "Artist Website": "",
+    "Lat": 33.345094,
+    "Long": -115.7305223
+  },
+  {
+    "Name": "HYBYCOZO sculpture",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "HYBYCOZO",
+    "Artist Website": "https://www.hybycozo.com/",
+    "Lat": 33.346458,
+    "Long": -115.7312689
+  },
+  {
+    "Name": "Re In Car Nation",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Sean Guerrero",
+    "Artist Website": "https://www.chromesean.com/",
+    "Lat": 33.3470797,
+    "Long": -115.7317249
+  },
+  {
+    "Name": "TOXICON",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Kathy Suder",
+    "Artist Website": "https://www.toxikonapothecary.com/",
+    "Lat": 33.3496555,
+    "Long": -115.7308294
+  },
+  {
+    "Name": "Shig Memorial Pyramids",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "t",
+    "Lat": 33.347844,
+    "Long": -115.7256179
+  },
+  {
+    "Name": "H♥️me",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Jennifer Korsen",
+    "Artist Website": "https://humansmakeart.com/home.html",
+    "Lat": 33.3510168,
+    "Long": -115.7282793
+  },
+  {
+    "Name": "The Art of Decay: permanent photo exhibit",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.348968,
+    "Long": -115.726639
+  },
+  {
+    "Name": "Chicks with chicks (and sometimes cocks)",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Stefanie Schneider",
+    "Artist Website": "",
+    "Lat": 33.349056,
+    "Long": -115.726837
+  },
+  {
+    "Name": "Venus of Salton",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Robert Stivers",
+    "Artist Website": "",
+    "Lat": 33.348968,
+    "Long": -115.726639
+  },
+  {
+    "Name": "No Shoes + Dry West — Moonscapes",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Uwe Martin",
+    "Artist Website": "",
+    "Lat": 33.34911,
+    "Long": -115.726836
+  },
+  {
+    "Name": "The Bombay Beach Particle Accelerator",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "David Corcoran",
+    "Artist Website": "",
+    "Lat": 33.349084,
+    "Long": -115.726701
+  },
+  {
+    "Name": "In Search of El Dorado: The Salton Sea",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Christopher Landis",
+    "Artist Website": "",
+    "Lat": 33.349157,
+    "Long": -115.726684
+  },
+  {
+    "Name": "Lamp Shade",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "David Corcoran",
+    "Artist Website": "https://dvdcor.wixsite.com/davidcorcoranartwork",
+    "Lat": 33.349157,
+    "Long": -115.726684
+  },
+  {
+    "Name": "Mirror Sculpture",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Alexander",
+    "Artist Website": "",
+    "Lat": 33.349186,
+    "Long": -115.726879
+  },
+  {
+    "Name": "SOS",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Shig",
+    "Artist Website": "",
+    "Lat": 33.3453334,
+    "Long": -115.7268305
+  },
+  {
+    "Name": "The Crane",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3474,
+    "Long": -115.726175
+  },
+  {
+    "Name": "El tribute",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Luciano",
+    "Artist Website": "",
+    "Lat": 33.345189,
+    "Long": -115.726593
+  },
+  {
+    "Name": "The Cone",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3484501,
+    "Long": -115.7254687
+  },
+  {
+    "Name": "World’s Tallest Ghosts",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "RJ",
+    "Artist Website": "https://www.batmanswedding.com/",
+    "Lat": 33.3493065,
+    "Long": -115.7258868
+  },
+  {
+    "Name": "There's No Place Like Home",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Damon & Shig",
+    "Artist Website": "",
+    "Lat": 33.3456891,
+    "Long": -115.7310363
+  },
+  {
+    "Name": "Audio Install",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3453847,
+    "Long": -115.7265784
+  },
+  {
+    "Name": "Bombay Tethra",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Anderson / Daniela",
+    "Artist Website": "",
+    "Lat": 33.3452346,
+    "Long": -115.7284811
+  },
+  {
+    "Name": "The Ocean Remains in Bombay",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Midabi",
+    "Artist Website": "",
+    "Lat": 33.3456459,
+    "Long": -115.7299041
+  },
+  {
+    "Name": "Sea Gate Wind Chimes",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.3475374,
+    "Long": -115.729719
+  },
+  {
+    "Name": "facefoods",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "http://thefacefoods.com",
+    "Lat": 33.3492909,
+    "Long": -115.7276848
+  },
+  {
+    "Name": "Fish skeleton",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Judyth Greenburgh & Jael Hoffmann",
+    "Artist Website": "https://linktr.ee/curlybirdjude",
+    "Lat": 33.34515,
+    "Long": -115.72925
+  },
+  {
+    "Name": "Arbitrary Permanence",
+    "Category": "Art Installation",
+    "Openness": "Private unless invited, Public 12-3",
+    "Artist(s)": "Sydney Gravelle",
+    "Artist Website": "https://www.sydsexhibit.com/",
+    "Lat": 33.34914,
+    "Long": -115.72597
+  },
+  {
+    "Name": "From Chaos to Harmony: the transformative power of art",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Caitlin + Quentin",
+    "Artist Website": "",
+    "Lat": 33.349528,
+    "Long": -115.726528
+  },
+  {
+    "Name": "Local Instability Prediction Model 1",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Kersteen Anderson",
+    "Artist Website": "www.kandersandersonfineart.com",
+    "Lat": 33.349167,
+    "Long": -115.727444
+  },
+  {
+    "Name": "Chicken Foot House",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Chris \"Ssippi\" Wessman & Amanda Gonzales",
+    "Artist Website": "",
+    "Lat": 33.3510105,
+    "Long": -115.7303427
+  },
+  {
+    "Name": "Saltation",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Tornado H.",
+    "Artist Website": "",
+    "Lat": 33.354744,
+    "Long": -115.72475
+  },
+  {
+    "Name": "Sea State",
+    "Category": "Art Installation",
+    "Openness": "Private, but viewable from the street",
+    "Artist(s)": "Janenne Willis",
+    "Artist Website": "",
+    "Lat": 33.35292,
+    "Long": -115.72665
+  },
+  {
+    "Name": "Unanswerable Questions",
+    "Category": "Art Installation",
+    "Openness": "Private, but viewable from the street",
+    "Artist(s)": "Janenne Willis",
+    "Artist Website": "",
+    "Lat": 33.35292,
+    "Long": -115.72665
+  },
+  {
+    "Name": "The Crying Room",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Lisa Darling",
+    "Artist Website": "",
+    "Lat": 33.351168,
+    "Long": -115.729746
+  },
+  {
+    "Name": "Heart of Bombay Mural",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Jennifer Korsen",
+    "Artist Website": "",
+    "Lat": 33.35074801,
+    "Long": -115.7281045
+  },
+  {
+    "Name": "Dementional Noir",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Spencer Davila",
+    "Artist Website": "",
+    "Lat": 33.34712,
+    "Long": -115.732195
+  },
+  {
+    "Name": "BB Country Club",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "John Geary",
+    "Artist Website": "",
+    "Lat": 33.34904,
+    "Long": -115.7330709
+  },
+  {
+    "Name": "Bonolith",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.34543176,
+    "Long": -115.729554
+  },
+  {
+    "Name": "Initials BB II",
+    "Category": "Art Installation",
+    "Openness": "Private, but viewable from the street",
+    "Artist(s)": "Olivia Fougeirol",
+    "Artist Website": "",
+    "Lat": 33.3526685,
+    "Long": -115.7280852
+  },
+  {
+    "Name": "Save Me Sign",
+    "Category": "Art Installation",
+    "Openness": "Public",
+    "Artist(s)": "Olivia Steele",
+    "Artist Website": "http://www.oliviasteele.com/",
+    "Lat": 33.34932747,
+    "Long": -115.7281882
+  }
+]

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { APIProvider, Map, AdvancedMarker } from "@vis.gl/react-google-maps";
-import { dayLabels, eventTypeLabels, MAP_DIMENSIONS } from "@/data/festival";
+import { dayLabels, eventTypeLabels } from "@/data/festival";
 import { FestivalDay, FestivalEvent, Venue } from "@/types/festival";
 
 const ALL_DAYS: FestivalDay[] = ["fri", "sat", "sun"];
@@ -26,11 +26,16 @@ type FestivalMapAppProps = {
   venues: Venue[];
   events: FestivalEvent[];
   dataSourceLabel?: string;
+  debug?: {
+    totalRows: number;
+    confirmedRows: number;
+    matchedRows: number;
+    unmatchedLocations: string[];
+  };
 };
 
-export function FestivalMapApp({ venues, events, dataSourceLabel }: FestivalMapAppProps) {
+export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: FestivalMapAppProps) {
   const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
-  const [hoveredVenueId, setHoveredVenueId] = useState<string | null>(venues[0]?.id ?? null);
   const [activeDays, setActiveDays] = useState<FestivalDay[]>(ALL_DAYS);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [layers, setLayers] = useState<LayerState>(initialLayers);
@@ -38,7 +43,6 @@ export function FestivalMapApp({ venues, events, dataSourceLabel }: FestivalMapA
   const [searchQuery, setSearchQuery] = useState("");
 
   const selectedVenue = venues.find((venue) => venue.id === selectedVenueId) ?? null;
-  const hoveredVenue = venues.find((venue) => venue.id === hoveredVenueId) ?? null;
   const selectedEvent = events.find((event) => event.id === selectedEventId) ?? null;
 
   const lowerQuery = searchQuery.toLowerCase();
@@ -96,6 +100,36 @@ export function FestivalMapApp({ venues, events, dataSourceLabel }: FestivalMapA
                 and a day-driven schedule sidebar wired to importable data.
               </p>
               {dataSourceLabel ? <p className="eyebrow">Data source: {dataSourceLabel}</p> : null}
+              {debug ? (
+                <details style={{ marginTop: 8 }}>
+                  <summary style={{ cursor: "pointer", fontWeight: 600 }}>
+                    Matching debug ({debug.matchedRows}/{debug.confirmedRows} confirmed matched)
+                  </summary>
+                  <div style={{ marginTop: 8, fontSize: 13, opacity: 0.9 }}>
+                    <div>Total rows: {debug.totalRows}</div>
+                    <div>Confirmed rows: {debug.confirmedRows}</div>
+                    <div>Matched to `locations_2023.json`: {debug.matchedRows}</div>
+                    <div>Unmatched locations: {debug.unmatchedLocations.length}</div>
+                    {debug.unmatchedLocations.length > 0 ? (
+                      <div
+                        style={{
+                          marginTop: 8,
+                          maxHeight: 140,
+                          overflow: "auto",
+                          border: "1px solid rgba(255,255,255,0.2)",
+                          borderRadius: 8,
+                          padding: 8,
+                          background: "rgba(0,0,0,0.35)",
+                        }}
+                      >
+                        {debug.unmatchedLocations.map((name) => (
+                          <div key={name}>{name}</div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                </details>
+              ) : null}
             </div>
 
             <div className="map-controls">
@@ -162,12 +196,11 @@ export function FestivalMapApp({ venues, events, dataSourceLabel }: FestivalMapA
                   gestureHandling="greedy"
                   style={{ width: "100%", height: "100%" }}
                 >
-                  {visibleVenues.map((venue) => (
+                  {visibleVenues.slice(0, 100).map((venue) => (
                     <AdvancedMarker
                       key={venue.id}
                       position={{ lat: venue.lat || 33.351, lng: venue.lng || -115.731 }}
                       onClick={() => setSelectedVenueId(venue.id)}
-                      onMouseEnter={() => setHoveredVenueId(venue.id)}
                     >
                       <button
                         className={`pin-button ${selectedVenueId === venue.id ? "is-selected" : ""}`}

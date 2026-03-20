@@ -1,6 +1,9 @@
 import { FestivalDay, FestivalEvent, Venue } from "@/types/festival";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 
 const AIRTABLE_API_BASE = "https://api.airtable.com/v0";
+const LOCATIONS_2023_PATH = path.join(process.cwd(), "locations_2023.json");
 
 type AirtableRecord = {
   id: string;
@@ -19,6 +22,48 @@ type AirtableConfig = {
   view?: string;
 };
 
+type Location2023 = {
+  Name: string;
+  Category?: string;
+  Openness?: string;
+  Lat: number;
+  Long: number;
+};
+
+type MatchingDebug = {
+  totalRows: number;
+  confirmedRows: number;
+  matchedRows: number;
+  unmatchedLocations: string[];
+};
+
+export type AirtableInstallationsResult = {
+  venues: Venue[];
+  events: FestivalEvent[];
+  debug: MatchingDebug;
+};
+
+function cleanEnv(val?: string): string | undefined {
+  if (!val) return undefined;
+  let s = val.trim();
+  if (s.startsWith('"') && s.endsWith('"')) s = s.slice(1, -1);
+  if (s.startsWith("'") && s.endsWith("'")) s = s.slice(1, -1);
+  return s;
+}
+
+function getConfig(): AirtableConfig | null {
+  const token = cleanEnv(process.env.AIRTABLE_TOKEN);
+  const baseId = cleanEnv(process.env.AIRTABLE_BASE_ID);
+  const tableName = cleanEnv(process.env.AIRTABLE_TABLE_NAME);
+  const view = cleanEnv(process.env.AIRTABLE_VIEW);
+
+  if (!token || !baseId || !tableName) {
+    return null;
+  }
+
+  return { token, baseId, tableName, view };
+}
+
 function getString(fields: Record<string, unknown>, keys: string[]): string {
   for (const key of keys) {
     const value = fields[key];
@@ -29,166 +74,162 @@ function getString(fields: Record<string, unknown>, keys: string[]): string {
   return "";
 }
 
-function parseDay(value: string): FestivalDay | null {
-  const normalized = value.trim().toLowerCase();
-  if (normalized === "fri" || normalized === "friday") return "fri";
-  if (normalized === "sat" || normalized === "saturday") return "sat";
-  if (normalized === "sun" || normalized === "sunday") return "sun";
-  return null;
+function normalizeText(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[\u2019']/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\bthe\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function slugify(value: string): string {
+  return normalizeText(value).replace(/\s+/g, "-") || "unknown-venue";
 }
 
 function parseEventType(value: string): FestivalEvent["type"] {
   const normalized = value.trim().toLowerCase();
-  if (normalized === "music") return "music";
-  if (normalized === "performance") return "performance";
-  if (normalized === "installation") return "installation";
-  if (normalized === "lecture") return "lecture";
+  if (normalized.includes("music")) return "music";
+  if (normalized.includes("performance")) return "performance";
+  if (normalized.includes("installation")) return "installation";
+  if (normalized.includes("lecture")) return "lecture";
+  if (normalized.includes("object")) return "object";
+  if (normalized.includes("experience") || normalized.includes("facilitated")) return "experience";
+  if (normalized.includes("dj")) return "dj";
+  if (normalized.includes("venue")) return "venue";
+  if (normalized.includes("food")) return "food";
   return "community";
 }
 
-function toEvent(record: AirtableRecord): FestivalEvent | null {
-  const { fields } = record;
-
-  const title = getString(fields, ["title", "Title"]);
-  const venueId = getString(fields, ["venueId", "venue_id", "Venue ID", "venue"]);
-  const dayValue = getString(fields, ["day", "Day"]);
-  const day = parseDay(dayValue);
-
-  if (!title || !venueId || !day) {
-    return null;
-  }
-
-  return {
-    id: getString(fields, ["id", "eventId", "event_id"]) || record.id,
-    venueId,
-    title,
-    host: getString(fields, ["host", "Host", "presenter"]) || "TBD",
-    description: getString(fields, ["description", "Description"]) || "No description yet.",
-    day,
-    startTime: getString(fields, ["startTime", "start_time", "Start", "start"]) || "TBD",
-    endTime: getString(fields, ["endTime", "end_time", "End", "end"]) || "TBD",
-    type: parseEventType(getString(fields, ["type", "eventType", "event_type", "Type"])),
-    thumbnailUrl:
-      getString(fields, ["thumbnailUrl", "thumbnail_url", "image", "Image"]) ||
-      "/map-layers/image_BB_map.jpg",
-  };
+function parseDayFromSchedule(rawSchedule: string): FestivalDay {
+  if (!rawSchedule) return "fri";
+  const parsed = new Date(rawSchedule);
+  if (Number.isNaN(parsed.getTime())) return "fri";
+  const day = parsed.getDay();
+  if (day === 5) return "fri";
+  if (day === 6) return "sat";
+  if (day === 0) return "sun";
+  return "fri";
 }
 
-function getConfig(): AirtableConfig | null {
-  const token = process.env.AIRTABLE_TOKEN;
-  const baseId = process.env.AIRTABLE_BASE_ID;
-  const tableName = process.env.AIRTABLE_TABLE_NAME;
-  const view = process.env.AIRTABLE_VIEW;
-
-  if (!token || !baseId || !tableName) {
-    return null;
-  }
-
-  return {
-    token,
-    baseId,
-    tableName,
-    view,
-  };
+function formatColumnName(key: string): string {
+  return key
+    .split(/\s+/)
+    .join(" ")
+    .trim();
 }
 
-export async function fetchAirtableEvents(): Promise<FestivalEvent[] | null> {
-  const config = getConfig();
-  if (!config) {
-    return null;
-  }
+function buildDescription(fields: Record<string, unknown>): string {
+  const entries = Object.entries(fields)
+    .filter(([key, value]) => {
+      if (key.toLowerCase() === "status") return false;
+      if (typeof value !== "string") return false;
+      return value.trim().length > 0;
+    })
+    .map(([key, value]) => `${formatColumnName(key)}: ${(value as string).trim()}`);
 
-  const events: FestivalEvent[] = [];
-  let offset: string | undefined;
+  return entries.join("\n");
+}
 
-  do {
-    const params = new URLSearchParams({
-      pageSize: "100",
-    });
-
-    if (config.view) {
-      params.set("view", config.view);
-    }
-
-    if (offset) {
-      params.set("offset", offset);
-    }
-
-    const url = `${AIRTABLE_API_BASE}/${config.baseId}/${encodeURIComponent(config.tableName)}?${params.toString()}`;
-
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${config.token}`,
-      },
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
+async function loadLocations2023(): Promise<{ byNormalizedName: Map<string, Location2023>; all: Location2023[] } | null> {
+  try {
+    const text = await readFile(LOCATIONS_2023_PATH, "utf-8");
+    const parsed = JSON.parse(text) as unknown;
+    if (!Array.isArray(parsed)) {
       return null;
     }
 
-    const payload = (await response.json()) as AirtableResponse;
-    for (const record of payload.records) {
-      const mapped = toEvent(record);
-      if (mapped) {
-        events.push(mapped);
+    const all: Location2023[] = [];
+    const byNormalizedName = new Map<string, Location2023>();
+
+    for (const item of parsed) {
+      const maybe = item as Partial<Location2023>;
+      const name = typeof maybe.Name === "string" ? maybe.Name : "";
+      const lat = typeof maybe.Lat === "number" ? maybe.Lat : Number(maybe.Lat);
+      const lng = typeof maybe.Long === "number" ? maybe.Long : Number(maybe.Long);
+
+      if (!name || Number.isNaN(lat) || Number.isNaN(lng)) {
+        continue;
       }
+
+      const loc: Location2023 = {
+        Name: name,
+        Category: maybe.Category,
+        Openness: maybe.Openness,
+        Lat: lat,
+        Long: lng,
+      };
+
+      all.push(loc);
+      byNormalizedName.set(normalizeText(name), loc);
     }
 
-    offset = payload.offset;
-  } while (offset);
-
-  return events;
+    return { byNormalizedName, all };
+  } catch {
+    return null;
+  }
 }
 
-function extractCoordinates(input?: string): { lat: number; lng: number } | null {
-  if (!input) return null;
+function findMatchingLocation(
+  locationInternal: string,
+  byNormalizedName: Map<string, Location2023>,
+  allLocations: Location2023[]
+): Location2023 | null {
+  if (!locationInternal) return null;
+  const normalized = normalizeText(locationInternal);
+  if (!normalized) return null;
 
-  // Look for @33.351050,-115.732958 in URLs
-  const linkMatch = input.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if (linkMatch) {
-    return { lat: parseFloat(linkMatch[1]), lng: parseFloat(linkMatch[2]) };
-  }
+  const exact = byNormalizedName.get(normalized);
+  if (exact) return exact;
 
-  // Look for raw coordinates 33.351050, -115.732958
-  const coordMatch = input.match(/(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
-  if (coordMatch) {
-    return { lat: parseFloat(coordMatch[1]), lng: parseFloat(coordMatch[2]) };
+  for (const loc of allLocations) {
+    const candidate = normalizeText(loc.Name);
+    if (!candidate) continue;
+    if (candidate.includes(normalized) || normalized.includes(candidate)) {
+      return loc;
+    }
   }
 
   return null;
 }
 
-export async function fetchAirtableInstallations(): Promise<{ venues: Venue[], events: FestivalEvent[] } | null> {
+export async function fetchAirtableEvents(): Promise<FestivalEvent[] | null> {
+  const installations = await fetchAirtableInstallations();
+  return installations?.events ?? null;
+}
+
+export async function fetchAirtableInstallations(): Promise<AirtableInstallationsResult | null> {
   const config = getConfig();
   if (!config) {
     return null;
   }
 
-  const venues: Venue[] = [];
+  const locationsBundle = await loadLocations2023();
+  if (!locationsBundle) {
+    return null;
+  }
+
+  const venuesById = new Map<string, Venue>();
   const events: FestivalEvent[] = [];
+  let totalRows = 0;
+  let confirmedRows = 0;
+  let matchedRows = 0;
+  const unmatchedSet = new Set<string>();
   let offset: string | undefined;
 
   do {
-    const params = new URLSearchParams({
-      pageSize: "100",
-    });
-
-    if (config.view) {
-      params.set("view", config.view);
-    }
-
-    if (offset) {
-      params.set("offset", offset);
-    }
+    const params = new URLSearchParams({ pageSize: "100" });
+    if (config.view) params.set("view", config.view);
+    if (offset) params.set("offset", offset);
 
     const url = `${AIRTABLE_API_BASE}/${config.baseId}/${encodeURIComponent(config.tableName)}?${params.toString()}`;
-
     const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${config.token}`,
       },
       cache: "no-store",
+      next: { revalidate: 0 },
     });
 
     if (!response.ok) {
@@ -196,92 +237,96 @@ export async function fetchAirtableInstallations(): Promise<{ venues: Venue[], e
     }
 
     const payload = (await response.json()) as AirtableResponse;
-    const isInstallationExport = payload.records.length > 0 && !!getString(payload.records[0].fields, ["Project Name", "Artist Name"]);
-    
+
     for (const record of payload.records) {
+      totalRows += 1;
       const { fields } = record;
-      
-      const projectName = getString(fields, ["Project Name", "project_name"]);
+      const status = getString(fields, ["Status", "status"]).toLowerCase();
+
+      // Requirement: use only confirmed rows.
+      if (status && status !== "confirmed") {
+        continue;
+      }
+      confirmedRows += 1;
+
+      const locationInternal = getString(fields, ["Location (Internal)", "location_internal"]);
+      const matched = findMatchingLocation(
+        locationInternal,
+        locationsBundle.byNormalizedName,
+        locationsBundle.all
+      );
+
+      // Requirement: include only locations that exist in locations_2023.json.
+      if (!matched) {
+        if (locationInternal) {
+          unmatchedSet.add(locationInternal);
+        } else {
+          unmatchedSet.add("(empty Location (Internal))");
+        }
+        continue;
+      }
+      matchedRows += 1;
+
+      const venueId = `loc-${slugify(matched.Name)}`;
+      if (!venuesById.has(venueId)) {
+        venuesById.set(venueId, {
+          id: venueId,
+          name: matched.Name,
+          label: matched.Category || "Venue",
+          shortDescription: matched.Openness ? `Openness: ${matched.Openness}` : "Matched from 2023 locations",
+          description: `Matched from locations_2023.json using Location (Internal): ${locationInternal}`,
+          x: 0,
+          y: 0,
+          lat: matched.Lat,
+          lng: matched.Long,
+          hasLocation: true,
+          thumbnailUrl: "/map-layers/image_BB_map.jpg",
+          accent: "#8b5cf6",
+        });
+      }
+
+      const projectName = getString(fields, ["Project Name", "project_name"]) || `Installation ${record.id}`;
       const artistName = getString(fields, ["Artist Name", "artist_name"]);
-      
-      if (!projectName && !artistName && isInstallationExport) continue;
-      
-      const gpsData = getString(fields, ["GPS Coordinates/Link (from Location NEW)"]);
-      let coords = extractCoordinates(gpsData);
-      
-      const explicitLat = getString(fields, ["Latitude", "lat", "Lat"]);
-      const explicitLng = getString(fields, ["Longitude", "lng", "Lng", "Lon", "lon"]);
+      const additionalArtists = getString(fields, ["Additional Artists", "additional_artists"]);
+      const schedule = getString(fields, ["Schedule", "schedule"]);
+      const duration = getString(fields, ["Duration", "duration"]);
+      const projectType = getString(fields, ["Project Type", "project_type"]);
+      const permanence = getString(fields, ["Year or Permanent", "year_or_permanent"]);
 
-      if (explicitLat && explicitLng) {
-        coords = { lat: parseFloat(explicitLat), lng: parseFloat(explicitLng) };
-      }
-
-      const hasLocation = !!coords;
-      
-      if (!coords) {
-         coords = {
-             lat: 33.352 + (Math.random() - 0.5) * 0.005,
-             lng: -115.729 + (Math.random() - 0.5) * 0.005
-         };
-      }
-      
-      const rawType = getString(fields, ["Project Type"]).toLowerCase();
-      let accent = '#1e3a8a';
-      let typeId: FestivalEvent["type"] = 'installation';
-      
-      if (rawType.includes('performance')) { accent = '#86efac'; typeId = 'performance'; }
-      else if (rawType.includes('object')) { accent = '#7dd3fc'; typeId = 'object'; }
-      else if (rawType.includes('experience') || rawType.includes('facilitated')) { accent = '#a855f7'; typeId = 'experience'; }
-      else if (rawType.includes('dj')) { accent = '#fef08a'; typeId = 'dj'; }
-      else if (rawType.includes('music')) { accent = '#166534'; typeId = 'music'; }
-      else if (rawType.includes('venue')) { accent = '#8b5cf6'; typeId = 'venue'; }
-      else if (rawType.includes('food')) { accent = '#d8b4fe'; typeId = 'food'; }
-      
-      const venueId = record.id;
-      const name = projectName || artistName || 'Untitled';
-      const shortDesc = `By ${artistName || 'Unknown Artist'}`;
-      const desc = getString(fields, ["Abridged Project Text"]);
-      const permanence = getString(fields, ["Year or Permanent"]);
-      
-      venues.push({
-        id: venueId,
-        name: name,
-        label: getString(fields, ["Project Type"]) || "Installation",
-        shortDescription: shortDesc,
-        description: desc,
-        lat: coords.lat,
-        lng: coords.lng,
-        x: 0,
-        y: 0,
-        hasLocation: hasLocation,
-        permanence: permanence,
-        thumbnailUrl: "/map-layers/image_BB_map.jpg",
-        accent: accent
-      });
-      
-      const schedule = getString(fields, ["Schedule"]);
-      const duration = getString(fields, ["Duration"]);
-      
       events.push({
-        id: `event-${venueId}`,
-        venueId: venueId,
-        title: name,
-        host: artistName || "TBD",
-        description: desc || "No description yet.",
-        day: "fri",
+        id: `event-${record.id}`,
+        venueId,
+        title: projectName,
+        host: [artistName, additionalArtists].filter(Boolean).join(" — ") || "TBD",
+        description: buildDescription(fields),
+        day: parseDayFromSchedule(schedule),
         startTime: schedule || "TBD",
         endTime: duration || "TBD",
-        type: typeId,
+        type: parseEventType(projectType),
         thumbnailUrl: "/map-layers/image_BB_map.jpg",
-        lat: coords.lat,
-        lng: coords.lng,
-        hasLocation: hasLocation,
-        permanence: permanence,
+        lat: matched.Lat,
+        lng: matched.Long,
+        hasLocation: true,
+        permanence,
       });
     }
 
     offset = payload.offset;
   } while (offset);
 
-  return { venues, events };
+  const venues = Array.from(venuesById.values());
+  if (venues.length === 0 || events.length === 0) {
+    return null;
+  }
+
+  return {
+    venues,
+    events,
+    debug: {
+      totalRows,
+      confirmedRows,
+      matchedRows,
+      unmatchedLocations: Array.from(unmatchedSet).sort((a, b) => a.localeCompare(b)),
+    },
+  };
 }
