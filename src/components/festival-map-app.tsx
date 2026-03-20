@@ -1,12 +1,76 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { APIProvider, Map, AdvancedMarker, AdvancedMarkerAnchorPoint } from "@vis.gl/react-google-maps";
 import { dayLabels, eventTypeLabels } from "@/data/festival";
 import { FestivalDay, FestivalEvent, Venue } from "@/types/festival";
 
 const ALL_DAYS: FestivalDay[] = ["fri", "sat", "sun"];
+const MAP_CENTER = { lat: 33.351508, lng: -115.729625 };
+const MAP_DEFAULT_ZOOM = 16.9;
+const MAP_FOCUS_ZOOM = 17.8;
+const MAP_MIN_ZOOM = 14;
+const MAP_MAX_ZOOM = 19.2;
+const GEOFENCE_RADIUS_METERS = 1609.34; // 1 mile
+const CAMERA_EPSILON = 0.000001;
+const ZOOM_EPSILON = 0.001;
+
+const LEGACY_CATEGORY_COLORS: Record<string, string> = {
+  parking: "#FA7B5D",
+  bathroom: "#90B4FF",
+  "local business": "#C98A76",
+  "community hub": "#FFD2B7",
+  museum: "#A17A7B",
+  gallery: "#B8A5BF",
+  studio: "#DDA390",
+  venue: "#48564D",
+  "art installation": "#9AA367",
+};
+
+function toRadians(deg: number): number {
+  return (deg * Math.PI) / 180;
+}
+
+function distanceMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const earthRadius = 6371000;
+  const dLat = toRadians(lat2 - lat1);
+  const dLng = toRadians(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  return 2 * earthRadius * Math.asin(Math.sqrt(a));
+}
+
+function isInsideGeofence(lat: number, lng: number): boolean {
+  return distanceMeters(MAP_CENTER.lat, MAP_CENTER.lng, lat, lng) <= GEOFENCE_RADIUS_METERS;
+}
+
+function hasCameraChanged(
+  prev: { lat: number; lng: number },
+  next: { lat: number; lng: number },
+  prevZoom: number,
+  nextZoom: number
+): boolean {
+  return (
+    Math.abs(prev.lat - next.lat) > CAMERA_EPSILON ||
+    Math.abs(prev.lng - next.lng) > CAMERA_EPSILON ||
+    Math.abs(prevZoom - nextZoom) > ZOOM_EPSILON
+  );
+}
+
+function getLegacyCategory(venue: Venue): string {
+  const label = (venue.label || "").toLowerCase();
+  if (label.includes("parking")) return "parking";
+  if (label.includes("bathroom")) return "bathroom";
+  if (label.includes("local business")) return "local business";
+  if (label.includes("community")) return "community hub";
+  if (label.includes("museum")) return "museum";
+  if (label.includes("gallery")) return "gallery";
+  if (label.includes("studio")) return "studio";
+  if (label.includes("venue")) return "venue";
+  return "art installation";
+}
 
 type FestivalMapAppProps = {
   venues: Venue[];
@@ -26,6 +90,9 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [locationFilter, setLocationFilter] = useState<"all" | "placed" | "unplaced">("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [mapCenter, setMapCenter] = useState(MAP_CENTER);
+  const [mapZoom, setMapZoom] = useState(MAP_DEFAULT_ZOOM);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   const selectedVenue = venues.find((venue) => venue.id === selectedVenueId) ?? null;
   const selectedEvent = events.find((event) => event.id === selectedEventId) ?? null;
@@ -65,6 +132,39 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     );
   }
 
+  function focusVenue(venue: Venue, zoom = MAP_FOCUS_ZOOM) {
+    const lat = venue.lat ?? MAP_CENTER.lat;
+    const lng = venue.lng ?? MAP_CENTER.lng;
+    setSelectedVenueId(venue.id);
+    setMapCenter({ lat, lng });
+    setMapZoom(zoom);
+  }
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        setUserLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      },
+      () => {
+        // Ignore permission and device errors silently; map remains fully usable.
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 15000,
+      }
+    );
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, []);
+
   return (
     <main className="legacy-app">
       <header className="legacy-banner">
@@ -85,7 +185,11 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
             <button
               className={`legacy-chip ${selectedVenueId === null ? "active" : ""}`}
               type="button"
-              onClick={() => setSelectedVenueId(null)}
+              onClick={() => {
+                setSelectedVenueId(null);
+                setMapCenter(MAP_CENTER);
+                setMapZoom(MAP_DEFAULT_ZOOM);
+              }}
             >
               All Venues
             </button>
@@ -101,6 +205,18 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
             ))}
           </div>
           <div className="legacy-control-row">
+            {userLocation ? (
+              <button
+                className="legacy-chip"
+                type="button"
+                onClick={() => {
+                  setMapCenter(userLocation);
+                  setMapZoom(Math.max(mapZoom, 17.2));
+                }}
+              >
+                My Location
+              </button>
+            ) : null}
             <button
               className={`legacy-chip ${locationFilter === "all" ? "active" : ""}`}
               type="button"
@@ -130,37 +246,101 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
         <section className="legacy-map-panel">
           <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""}>
             <Map
-              defaultCenter={{ lat: 33.352, lng: -115.729 }}
-              defaultZoom={16.9}
+              center={mapCenter}
+              zoom={mapZoom}
               mapId="2f9f04bb8e9c458045b99a65"
               mapTypeId="satellite"
               disableDefaultUI={true}
               zoomControl={true}
+              clickableIcons={false}
               gestureHandling="greedy"
+              minZoom={MAP_MIN_ZOOM}
+              maxZoom={MAP_MAX_ZOOM}
+              onCameraChanged={(ev) => {
+                const nextCenter = ev.detail.center;
+                const nextZoom = ev.detail.zoom;
+                if (
+                  isInsideGeofence(nextCenter.lat, nextCenter.lng) &&
+                  hasCameraChanged(mapCenter, nextCenter, mapZoom, nextZoom)
+                ) {
+                  setMapCenter(nextCenter);
+                  if (Math.abs(mapZoom - nextZoom) > ZOOM_EPSILON) {
+                    setMapZoom(nextZoom);
+                  }
+                }
+              }}
               style={{ width: "100%", height: "100%" }}
             >
-              {visibleVenues.slice(0, 100).map((venue) => (
+              {visibleVenues.slice(0, 100).map((venue) => {
+                const category = getLegacyCategory(venue);
+                const markerSize = category === "art installation" ? 10 : 12;
+                return (
+                  <AdvancedMarker
+                    key={venue.id}
+                    position={{ lat: venue.lat || 33.351, lng: venue.lng || -115.731 }}
+                    anchorPoint={AdvancedMarkerAnchorPoint.CENTER}
+                  >
+                    <button
+                      className={`legacy-pin ${selectedVenueId === venue.id ? "is-selected" : ""}`}
+                      type="button"
+                      aria-label={venue.name}
+                      style={{
+                        background: LEGACY_CATEGORY_COLORS[category] || venue.accent,
+                        width: markerSize,
+                        height: markerSize,
+                      }}
+                      onMouseDown={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        setSelectedVenueId(venue.id);
+                      }}
+                    />
+                  </AdvancedMarker>
+                );
+              })}
+              {selectedVenue ? (
                 <AdvancedMarker
-                  key={venue.id}
-                  position={{ lat: venue.lat || 33.351, lng: venue.lng || -115.731 }}
-                  anchorPoint={AdvancedMarkerAnchorPoint.CENTER}
+                  position={{
+                    lat: selectedVenue.lat ?? MAP_CENTER.lat,
+                    lng: selectedVenue.lng ?? MAP_CENTER.lng,
+                  }}
+                  anchorPoint={AdvancedMarkerAnchorPoint.BOTTOM_CENTER}
                 >
-                  <button
-                    className={`legacy-pin ${selectedVenueId === venue.id ? "is-selected" : ""}`}
-                    type="button"
-                    aria-label={venue.name}
-                    onMouseDown={(event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                    }}
-                    onClick={(event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      setSelectedVenueId(venue.id);
-                    }}
-                  />
+                  <article className="legacy-popup">
+                    <div className="legacy-popup-head">
+                      <h3>{selectedVenue.name}</h3>
+                      <button
+                        type="button"
+                        className="legacy-popup-close"
+                        aria-label="Close location popup"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          setSelectedVenueId(null);
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <div>
+                      <i>{selectedVenue.label}</i>
+                    </div>
+                    <div>{selectedVenue.shortDescription || selectedVenue.description}</div>
+                    {selectedVenue.permanence ? (
+                      <div className="legacy-popup-meta">{selectedVenue.permanence}</div>
+                    ) : null}
+                  </article>
                 </AdvancedMarker>
-              ))}
+              ) : null}
+              {userLocation ? (
+                <AdvancedMarker position={userLocation} anchorPoint={AdvancedMarkerAnchorPoint.CENTER}>
+                  <div className="legacy-user-dot" aria-label="Your location" />
+                </AdvancedMarker>
+              ) : null}
             </Map>
           </APIProvider>
         </section>
@@ -177,9 +357,12 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                   key={venue.id}
                   className={`legacy-venue-item ${selectedVenueId === venue.id ? "active" : ""}`}
                   type="button"
-                  onClick={() => setSelectedVenueId(venue.id)}
+                  onClick={() => focusVenue(venue)}
                 >
-                  <span className="legacy-venue-dot" style={{ background: venue.accent }} />
+                  <span
+                    className="legacy-venue-dot"
+                    style={{ background: LEGACY_CATEGORY_COLORS[getLegacyCategory(venue)] || venue.accent }}
+                  />
                   <span>{venue.name}</span>
                 </button>
               ))}

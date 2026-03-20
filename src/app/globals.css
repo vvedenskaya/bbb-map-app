@@ -149,7 +149,7 @@ a {
 }
 
 .legacy-list-panel {
-  width: min(420px, 38vw);
+  width: min(360px, 33vw);
   border-left: 1px solid #ded8c8;
   background: #fffdf3;
   overflow-y: auto;
@@ -244,11 +244,79 @@ a {
   background: #9aa367;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
   cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
 }
 
 .legacy-pin.is-selected {
   transform: scale(1.25);
   box-shadow: 0 0 0 2px rgba(255, 253, 243, 0.95), 0 0 0 3px rgba(0, 0, 0, 0.65);
+}
+
+.legacy-user-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #4286f4;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 2px rgba(66, 134, 244, 0.35);
+}
+
+.legacy-popup {
+  position: relative;
+  min-width: 180px;
+  max-width: 240px;
+  padding: 12px 10px 10px;
+  background: #fffdf3;
+  border: 1px solid #cfc8b6;
+  border-radius: 4px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  color: #141414;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.legacy-popup::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  bottom: -7px;
+  width: 12px;
+  height: 12px;
+  background: #fffdf3;
+  border-left: 1px solid #cfc8b6;
+  border-bottom: 1px solid #cfc8b6;
+  transform: rotate(-45deg);
+}
+
+.legacy-popup-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.legacy-popup h3 {
+  margin: 0;
+  font-size: 13px;
+}
+
+.legacy-popup-close {
+  border: 0;
+  background: transparent;
+  color: #6b6b6b;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.legacy-popup i {
+  color: #444;
+}
+
+.legacy-popup-meta {
+  margin-top: 4px;
+  color: #7a7a7a;
 }
 
 .legacy-debug {
