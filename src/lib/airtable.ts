@@ -67,8 +67,26 @@ function getConfig(): AirtableConfig | null {
 function getString(fields: Record<string, unknown>, keys: string[]): string {
   for (const key of keys) {
     const value = fields[key];
-    if (typeof value === "string" && value.trim()) {
-      return value.trim();
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (trimmed) return trimmed;
+    }
+
+    if (Array.isArray(value)) {
+      const joined = value
+        .map((entry) => {
+          if (typeof entry === "string") return entry.trim();
+          if (typeof entry === "number") return String(entry);
+          if (entry && typeof entry === "object" && "name" in entry) {
+            const maybeName = (entry as { name?: unknown }).name;
+            if (typeof maybeName === "string") return maybeName.trim();
+          }
+          return "";
+        })
+        .filter(Boolean)
+        .join(", ")
+        .trim();
+      if (joined) return joined;
     }
   }
   return "";
@@ -219,7 +237,13 @@ export async function fetchAirtableInstallations(): Promise<AirtableInstallation
   let offset: string | undefined;
 
   do {
-    const params = new URLSearchParams({ pageSize: "100" });
+    const params = new URLSearchParams({
+      pageSize: "100",
+      // Use string cell format so linked-record fields come back as names, not record IDs.
+      cellFormat: "string",
+      timeZone: "America/Los_Angeles",
+      userLocale: "en",
+    });
     if (config.view) params.set("view", config.view);
     if (offset) params.set("offset", offset);
 
@@ -288,7 +312,7 @@ export async function fetchAirtableInstallations(): Promise<AirtableInstallation
       const projectName = getString(fields, ["Project Name", "project_name"]) || `Installation ${record.id}`;
       const artistName = getString(fields, ["Artist Name", "artist_name"]);
       const additionalArtists = getString(fields, ["Additional Artists", "additional_artists"]);
-      const schedule = getString(fields, ["Schedule", "schedule"]);
+      const schedule = getString(fields, ["Start Time", "start_time", "Schedule", "schedule"]);
       const duration = getString(fields, ["Duration", "duration"]);
       const projectType = getString(fields, ["Project Type", "project_type"]);
       const permanence = getString(fields, ["Year or Permanent", "year_or_permanent"]);

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { APIProvider, Map, AdvancedMarker, AdvancedMarkerAnchorPoint } from "@vis.gl/react-google-maps";
 import { dayLabels, eventTypeLabels } from "@/data/festival";
 import { FestivalDay, FestivalEvent, Venue } from "@/types/festival";
@@ -17,16 +17,30 @@ const CAMERA_EPSILON = 0.000001;
 const ZOOM_EPSILON = 0.001;
 
 const LEGACY_CATEGORY_COLORS: Record<string, string> = {
-  parking: "#FA7B5D",
-  bathroom: "#90B4FF",
-  "local business": "#C98A76",
-  "community hub": "#FFD2B7",
-  museum: "#A17A7B",
-  gallery: "#B8A5BF",
-  studio: "#DDA390",
-  venue: "#48564D",
-  "art installation": "#9AA367",
+  parking: "#FF2D55",
+  bathroom: "#00B5FF",
+  "local business": "#FF5A1F",
+  "community hub": "#FF9E00",
+  museum: "#9B4DFF",
+  gallery: "#B400FF",
+  studio: "#FF3D8E",
+  venue: "#00C853",
+  "art installation": "#D4E800",
 };
+
+const UNCATEGORIZED_KEY = "uncategorized";
+const CATEGORY_SORT_ORDER = [
+  "local business",
+  "community hub",
+  "venue",
+  "gallery",
+  "art installation",
+  "museum",
+  "studio",
+  "parking",
+  "bathroom",
+  UNCATEGORIZED_KEY,
+];
 
 function toRadians(deg: number): number {
   return (deg * Math.PI) / 180;
@@ -69,7 +83,25 @@ function getLegacyCategory(venue: Venue): string {
   if (label.includes("gallery")) return "gallery";
   if (label.includes("studio")) return "studio";
   if (label.includes("venue")) return "venue";
-  return "art installation";
+  if (label.includes("art installation")) return "art installation";
+  return UNCATEGORIZED_KEY;
+}
+
+function getCategoryDisplayLabel(categoryKey: string): string {
+  if (categoryKey === UNCATEGORIZED_KEY) {
+    return "Uncategorized";
+  }
+  return categoryKey.replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function getVenueColor(venue: Venue): string {
+  const category = getLegacyCategory(venue);
+  return LEGACY_CATEGORY_COLORS[category] || venue.accent || "#FF2D55";
+}
+
+function getCategoryOrderIndex(category: string): number {
+  const index = CATEGORY_SORT_ORDER.indexOf(category);
+  return index === -1 ? CATEGORY_SORT_ORDER.length : index;
 }
 
 type FestivalMapAppProps = {
@@ -89,6 +121,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [activeDays, setActiveDays] = useState<FestivalDay[]>(ALL_DAYS);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [locationFilter, setLocationFilter] = useState<"all" | "placed" | "unplaced">("all");
+  const [mapType, setMapType] = useState<"satellite" | "roadmap">("satellite");
   const [searchQuery, setSearchQuery] = useState("");
   const [mapCenter, setMapCenter] = useState(MAP_CENTER);
   const [mapZoom, setMapZoom] = useState(MAP_DEFAULT_ZOOM);
@@ -126,6 +159,29 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     })
     .sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""));
 
+  const venuesByCategory = visibleVenues.reduce<globalThis.Map<string, Venue[]>>((acc, venue) => {
+    const category = getLegacyCategory(venue);
+    const existing = acc.get(category);
+    if (existing) {
+      existing.push(venue);
+    } else {
+      acc.set(category, [venue]);
+    }
+    return acc;
+  }, new globalThis.Map());
+
+  const sortedVenueGroups = Array.from(venuesByCategory.entries())
+    .map(([category, categoryVenues]) => ({
+      category,
+      categoryLabel: getCategoryDisplayLabel(category),
+      venues: [...categoryVenues].sort((a, b) => a.name.localeCompare(b.name)),
+    }))
+    .sort((a, b) => {
+      const orderDelta = getCategoryOrderIndex(a.category) - getCategoryOrderIndex(b.category);
+      if (orderDelta !== 0) return orderDelta;
+      return a.categoryLabel.localeCompare(b.categoryLabel);
+    });
+
   function toggleDay(day: FestivalDay) {
     setActiveDays((current) =>
       current.includes(day) ? current.filter((entry) => entry !== day) : [...current, day]
@@ -138,6 +194,29 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     setSelectedVenueId(venue.id);
     setMapCenter({ lat, lng });
     setMapZoom(zoom);
+  }
+
+  function focusEvent(event: FestivalEvent) {
+    const venue = venues.find((entry) => entry.id === event.venueId) ?? null;
+    // Rule from sprintboard: event coords first, venue as fallback.
+    if (
+      typeof event.lat === "number" &&
+      typeof event.lng === "number" &&
+      !Number.isNaN(event.lat) &&
+      !Number.isNaN(event.lng)
+    ) {
+      setMapCenter({ lat: event.lat, lng: event.lng });
+      setMapZoom(MAP_FOCUS_ZOOM);
+    } else if (typeof venue?.lat === "number" && typeof venue.lng === "number") {
+      setMapCenter({ lat: venue.lat, lng: venue.lng });
+      setMapZoom(MAP_FOCUS_ZOOM);
+    }
+
+    if (venue) {
+      setSelectedVenueId(venue.id);
+    }
+
+    setSelectedEventId(event.id);
   }
 
   useEffect(() => {
@@ -205,6 +284,20 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
             ))}
           </div>
           <div className="legacy-control-row">
+            <button
+              className={`legacy-chip ${mapType === "satellite" ? "active" : ""}`}
+              type="button"
+              onClick={() => setMapType("satellite")}
+            >
+              Satellite
+            </button>
+            <button
+              className={`legacy-chip ${mapType === "roadmap" ? "active" : ""}`}
+              type="button"
+              onClick={() => setMapType("roadmap")}
+            >
+              Street
+            </button>
             {userLocation ? (
               <button
                 className="legacy-chip"
@@ -249,7 +342,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
               center={mapCenter}
               zoom={mapZoom}
               mapId="2f9f04bb8e9c458045b99a65"
-              mapTypeId="satellite"
+              mapTypeId={mapType}
               disableDefaultUI={true}
               zoomControl={true}
               clickableIcons={false}
@@ -272,8 +365,6 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
               style={{ width: "100%", height: "100%" }}
             >
               {visibleVenues.slice(0, 100).map((venue) => {
-                const category = getLegacyCategory(venue);
-                const markerSize = category === "art installation" ? 10 : 12;
                 return (
                   <AdvancedMarker
                     key={venue.id}
@@ -284,11 +375,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                       className={`legacy-pin ${selectedVenueId === venue.id ? "is-selected" : ""}`}
                       type="button"
                       aria-label={venue.name}
-                      style={{
-                        background: LEGACY_CATEGORY_COLORS[category] || venue.accent,
-                        width: markerSize,
-                        height: markerSize,
-                      }}
+                      style={{ "--pin-color": getVenueColor(venue) } as CSSProperties}
                       onMouseDown={(event) => {
                         event.preventDefault();
                         event.stopPropagation();
@@ -352,19 +439,27 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
               <span>{visibleVenues.length}</span>
             </div>
             <div className="legacy-venue-list">
-              {visibleVenues.map((venue) => (
-                <button
-                  key={venue.id}
-                  className={`legacy-venue-item ${selectedVenueId === venue.id ? "active" : ""}`}
-                  type="button"
-                  onClick={() => focusVenue(venue)}
-                >
-                  <span
-                    className="legacy-venue-dot"
-                    style={{ background: LEGACY_CATEGORY_COLORS[getLegacyCategory(venue)] || venue.accent }}
-                  />
-                  <span>{venue.name}</span>
-                </button>
+              {sortedVenueGroups.map((group) => (
+                <div key={group.category} className="legacy-venue-group">
+                  <div className="legacy-venue-group-header">
+                    <span>{group.categoryLabel}</span>
+                    <span>{group.venues.length}</span>
+                  </div>
+                  {group.venues.map((venue) => (
+                    <button
+                      key={venue.id}
+                      className={`legacy-venue-item ${selectedVenueId === venue.id ? "active" : ""}`}
+                      type="button"
+                      onClick={() => focusVenue(venue)}
+                    >
+                      <span
+                        className="legacy-venue-dot"
+                        style={{ "--pin-color": getVenueColor(venue) } as CSSProperties}
+                      />
+                      <span>{venue.name}</span>
+                    </button>
+                  ))}
+                </div>
               ))}
             </div>
           </section>
@@ -383,7 +478,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                     key={event.id}
                     className="legacy-event-item"
                     type="button"
-                    onClick={() => setSelectedEventId(event.id)}
+                    onClick={() => focusEvent(event)}
                   >
                     <span className={`type-chip type-${event.type}`}>{eventTypeLabels[event.type]}</span>
                     <strong>{event.title}</strong>
