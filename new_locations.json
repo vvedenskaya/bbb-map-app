@@ -111,8 +111,8 @@
   },
   {
     "Name": "Limbo Lounge Gallery",
-    "Lat": 33.35374,
-    "Long": -115.72753
+    "Lat": 33.351666302074975,
+    "Long": -115.72865401978495
   },
   {
     "Name": "Little Little Italy",
@@ -203,6 +203,16 @@
     "Name": "The Ski Inn",
     "Lat": 33.3535831,
     "Long": -115.7335035
+  },
+  {
+    "Name": "American Legion",
+    "Lat": 33.3547378,
+    "Long": -115.725771
+  },
+  {
+    "Name": "Chow Market",
+    "Lat": 33.3526499,
+    "Long": -115.7337213
   },
   {
     "Name": "Vulcan",

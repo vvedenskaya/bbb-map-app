@@ -1,10 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState, type CSSProperties } from "react";
 import { APIProvider, Map, AdvancedMarker, AdvancedMarkerAnchorPoint } from "@vis.gl/react-google-maps";
 import { dayLabels, eventTypeLabels } from "@/data/festival";
-import { FestivalDay, FestivalEvent, Venue } from "@/types/festival";
+import { EventType, FestivalDay, FestivalEvent, Venue } from "@/types/festival";
 
 const ALL_DAYS: FestivalDay[] = ["fri", "sat", "sun"];
 const MAP_CENTER = { lat: 33.351508, lng: -115.729625 };
@@ -16,16 +15,17 @@ const GEOFENCE_RADIUS_METERS = 1609.34; // 1 mile
 const CAMERA_EPSILON = 0.000001;
 const ZOOM_EPSILON = 0.001;
 
-const LEGACY_CATEGORY_COLORS: Record<string, string> = {
-  parking: "#FF2D55",
-  bathroom: "#00B5FF",
-  "local business": "#FF5A1F",
-  "community hub": "#FF9E00",
-  museum: "#9B4DFF",
-  gallery: "#B400FF",
-  studio: "#FF3D8E",
-  venue: "#00C853",
-  "art installation": "#D4E800",
+const PROJECT_TYPE_COLORS: Record<EventType, string> = {
+  music: "#3b82f6",
+  performance: "#ef4444",
+  installation: "#f59e0b",
+  lecture: "#14b8a6",
+  community: "#8b5cf6",
+  object: "#ec4899",
+  experience: "#22c55e",
+  dj: "#a855f7",
+  venue: "#0ea5e9",
+  food: "#f97316",
 };
 
 const UNCATEGORIZED_KEY = "uncategorized";
@@ -94,9 +94,8 @@ function getCategoryDisplayLabel(categoryKey: string): string {
   return categoryKey.replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-function getVenueColor(venue: Venue): string {
-  const category = getLegacyCategory(venue);
-  return LEGACY_CATEGORY_COLORS[category] || venue.accent || "#FF2D55";
+function getProjectTypeColor(type: EventType): string {
+  return PROJECT_TYPE_COLORS[type] || "#8b5cf6";
 }
 
 function getCategoryOrderIndex(category: string): number {
@@ -128,9 +127,46 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   const selectedVenue = venues.find((venue) => venue.id === selectedVenueId) ?? null;
-  const selectedEvent = events.find((event) => event.id === selectedEventId) ?? null;
+  const venueById = venues.reduce<globalThis.Map<string, Venue>>((acc, venue) => {
+    acc.set(venue.id, venue);
+    return acc;
+  }, new globalThis.Map());
 
   const lowerQuery = searchQuery.toLowerCase();
+  const eventsByVenueId = events.reduce<globalThis.Map<string, FestivalEvent[]>>((acc, event) => {
+    const existing = acc.get(event.venueId);
+    if (existing) {
+      existing.push(event);
+    } else {
+      acc.set(event.venueId, [event]);
+    }
+    return acc;
+  }, new globalThis.Map());
+
+  const venueColorById = venues.reduce<globalThis.Map<string, string>>((acc, venue) => {
+    const venueEvents = eventsByVenueId.get(venue.id) ?? [];
+    if (venueEvents.length === 0) {
+      acc.set(venue.id, venue.accent || "#8b5cf6");
+      return acc;
+    }
+
+    const typeCounts = venueEvents.reduce<globalThis.Map<EventType, number>>((counts, event) => {
+      counts.set(event.type, (counts.get(event.type) ?? 0) + 1);
+      return counts;
+    }, new globalThis.Map());
+
+    let dominantType: EventType = venueEvents[0].type;
+    let dominantCount = typeCounts.get(dominantType) ?? 0;
+    for (const [type, count] of typeCounts.entries()) {
+      if (count > dominantCount) {
+        dominantType = type;
+        dominantCount = count;
+      }
+    }
+
+    acc.set(venue.id, getProjectTypeColor(dominantType));
+    return acc;
+  }, new globalThis.Map());
 
   const visibleVenues = venues.filter((venue) => {
     let matchesLocation = true;
@@ -144,7 +180,6 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const visibleEvents = events
     .filter((event) => {
       const matchesDay = activeDays.includes(event.day);
-      const matchesVenue = selectedVenueId ? event.venueId === selectedVenueId : true;
       
       let matchesLocation = true;
       if (locationFilter === "placed") matchesLocation = event.hasLocation !== false;
@@ -155,9 +190,46 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
           event.host.toLowerCase().includes(lowerQuery) ||
           (event.description || "").toLowerCase().includes(lowerQuery)
         : true;
-      return matchesDay && matchesVenue && matchesLocation && matchesSearch;
+      return matchesDay && matchesLocation && matchesSearch;
     })
     .sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""));
+
+  const eventsByCategory = visibleEvents.reduce<globalThis.Map<string, FestivalEvent[]>>((acc, event) => {
+    const venue = venueById.get(event.venueId);
+    const category = venue ? getLegacyCategory(venue) : UNCATEGORIZED_KEY;
+    const existing = acc.get(category);
+    if (existing) {
+      existing.push(event);
+    } else {
+      acc.set(category, [event]);
+    }
+    return acc;
+  }, new globalThis.Map());
+
+  const sortedEventGroups = Array.from(eventsByCategory.entries())
+    .map(([category, categoryEvents]) => ({
+      category,
+      categoryLabel: getCategoryDisplayLabel(category),
+      events: [...categoryEvents].sort((a, b) => {
+        const timeDelta = (a.startTime || "").localeCompare(b.startTime || "");
+        if (timeDelta !== 0) return timeDelta;
+        return a.title.localeCompare(b.title);
+      }),
+    }))
+    .sort((a, b) => {
+      const orderDelta = getCategoryOrderIndex(a.category) - getCategoryOrderIndex(b.category);
+      if (orderDelta !== 0) return orderDelta;
+      return a.categoryLabel.localeCompare(b.categoryLabel);
+    });
+
+  const selectedVenueSchedule = selectedVenue
+    ? events
+        .filter((event) => event.venueId === selectedVenue.id)
+        .sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""))
+    : [];
+  const visibleMappableVenues = visibleVenues.filter(
+    (venue) => typeof venue.lat === "number" && typeof venue.lng === "number"
+  );
 
   const venuesByCategory = visibleVenues.reduce<globalThis.Map<string, Venue[]>>((acc, venue) => {
     const category = getLegacyCategory(venue);
@@ -192,23 +264,24 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     const lat = venue.lat ?? MAP_CENTER.lat;
     const lng = venue.lng ?? MAP_CENTER.lng;
     setSelectedVenueId(venue.id);
+    setSelectedEventId(null);
     setMapCenter({ lat, lng });
     setMapZoom(zoom);
   }
 
   function focusEvent(event: FestivalEvent) {
     const venue = venues.find((entry) => entry.id === event.venueId) ?? null;
-    // Rule from sprintboard: event coords first, venue as fallback.
-    if (
+    // When selecting from the sidebar, center on the venue location first.
+    if (typeof venue?.lat === "number" && typeof venue.lng === "number") {
+      setMapCenter({ lat: venue.lat, lng: venue.lng });
+      setMapZoom(MAP_FOCUS_ZOOM);
+    } else if (
       typeof event.lat === "number" &&
       typeof event.lng === "number" &&
       !Number.isNaN(event.lat) &&
       !Number.isNaN(event.lng)
     ) {
       setMapCenter({ lat: event.lat, lng: event.lng });
-      setMapZoom(MAP_FOCUS_ZOOM);
-    } else if (typeof venue?.lat === "number" && typeof venue.lng === "number") {
-      setMapCenter({ lat: venue.lat, lng: venue.lng });
       setMapZoom(MAP_FOCUS_ZOOM);
     }
 
@@ -266,6 +339,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
               type="button"
               onClick={() => {
                 setSelectedVenueId(null);
+                setSelectedEventId(null);
                 setMapCenter(MAP_CENTER);
                 setMapZoom(MAP_DEFAULT_ZOOM);
               }}
@@ -364,7 +438,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
               }}
               style={{ width: "100%", height: "100%" }}
             >
-              {visibleVenues.slice(0, 100).map((venue) => {
+              {visibleMappableVenues.slice(0, 100).map((venue) => {
                 return (
                   <AdvancedMarker
                     key={venue.id}
@@ -375,7 +449,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                       className={`legacy-pin ${selectedVenueId === venue.id ? "is-selected" : ""}`}
                       type="button"
                       aria-label={venue.name}
-                      style={{ "--pin-color": getVenueColor(venue) } as CSSProperties}
+                      style={{ "--pin-color": venueColorById.get(venue.id) || venue.accent || "#8b5cf6" } as CSSProperties}
                       onMouseDown={(event) => {
                         event.preventDefault();
                         event.stopPropagation();
@@ -384,12 +458,13 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                         event.preventDefault();
                         event.stopPropagation();
                         setSelectedVenueId(venue.id);
+                        setSelectedEventId(null);
                       }}
                     />
                   </AdvancedMarker>
                 );
               })}
-              {selectedVenue ? (
+              {selectedVenue && typeof selectedVenue.lat === "number" && typeof selectedVenue.lng === "number" ? (
                 <AdvancedMarker
                   position={{
                     lat: selectedVenue.lat ?? MAP_CENTER.lat,
@@ -408,18 +483,37 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                           event.preventDefault();
                           event.stopPropagation();
                           setSelectedVenueId(null);
+                          setSelectedEventId(null);
                         }}
                       >
                         ×
                       </button>
                     </div>
                     <div>
-                      <i>{selectedVenue.label}</i>
+                      <i>Schedule at this location</i>
                     </div>
-                    <div>{selectedVenue.shortDescription || selectedVenue.description}</div>
-                    {selectedVenue.permanence ? (
-                      <div className="legacy-popup-meta">{selectedVenue.permanence}</div>
-                    ) : null}
+                    {selectedVenueSchedule.length > 0 ? (
+                      <div>
+                        {selectedVenueSchedule.map((event) => (
+                          <div key={event.id} style={{ marginTop: 8 }}>
+                            <span
+                              className={`type-chip type-${event.type}`}
+                              style={{ backgroundColor: getProjectTypeColor(event.type) }}
+                            >
+                              {eventTypeLabels[event.type]}
+                            </span>
+                            <div>
+                              <strong>{event.title}</strong>
+                            </div>
+                            <div className="legacy-popup-meta">
+                              {dayLabels[event.day]} | {event.startTime} - {event.endTime}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div>No scheduled events for this location.</div>
+                    )}
                   </article>
                 </AdvancedMarker>
               ) : null}
@@ -454,7 +548,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                     >
                       <span
                         className="legacy-venue-dot"
-                        style={{ "--pin-color": getVenueColor(venue) } as CSSProperties}
+                        style={{ "--pin-color": venueColorById.get(venue.id) || venue.accent || "#8b5cf6" } as CSSProperties}
                       />
                       <span>{venue.name}</span>
                     </button>
@@ -471,24 +565,37 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
             </div>
 
             <div className="legacy-event-list">
-              {visibleEvents.map((event) => {
-                const venue = venues.find((entry) => entry.id === event.venueId);
-                return (
-                  <button
-                    key={event.id}
-                    className="legacy-event-item"
-                    type="button"
-                    onClick={() => focusEvent(event)}
-                  >
-                    <span className={`type-chip type-${event.type}`}>{eventTypeLabels[event.type]}</span>
-                    <strong>{event.title}</strong>
-                    <small>
-                      {dayLabels[event.day]} | {event.startTime} - {event.endTime}
-                    </small>
-                    <small>{venue?.name ?? "Unknown venue"}</small>
-                  </button>
-                );
-              })}
+              {sortedEventGroups.map((group) => (
+                <div key={group.category} className="legacy-venue-group">
+                  <div className="legacy-venue-group-header">
+                    <span>{group.categoryLabel}</span>
+                    <span>{group.events.length}</span>
+                  </div>
+                  {group.events.map((event) => {
+                    const venue = venueById.get(event.venueId);
+                    return (
+                      <button
+                        key={event.id}
+                        className={`legacy-event-item ${selectedEventId === event.id ? "active" : ""}`}
+                        type="button"
+                        onClick={() => focusEvent(event)}
+                      >
+                        <span
+                          className={`type-chip type-${event.type}`}
+                          style={{ backgroundColor: getProjectTypeColor(event.type) }}
+                        >
+                          {eventTypeLabels[event.type]}
+                        </span>
+                        <strong>{event.title}</strong>
+                        <small>
+                          {dayLabels[event.day]} | {event.startTime} - {event.endTime}
+                        </small>
+                        <small>{venue?.name ?? "Unknown venue"}</small>
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
             </div>
           </section>
 
@@ -508,55 +615,6 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
         </aside>
       </div>
 
-      {selectedEvent ? (
-        <div className="modal-backdrop" role="presentation" onClick={() => setSelectedEventId(null)}>
-          <article
-            className="modal-card"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="event-modal-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="modal-topbar">
-              <button
-                className="close-button"
-                type="button"
-                aria-label="Close event details"
-                onClick={() => setSelectedEventId(null)}
-              >
-                ×
-              </button>
-            </div>
-            <div className="modal-image">
-              <Image
-                src={selectedEvent.thumbnailUrl}
-                alt={selectedEvent.title}
-                fill
-                sizes="900px"
-                style={{ objectFit: "cover" }}
-              />
-            </div>
-            <div className="modal-copy">
-              <span className="eyebrow">Event Detail</span>
-              <h2 id="event-modal-title">{selectedEvent.title}</h2>
-              <div className="modal-meta">
-                <span className={`type-chip type-${selectedEvent.type}`}>
-                  {eventTypeLabels[selectedEvent.type]}
-                </span>
-                <span className="meta-chip">{dayLabels[selectedEvent.day]}</span>
-                <span className="meta-chip">
-                  {selectedEvent.startTime} - {selectedEvent.endTime}
-                </span>
-                <span className="meta-chip">Host: {selectedEvent.host}</span>
-                {selectedEvent.permanence ? (
-                  <span className="meta-chip">{selectedEvent.permanence}</span>
-                ) : null}
-              </div>
-              <p>{selectedEvent.description}</p>
-            </div>
-          </article>
-        </div>
-      ) : null}
     </main>
   );
 }
