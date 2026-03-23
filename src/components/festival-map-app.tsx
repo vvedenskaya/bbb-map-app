@@ -6,6 +6,7 @@ import { dayLabels, eventTypeLabels } from "@/data/festival";
 import { EventType, FestivalDay, FestivalEvent, Venue } from "@/types/festival";
 
 const ALL_DAYS: FestivalDay[] = ["fri", "sat", "sun"];
+const DAY_SORT_ORDER: Record<FestivalDay, number> = { fri: 0, sat: 1, sun: 2 };
 const MAP_CENTER = { lat: 33.351508, lng: -115.729625 };
 const MAP_DEFAULT_ZOOM = 16.9;
 const MAP_FOCUS_ZOOM = 17.8;
@@ -103,6 +104,14 @@ function getCategoryOrderIndex(category: string): number {
   return index === -1 ? CATEGORY_SORT_ORDER.length : index;
 }
 
+function sortScheduleEvents(a: FestivalEvent, b: FestivalEvent): number {
+  const dayDelta = DAY_SORT_ORDER[a.day] - DAY_SORT_ORDER[b.day];
+  if (dayDelta !== 0) return dayDelta;
+  const startDelta = (a.startTime || "").localeCompare(b.startTime || "");
+  if (startDelta !== 0) return startDelta;
+  return a.title.localeCompare(b.title);
+}
+
 type FestivalMapAppProps = {
   venues: Venue[];
   events: FestivalEvent[];
@@ -117,6 +126,7 @@ type FestivalMapAppProps = {
 
 export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: FestivalMapAppProps) {
   const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
+  const [lastInteractedVenueId, setLastInteractedVenueId] = useState<string | null>(null);
   const [activeDays, setActiveDays] = useState<FestivalDay[]>(ALL_DAYS);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [locationFilter, setLocationFilter] = useState<"all" | "placed" | "unplaced">("all");
@@ -225,8 +235,13 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const selectedVenueSchedule = selectedVenue
     ? events
         .filter((event) => event.venueId === selectedVenue.id)
-        .sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""))
+        .sort(sortScheduleEvents)
     : [];
+  const selectedVenueObjectEvents = selectedVenueSchedule.filter((event) => event.type === "object");
+  const selectedVenueDjEvents = selectedVenueSchedule.filter((event) => event.type === "dj");
+  const selectedVenueOtherEvents = selectedVenueSchedule.filter(
+    (event) => event.type !== "object" && event.type !== "dj"
+  );
   const visibleMappableVenues = visibleVenues.filter(
     (venue) => typeof venue.lat === "number" && typeof venue.lng === "number"
   );
@@ -264,6 +279,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     const lat = venue.lat ?? MAP_CENTER.lat;
     const lng = venue.lng ?? MAP_CENTER.lng;
     setSelectedVenueId(venue.id);
+    setLastInteractedVenueId(venue.id);
     setSelectedEventId(null);
     setMapCenter({ lat, lng });
     setMapZoom(zoom);
@@ -287,6 +303,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
 
     if (venue) {
       setSelectedVenueId(venue.id);
+      setLastInteractedVenueId(venue.id);
     }
 
     setSelectedEventId(event.id);
@@ -418,9 +435,9 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
               mapId="2f9f04bb8e9c458045b99a65"
               mapTypeId={mapType}
               disableDefaultUI={true}
-              zoomControl={true}
+              zoomControl={!selectedVenue}
               clickableIcons={false}
-              gestureHandling="greedy"
+              gestureHandling={selectedVenue ? "none" : "greedy"}
               minZoom={MAP_MIN_ZOOM}
               maxZoom={MAP_MAX_ZOOM}
               onCameraChanged={(ev) => {
@@ -446,7 +463,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                     anchorPoint={AdvancedMarkerAnchorPoint.CENTER}
                   >
                     <button
-                      className={`legacy-pin ${selectedVenueId === venue.id ? "is-selected" : ""}`}
+                      className={`legacy-pin ${selectedVenueId === venue.id ? "is-selected" : ""} ${lastInteractedVenueId === venue.id ? "is-last-interacted" : ""}`}
                       type="button"
                       aria-label={venue.name}
                       style={{ "--pin-color": venueColorById.get(venue.id) || venue.accent || "#8b5cf6" } as CSSProperties}
@@ -458,65 +475,13 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                         event.preventDefault();
                         event.stopPropagation();
                         setSelectedVenueId(venue.id);
+                        setLastInteractedVenueId(venue.id);
                         setSelectedEventId(null);
                       }}
                     />
                   </AdvancedMarker>
                 );
               })}
-              {selectedVenue && typeof selectedVenue.lat === "number" && typeof selectedVenue.lng === "number" ? (
-                <AdvancedMarker
-                  position={{
-                    lat: selectedVenue.lat ?? MAP_CENTER.lat,
-                    lng: selectedVenue.lng ?? MAP_CENTER.lng,
-                  }}
-                  anchorPoint={AdvancedMarkerAnchorPoint.BOTTOM_CENTER}
-                >
-                  <article className="legacy-popup">
-                    <div className="legacy-popup-head">
-                      <h3>{selectedVenue.name}</h3>
-                      <button
-                        type="button"
-                        className="legacy-popup-close"
-                        aria-label="Close location popup"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          event.stopPropagation();
-                          setSelectedVenueId(null);
-                          setSelectedEventId(null);
-                        }}
-                      >
-                        ×
-                      </button>
-                    </div>
-                    <div>
-                      <i>Schedule at this location</i>
-                    </div>
-                    {selectedVenueSchedule.length > 0 ? (
-                      <div>
-                        {selectedVenueSchedule.map((event) => (
-                          <div key={event.id} style={{ marginTop: 8 }}>
-                            <span
-                              className={`type-chip type-${event.type}`}
-                              style={{ backgroundColor: getProjectTypeColor(event.type) }}
-                            >
-                              {eventTypeLabels[event.type]}
-                            </span>
-                            <div>
-                              <strong>{event.title}</strong>
-                            </div>
-                            <div className="legacy-popup-meta">
-                              {dayLabels[event.day]} | {event.startTime} - {event.endTime}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div>No scheduled events for this location.</div>
-                    )}
-                  </article>
-                </AdvancedMarker>
-              ) : null}
               {userLocation ? (
                 <AdvancedMarker position={userLocation} anchorPoint={AdvancedMarkerAnchorPoint.CENTER}>
                   <div className="legacy-user-dot" aria-label="Your location" />
@@ -524,6 +489,128 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
               ) : null}
             </Map>
           </APIProvider>
+          {selectedVenue ? (
+            <div
+              className="legacy-map-modal-overlay"
+              role="presentation"
+              onClick={() => {
+                setSelectedVenueId(null);
+                setSelectedEventId(null);
+              }}
+            >
+              <article
+                className="legacy-popup is-centered-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-label={`${selectedVenue.name} venue details`}
+                onMouseDown={(event) => {
+                  event.stopPropagation();
+                }}
+                onClick={(event) => {
+                  event.stopPropagation();
+                }}
+                onWheel={(event) => {
+                  event.stopPropagation();
+                }}
+              >
+                <div className="legacy-popup-head">
+                  <div>
+                    <h3>{selectedVenue.name}</h3>
+                    <p className="legacy-popup-subtitle">
+                      {selectedVenueSchedule.length} scheduled {selectedVenueSchedule.length === 1 ? "event" : "events"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="legacy-popup-close"
+                    aria-label="Close location popup"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setSelectedVenueId(null);
+                      setSelectedEventId(null);
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="legacy-popup-content">
+                  {selectedVenueSchedule.length > 0 ? (
+                    <>
+                      <details className="legacy-popup-section is-schedule" open>
+                        <summary className="legacy-popup-section-title">Schedule</summary>
+                        <div className="legacy-popup-event-list">
+                          {selectedVenueSchedule.map((event) => (
+                            <article key={event.id} className="legacy-popup-event">
+                              <div className="legacy-popup-event-head">
+                                <span
+                                  className={`type-chip type-${event.type}`}
+                                  style={{ backgroundColor: getProjectTypeColor(event.type) }}
+                                >
+                                  {eventTypeLabels[event.type]}
+                                </span>
+                                <span className="legacy-popup-meta">
+                                  {dayLabels[event.day]} | {event.startTime} - {event.endTime}
+                                </span>
+                              </div>
+                              <strong>{event.title}</strong>
+                              <p>{event.host}</p>
+                            </article>
+                          ))}
+                        </div>
+                      </details>
+
+                      {selectedVenueObjectEvents.length > 0 ? (
+                        <details className="legacy-popup-section is-object" open>
+                          <summary className="legacy-popup-section-title">Objects</summary>
+                          <ul className="legacy-popup-mini-list">
+                            {selectedVenueObjectEvents.map((event) => (
+                              <li key={event.id}>
+                                <strong>{event.title}</strong>
+                                <span>{dayLabels[event.day]} | {event.startTime}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </details>
+                      ) : null}
+
+                      {selectedVenueDjEvents.length > 0 ? (
+                        <details className="legacy-popup-section is-dj" open>
+                          <summary className="legacy-popup-section-title">DJ Sets</summary>
+                          <ul className="legacy-popup-mini-list">
+                            {selectedVenueDjEvents.map((event) => (
+                              <li key={event.id}>
+                                <strong>{event.title}</strong>
+                                <span>{dayLabels[event.day]} | {event.startTime}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </details>
+                      ) : null}
+
+                      {selectedVenueOtherEvents.length > 0 ? (
+                        <details className="legacy-popup-section is-other" open>
+                          <summary className="legacy-popup-section-title">Other Events</summary>
+                          <ul className="legacy-popup-mini-list">
+                            {selectedVenueOtherEvents.map((event) => (
+                              <li key={event.id}>
+                                <strong>{event.title}</strong>
+                                <span>
+                                  {eventTypeLabels[event.type]} | {dayLabels[event.day]} | {event.startTime}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </details>
+                      ) : null}
+                    </>
+                  ) : (
+                    <p className="legacy-popup-empty">No scheduled events for this venue.</p>
+                  )}
+                </div>
+              </article>
+            </div>
+          ) : null}
         </section>
 
         <aside className="legacy-list-panel">
