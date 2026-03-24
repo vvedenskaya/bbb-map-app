@@ -1,5 +1,14 @@
 [
   {
+    "Name": "BBB Parking Lot",
+    "Category": "Parking",
+    "Openness": "Public",
+    "Artist(s)": "",
+    "Artist Website": "",
+    "Lat": 33.354693,
+    "Long": -115.733349
+  },
+  {
     "Name": "San Litio (Saint Lithium)",
     "Address": "Corner of First Ave and Isle of Palms, on the way to Mars College",
     "Category": "Art Installation",
@@ -12,8 +21,8 @@
     "Name": "3D",
     "Address": "3D. 3rd and D streets.",
     "Category": "Venue",
-    "Lat": "",
-    "Long": "",
+    "Lat": 33.352539,
+    "Long": -115.0730810,
     "Installations/Art pieces": "3D Therapy in Perspective",
     "Artist(s)": "Jimmy Mahaffey, Jimmy Mahaffey"
   },
@@ -55,7 +64,7 @@
   },
   {
     "Name": "Bombay Beach Community Center",
-    "Address": "BBAC",
+    "Address": "",
     "Category": "Community Hub",
     "Lat": 33.35253, 
     "Long": -115.73127,
@@ -134,15 +143,7 @@
     "Installations/Art pieces": "A Piece of Hell's Kitchen: The Family Fridge | Answer the Call | Bombay Bliss Beach Club | Fancy Vandals | Kiamora | Moral Development Dice Bar | Sima & Sidu",
     "Artist(s)": "Carolyn Weiner aka fancyVANDALS, DANIELA ARDIZZONE, Jessie James, Kiamora, Rasza, Sima & Sidu, The Anti-Bootlicking Coalition (ABC)"
   },
-  {
-    "Name": "Bombay North",
-    "Address": "Our preference is to situate the installation at a significant separation from the town center, safeguarding the sky from surrounding light sources and supporting the intended stargazing experience. We have scoped a specific shoreline site on the beach that is zoned for open space recreation and is not under IID stewardship. Specifically at 33°20'54.6\"N, 115°42'42.9\"W. Still, we stay sincerely flexible and would gladly consider substitute sites, especially should a supportive steward, stakeholder, or organization be interested in sponsoring or hosting the installation.",
-    "Category": "Art Installation",
-    "Lat": 33.3485,
-    "Long": -115.71191666666667,
-    "Installations/Art pieces": "L and the Angel Cat | Salton Sea Stellar Sky Society: Star Sight Site",
-    "Artist(s)": "Alva Caple, Sarah K Larsen"
-  },
+ 
   {
     "Name": "Bombay Soleil",
     "Address": "Bombay Soleil, 2126 2nd St.",
@@ -163,7 +164,7 @@
   },
   {
     "Name": "Dream Demon",
-    "Address": "Throughout town plus Poetry House",
+    "Address": "",
     "Category": "Venue",
     "Lat": 33.35255,
     "Long": -115.72899,
@@ -199,7 +200,7 @@
   },
   {
     "Name": "Horsefly Ranch",
-    "Address": "BBAC?",
+    "Address": "",
     "Category": "Venue",
     "Lat": 33.35223,
     "Long": -115.72617,
@@ -311,8 +312,8 @@
     "Name": "The Nest",
     "Address": "",
     "Category": "Art Installation",
-    "Lat": "",
-    "Long": "",
+    "Lat": 33.350034,
+    "Long": -115.726441,
     "Artist(s)": ""
   },
   {
@@ -320,7 +321,7 @@
     "Address": "9550 Avenue E",
     "Category": "Venue",
     "Lat": 33.35017332280115,
-    "Long": 115.72941114232911,
+    "Long": -115.72941114232911,
     "Installations/Art pieces": "Butterfly Pavilion",
     "Artist(s)": "April Leighton"
   },
@@ -501,15 +502,7 @@
     "Installations/Art pieces": "",
     "Artist(s)": "Jay Fella"
   },
-  {
-    "Name": "The Egg",
-    "Address": "",
-    "Category": "Art Installation",
-    "Lat": 33.34999916,
-    "Long": -115.7266109,
-    "Installations/Art pieces": "",
-    "Artist(s)": "Tao Ruspoli"
-  },
+ 
   {
     "Name": "Salton Civilization Archeological Site",
     "Address": "",
@@ -760,7 +753,7 @@
     "Address": "",
     "Category": "Art Installation",
     "Lat": 33.348581,
-    "Long": 115.72893,
+    "Long": -115.72893,
     "Installations/Art pieces": "",
     "Artist(s)": "Kate Marusina"
   },
@@ -844,5 +837,203 @@
     "Long": -115.731857,
     "Installations/Art pieces": "",
     "Artist(s)": "Katrina Brown"
+  },
+  {
+    "Name": "Derangers Before the Playa",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.35376728,
+    "Long": -115.7276156,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Jake Ford Wade and Sandi Wheaton Trily"
+  },
+  {
+    "Name": "Bro need: Loss at the Salton Sea",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.34777,
+    "Long": -115.73263,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Andrea (Andee) Strickland"
+  },
+  {
+    "Name": "Artemis makes a house call",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.34903,
+    "Long": -115.72653,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Branwen Judith Berndsen"
+  },
+  {
+    "Name": "Sea Ya In Hell",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.34999,
+    "Long": -115.72944,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Masha D'yans"
+  },
+  {
+    "Name": "While It Lasts",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.344318,
+    "Long": -115.730383,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Spencer Davila"
+  },
+  {
+    "Name": "WATER HOLE - Free Filtered Water For All",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.3536806,
+    "Long": -115.7261436,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Randy Polumbo"
+  },
+  {
+    "Name": "GRUB - PALEO INSECT PROTEIN FUEL STATION",
+    "Address": "",
+    "Category": "Venue",
+    "Lat": 33.3536806,
+    "Long": -115.7261436,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Randy Polumbo"
+  },
+  {
+    "Name": "Eye of God",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.3536806,
+    "Long": -115.7261436,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Randy Polumbo"
+  },
+  {
+    "Name": "FUGU",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.3536806,
+    "Long": -115.7261436,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Randy Polumbo"
+  },
+  {
+    "Name": "Mirage",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.35171,
+    "Long": -115.725453,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Randy Polumbo"
+  },
+  {
+    "Name": "Bombay Bathroom Club - Public Restroom",
+    "Address": "",
+    "Category": "Services",
+    "Lat": 33.35326262,
+    "Long": -115.7269229,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Randy Polumbo"
+  },
+  {
+    "Name": "KDEZ RADIO TRAILER",
+    "Address": "",
+    "Category": "Venue",
+    "Lat": 33.349076,
+    "Long": -115.72678,
+    "Installations/Art pieces": "",
+    "Artist(s)": ""
+  },
+  {
+    "Name": "GRUB",
+    "Address": "",
+    "Category": "Venue",
+    "Lat": 33.353567,
+    "Long": -115.726389,
+    "Installations/Art pieces": "",
+    "Artist(s)": ""
+  },
+  {
+    "Name": "Sothebys",
+    "Address": "",
+    "Category": "Venue",
+    "Lat": 33.349629,
+    "Long": -115.727411,
+    "Installations/Art pieces": "",
+    "Artist(s)": ""
+  },
+  {
+    "Name": "Food Court",
+    "Address": "",
+    "Category": "Venue",
+    "Lat": 33.35236,
+    "Long": -115.731427,
+    "Installations/Art pieces": "",
+    "Artist(s)": ""
+  },
+  {
+    "Name": "Cult of Reality's Grhastha Matha",
+    "Address": "",
+    "Category": "Venue",
+    "Lat": 33.35245,
+    "Long": -115.727152,
+    "Installations/Art pieces": "",
+    "Artist(s)": ""
+  },
+  {
+    "Name": "Kevin's Lit Landing",
+    "Address": "",
+    "Category": "Venue",
+    "Lat": 33.34458,
+    "Long": -115.727328,
+    "Installations/Art pieces": "",
+    "Artist(s)": ""
+  },
+  {
+    "Name": "Skull Pony",
+    "Address": "",
+    "Category": "Venue",
+    "Lat": 33.350585,
+    "Long": -115.729699,
+    "Installations/Art pieces": "",
+    "Artist(s)": ""
+  },
+  {
+    "Name": "The Tradewinds",
+    "Address": "",
+    "Category": "Venue",
+    "Lat": 33.349064,
+    "Long": -115.7329,
+    "Installations/Art pieces": "",
+    "Artist(s)": ""
+  },
+  {
+    "Name": "Love Buggin",
+    "Address": "",
+    "Category": "Venue",
+    "Lat": 33.354242,
+    "Long": -115.732372,
+    "Installations/Art pieces": "",
+    "Artist(s)": ""
+  },
+  {
+    "Name": "Paparazzi Plaza",
+    "Address": "",
+    "Category": "Venue",
+    "Lat": 33.350364,
+    "Long": -115.730656,
+    "Installations/Art pieces": "",
+    "Artist(s)": ""
+  },
+  {
+    "Name": "Globalschism",
+    "Address": "The Beach",
+    "Category": "Venue",
+    "Lat": 33.347656,
+    "Long": -115.730933,
+    "Installations/Art pieces": "",
+    "Artist(s)": ""
   }
 ]
