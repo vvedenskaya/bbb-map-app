@@ -81,9 +81,28 @@ function parseEventType(value: string): FestivalEvent["type"] {
 
 function parseDay(rawStart: string): FestivalDay {
   if (!rawStart) return "fri";
-  const parsed = new Date(rawStart);
+  const match = rawStart.match(/^\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (!match) return "fri";
+
+  const month = Number(match[1]);
+  const dayOfMonth = Number(match[2]);
+  const year = Number(match[3]);
+  if (
+    Number.isNaN(month) ||
+    Number.isNaN(dayOfMonth) ||
+    Number.isNaN(year) ||
+    month < 1 ||
+    month > 12 ||
+    dayOfMonth < 1 ||
+    dayOfMonth > 31
+  ) {
+    return "fri";
+  }
+
+  // Use UTC noon to avoid timezone shifts changing the weekday.
+  const parsed = new Date(Date.UTC(year, month - 1, dayOfMonth, 12, 0, 0));
   if (Number.isNaN(parsed.getTime())) return "fri";
-  const day = parsed.getDay();
+  const day = parsed.getUTCDay();
   if (day === 5) return "fri";
   if (day === 6) return "sat";
   if (day === 0) return "sun";

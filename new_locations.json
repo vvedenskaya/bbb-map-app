@@ -1,8 +1,8 @@
 [
   {
-    "Name": "1st & Aisle of Palms",
+    "Name": "San Litio (Saint Lithium)",
     "Address": "Corner of First Ave and Isle of Palms, on the way to Mars College",
-    "Category": "Uncategorized",
+    "Category": "Art Installation",
     "Lat": 33.354255,
     "Long": -115.725342,
     "Installations/Art pieces": "San Litio (Saint Lithium)",
@@ -11,25 +11,25 @@
   {
     "Name": "3D",
     "Address": "3D. 3rd and D streets.",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": "",
     "Long": "",
     "Installations/Art pieces": "3D Therapy in Perspective",
     "Artist(s)": "Jimmy Mahaffey, Jimmy Mahaffey"
   },
   {
-    "Name": "9536 Avenue D",
+    "Name": "Curl",
     "Address": "Private property at 9536 Avenue D",
-    "Category": "Uncategorized",
+    "Category": "Art Installation",
     "Lat": 33.34911,
     "Long": -115.73023,
     "Installations/Art pieces": "Curl",
     "Artist(s)": "Sam Cooler"
   },
   {
-    "Name": "9543 Avenue H",
+    "Name": "Aperion",
     "Address": "9543 Avenue H",
-    "Category": "Uncategorized",
+    "Category": "Art Installation",
     "Lat": 33.34981,
     "Long": -115.72666,
     "Installations/Art pieces": "Aperion",
@@ -54,9 +54,27 @@
     "Artist(s)": "Christopher Landis"
   },
   {
+    "Name": "Bombay Beach Community Center",
+    "Address": "BBAC",
+    "Category": "Community Hub",
+    "Lat": 33.35253, 
+    "Long": -115.73127,
+    "Installations/Art pieces": "The Salton Sea Museum and Library",
+    "Artist(s)": "Christopher Landis"
+  },
+  {
+    "Name": "Food Court",
+    "Address": "9590 Avenue C, Niland, CA 92257",
+    "Category": "Venue",
+    "Lat": 33.35205154941772,  
+    "Long": -115.73165017707376,
+    "Installations/Art pieces": "The Salton Sea Museum and Library",
+    "Artist(s)": "Christopher Landis"
+  },
+  {
     "Name": "Beach: Lemonade Stand",
     "Address": "Near the Lemonade Stand on the Beach",
-    "Category": "Uncategorized",
+    "Category": "Art Installation",
     "Lat": 33.34749,
     "Long": -115.72943,
     "Installations/Art pieces": "Bombay Beach Binoculars",
@@ -65,7 +83,7 @@
   {
     "Name": "Beach: Tesseract",
     "Address": "Tesseract lot. Tao already ok’d",
-    "Category": "Uncategorized",
+    "Category": "Art Installation",
     "Lat": 33.34837,
     "Long": -115.7294,
     "Installations/Art pieces": "Dino pez dispenser",
@@ -74,7 +92,7 @@
   {
     "Name": "Beach: The Lighthouse",
     "Address": "",
-    "Category": "Uncategorized",
+    "Category": "Art Installation",
     "Lat": 33.3475925,
     "Long": -115.7294454,
     "Installations/Art pieces": "The Last Catch (what remains as everything drains away)",
@@ -83,7 +101,7 @@
   {
     "Name": "Beach: The Sub Club/The Underground",
     "Address": "Sub Club",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": 33.34825936,
     "Long": -115.7293901,
     "Installations/Art pieces": "How to Freestyle Rap | SILICON WASTELAND PRESENTS \"TILAPIA TANK\": A BUSINESS GAME SHOW IMPROV FOR THE END TIME",
@@ -92,7 +110,7 @@
   {
     "Name": "Bombay Beach Museum of Bombay Beach",
     "Address": "Book display: Bombay Beach Museum of Bombay Beach (downstairs). Live reading: Bombay Beach Museum of Bombay Beach (upstairs).",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": 33.34898,
     "Long": -115.72611,
     "Installations/Art pieces": "Empathy Bleed",
@@ -101,7 +119,7 @@
   {
     "Name": "Bombay Beach Yacht Club",
     "Address": "",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": 33.3531109,
     "Long": -115.7265341,
     "Installations/Art pieces": "The Kraken",
@@ -110,7 +128,7 @@
   {
     "Name": "Bombay Bliss Beach Club",
     "Address": "Near Bliss Beach Club",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": 33.34735,
     "Long": -115.7278,
     "Installations/Art pieces": "A Piece of Hell's Kitchen: The Family Fridge | Answer the Call | Bombay Bliss Beach Club | Fancy Vandals | Kiamora | Moral Development Dice Bar | Sima & Sidu",
@@ -119,7 +137,7 @@
   {
     "Name": "Bombay North",
     "Address": "Our preference is to situate the installation at a significant separation from the town center, safeguarding the sky from surrounding light sources and supporting the intended stargazing experience. We have scoped a specific shoreline site on the beach that is zoned for open space recreation and is not under IID stewardship. Specifically at 33°20'54.6\"N, 115°42'42.9\"W. Still, we stay sincerely flexible and would gladly consider substitute sites, especially should a supportive steward, stakeholder, or organization be interested in sponsoring or hosting the installation.",
-    "Category": "Uncategorized",
+    "Category": "Art Installation",
     "Lat": 33.3485,
     "Long": -115.71191666666667,
     "Installations/Art pieces": "L and the Angel Cat | Salton Sea Stellar Sky Society: Star Sight Site",
@@ -146,7 +164,7 @@
   {
     "Name": "Dream Demon",
     "Address": "Throughout town plus Poetry House",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": 33.35255,
     "Long": -115.72899,
     "Installations/Art pieces": "God Is / Sustenance | Numen",
@@ -155,7 +173,7 @@
   {
     "Name": "Foundation Foundation",
     "Address": "Indoor Biennale gallery/group exhibition venue (assigned by BBB), Bombay Beach, CA 92233",
-    "Category": "Gallery",
+    "Category": "Venue",
     "Lat": 33.3500821,
     "Long": -115.7294487,
     "Installations/Art pieces": "Bombay Beach Retrospective | Small Mercies (A Diptych)",
@@ -164,7 +182,7 @@
   {
     "Name": "Get Lost Gallery",
     "Address": "The project utilizes a hybrid \"scattered-site\" model across Bombay Beach:  Central Hub & Gallery Venue: The Electric Lounge.  Satellite Archive Sites: 10 solar-powered beacon locations positioned on vacant lots and in collaboration with local mural sites throughout the town (specific coordinates to be finalized with the BBB placement team).",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": 33.34908,
     "Long": -115.73,
     "Installations/Art pieces": "Art Basil | Bombay | GHOST LAYERS",
@@ -173,7 +191,7 @@
   {
     "Name": "Henderson Hall",
     "Address": "Henderson Hall, 2&B, 2184 2nd",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": 33.353735060939144,
     "Long": -115.73226869554519,
     "Installations/Art pieces": "HENDERSON HALL.  MZ Aqua Community Enrichment ProjectS *MACEPS | Mapping the Sacrifice Zone | okay you | Sun Shine Dreams: Legends of Bomabay Beach, Unconditional Love and Stuff | The Last Chord Divine",
@@ -182,7 +200,7 @@
   {
     "Name": "Horsefly Ranch",
     "Address": "BBAC?",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": 33.35223,
     "Long": -115.72617,
     "Installations/Art pieces": "Silver Tongued Devil: A Speaker-Creature",
@@ -191,7 +209,7 @@
   {
     "Name": "Jaybird Nest",
     "Address": "Need space with power + room outside, procession sunset on Friday . Behind Saturn? 2169 2nd st?",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": 33.35329,
     "Long": -115.73125,
     "Installations/Art pieces": "Birth, Life and Becoming | The SCAR Wash",
@@ -200,7 +218,7 @@
   {
     "Name": "Limbo Lounge Gallery",
     "Address": "",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": 33.351666302074975,
     "Long": -115.72865401978495,
     "Installations/Art pieces": "Re-inanim-ation",
@@ -209,7 +227,7 @@
   {
     "Name": "Little Little Italy",
     "Address": "little little italy",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": 33.3490766,
     "Long": -115.7256358,
     "Installations/Art pieces": "Italia Fest",
@@ -218,16 +236,16 @@
   {
     "Name": "Neptune",
     "Address": "Neptune",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": 33.349543,
     "Long": -115.731895,
     "Installations/Art pieces": "Messages from Space | My kingdom for a crown | The Bombay Beach Country Club, The 6th Hole @Neptune | The New World - Gallery Closing & Gift Shop Event",
     "Artist(s)": "Johnny G, Kirby, RIA RAJAN, Tracey Keilly, John Geary, Jacob Joaquin, Sophi Kravitz, Sophi Kravitz, RIA RAJAN, Tracey Keilly, Tracey Keilly"
   },
   {
-    "Name": "No Shoes + Dry West — Moonscape",
+    "Name": "Dry West — Moonscape",
     "Address": "community center",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": 33.34911,
     "Long": -115.726836,
     "Installations/Art pieces": "a semisensualconductor | AI and the Apocalyptic Imagination | An information-theoretic recapitulation of God in the form of a public figure | Community Patchwork/Quilting Bee of the Damned | Precision",
@@ -251,28 +269,12 @@
     "Installations/Art pieces": "Bombay Beach Surf Club | Mella Tarantella--Risorga e Balla con i Morti e Vivi alla Fine Dei Giorni | PoP.  a MACEPS project",
     "Artist(s)": "Arabella Serrell, Carmella Martinique Bonadio, LucYSOL"
   },
-  {
-    "Name": "Pythia",
-    "Address": "Booth needs some breathing room - music",
-    "Category": "Venue",
-    "Lat": 33.352717,
-    "Long": -115.7286839,
-    "Installations/Art pieces": "Oracle Booth",
-    "Artist(s)": "Danielle Ackeroy"
-  },
-  {
-    "Name": "Shed",
-    "Address": "Shed (comprised of three rooms - see images attached in PDF) on lot 9543 Ave H (between Mark Mack and Poetry House)",
-    "Category": "Uncategorized",
-    "Lat": "",
-    "Long": "",
-    "Installations/Art pieces": "SYZYGY",
-    "Artist(s)": "Wanda Orme"
-  },
+
+
   {
     "Name": "Showtown",
     "Address": "",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": 33.34822,
     "Long": -115.73305,
     "Installations/Art pieces": "Body Dysturbia | Mamacita Junior the 3rd | Mobile Off Grid Studio Suites",
@@ -299,16 +301,24 @@
   {
     "Name": "The Bombay Beach Estates",
     "Address": "We would like to occupy our regular house at the Estates.",
-    "Category": "Art Installation",
+    "Category": "Venue",
     "Lat": 33.3489844,
     "Long": -115.7279718,
     "Installations/Art pieces": "Cafe Bosna | Pickle That Up presents THE SACRAMENT OF THE HOLY BRINE | The Jazz Club at the DORD , sponsored by YARGER PROJECTS",
     "Artist(s)": "Stefan Ashkenazy"
   },
   {
+    "Name": "The Nest",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": "",
+    "Long": "",
+    "Artist(s)": ""
+  },
+  {
     "Name": "The Butterfly Pavillion",
     "Address": "9550 Avenue E",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": 33.35017332280115,
     "Long": 115.72941114232911,
     "Installations/Art pieces": "Butterfly Pavilion",
@@ -317,16 +327,16 @@
   {
     "Name": "The Escapes",
     "Address": "Seamus' Lot",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": 33.3490043,
     "Long": -115.7298246,
     "Installations/Art pieces": "Algo(g)rave: The Manual for Dying | FLESH VERDICT | Lomochrome | StarShade",
     "Artist(s)": "Katana Calderwood, Lyosha, Sam Smith AKA Solar Sam, Sydney Parcell"
   },
   {
-    "Name": "The Institute",
+    "Name": "The Bombay Beach Institute of Particle Physics, Metaphysics & International Relations",
     "Address": "Robert Stivers Trailer",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": 33.3491567,
     "Long": -115.7266481,
     "Installations/Art pieces": "Artemis makes a house call | Reincarnation Station",
@@ -335,7 +345,7 @@
   {
     "Name": "The Poetry House",
     "Address": "The Poetry House",
-    "Category": "Gallery",
+    "Category": "Venue",
     "Lat": 33.349535,
     "Long": -115.726539,
     "Installations/Art pieces": "Akasha | Pharaoh and Tarot | The Holy Sinner’s Shrine | The Poetry House | The Poetry Salon | The Toll",
@@ -344,7 +354,7 @@
   {
     "Name": "The Portal",
     "Address": "In front of the Portal.",
-    "Category": "Uncategorized",
+    "Category": "Art Installation",
     "Lat": 33.349284,
     "Long": -115.727051,
     "Installations/Art pieces": "The Philosophical Computer.",
@@ -389,7 +399,7 @@
   {
     "Name": "Vulcan",
     "Address": "",
-    "Category": "Uncategorized",
+    "Category": "Venue",
     "Lat": 33.35042,
     "Long": -115.72951,
     "Installations/Art pieces": "Secret Society of the Palms",
@@ -404,15 +414,7 @@
     "Installations/Art pieces": "Ambient Atlas | Ann-Marie Lindblad Performs! | Anxious Attachment - A short play | Ashes and Breath: A Rite of Impermanence | Bacterial Beats | Baroque Sunburst | Eat Pray Cult | Immortalization Of Self | Olive | Prepared Tape Loops | The World’s Tallest Ghosts Reassessed",
     "Artist(s)": "Adrianna Krikl, Amy Brown Carver, Ann-Marie Lindblad, Cameron Gregg, chimaksou, Dragon Wu, Jana Cruder, Jenne Giles, Nora Dell, Nora Dell, RJ Okay, Scott (Seamus) Kildall"
   },
-  {
-    "Name": "The Bombay Beach Institute of Particle Physics, Metaphysics & International Relations",
-    "Address": "",
-    "Category": "Community Hub",
-    "Lat": 33.3491567,
-    "Long": -115.7266481,
-    "Installations/Art pieces": "",
-    "Artist(s)": ""
-  },
+
   {
     "Name": "Department of Redundancy Dept. (The Dord)",
     "Address": "",
@@ -458,15 +460,7 @@
     "Installations/Art pieces": "",
     "Artist(s)": "Adisa Ziric, Dmytro Bershadskyy, Tah Rei"
   },
-  {
-    "Name": "The Sub Club",
-    "Address": "",
-    "Category": "Venue",
-    "Lat": 33.34825936,
-    "Long": -115.7293901,
-    "Installations/Art pieces": "",
-    "Artist(s)": ""
-  },
+ 
   {
     "Name": "Club 86",
     "Address": "",
@@ -485,15 +479,7 @@
     "Installations/Art pieces": "",
     "Artist(s)": "Stefan Ashkenazy"
   },
-  {
-    "Name": "Blauhaus",
-    "Address": "",
-    "Category": "Venue",
-    "Lat": 33.35316124,
-    "Long": -115.7311178,
-    "Installations/Art pieces": "",
-    "Artist(s)": ""
-  },
+  
   {
     "Name": "Saturn",
     "Address": "",
@@ -503,33 +489,9 @@
     "Installations/Art pieces": "",
     "Artist(s)": ""
   },
-  {
-    "Name": "The Tiki House",
-    "Address": "",
-    "Category": "Venue",
-    "Lat": 33.349887,
-    "Long": -115.729751,
-    "Installations/Art pieces": "",
-    "Artist(s)": "Derek & Aya"
-  },
-  {
-    "Name": "The Low Bar",
-    "Address": "",
-    "Category": "Venue",
-    "Lat": 33.3495512,
-    "Long": -115.7315413,
-    "Installations/Art pieces": "",
-    "Artist(s)": ""
-  },
-  {
-    "Name": "Yacht Club",
-    "Address": "",
-    "Category": "Venue",
-    "Lat": 33.3531109,
-    "Long": -115.7265341,
-    "Installations/Art pieces": "",
-    "Artist(s)": ""
-  },
+
+
+
   {
     "Name": "Sotheby's Real Estate Office",
     "Address": "",
@@ -593,15 +555,7 @@
     "Installations/Art pieces": "",
     "Artist(s)": ""
   },
-  {
-    "Name": "Butterfly House",
-    "Address": "",
-    "Category": "Art Installation",
-    "Lat": 33.3499838,
-    "Long": -115.7294351,
-    "Installations/Art pieces": "",
-    "Artist(s)": ""
-  },
+
   {
     "Name": "Litlle Little Italy",
     "Address": "",
@@ -701,15 +655,7 @@
     "Installations/Art pieces": "",
     "Artist(s)": "Robert Stivers"
   },
-  {
-    "Name": "No Shoes + Dry West — Moonscapes",
-    "Address": "",
-    "Category": "Art Installation",
-    "Lat": 33.34911,
-    "Long": -115.726836,
-    "Installations/Art pieces": "",
-    "Artist(s)": "Uwe Martin"
-  },
+
   {
     "Name": "SOS",
     "Address": "",
@@ -729,7 +675,7 @@
     "Artist(s)": ""
   },
   {
-    "Name": "The Cone",
+    "Name": "Train Koan",
     "Address": "",
     "Category": "Art Installation",
     "Lat": 33.3484501,
@@ -772,5 +718,131 @@
     "Long": -115.73367222423228,
     "Installations/Art pieces": "",
     "Artist(s)": "John Geary"
+  },
+  {
+    "Name": "The NEST",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.350034,
+    "Long": -115.726441,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Debra Berger and Erica Spooner"
+  },
+  {
+    "Name": "Walking Dreams of Twigs",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.3492,
+    "Long": -115.7262,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Heiko Greb"
+  },
+  {
+    "Name": "Missing Link",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.347361,
+    "Long": -115.733389,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Frauke Huber & Uwe H. Martin"
+  },
+  {
+    "Name": "Mapping the Sacrifice Zone",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.352361,
+    "Long": -115.731389,
+    "Installations/Art pieces": "",
+    "Artist(s)": "The People of the Salton Sea, facilitated by Uwe H. Martin & IVEJ"
+  },
+  {
+    "Name": "Westlandia Bar and Lounge",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.348581,
+    "Long": 115.72893,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Kate Marusina"
+  },
+  {
+    "Name": "Grotto Heaven (@bliss club)",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.34809,
+    "Long": -115.728643,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Enoch Ma and Lauren Kim"
+  },
+  {
+    "Name": "SYZYGY",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.349667,
+    "Long": -115.726806,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Wanda Orme and Brandy Eve Allen"
+  },
+  {
+    "Name": "AMERICA IS BURNING",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.3461434,
+    "Long": -115.7293592,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Charlotte De Cock"
+  },
+  {
+    "Name": "Wings of Desire and Divine Discontent",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.349076,
+    "Long": -115.72678,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Debra Berger"
+  },
+  {
+    "Name": "Art Basil Bombay Beach by Tarcila Neves, Jmill & Daniela",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.349199,
+    "Long": -115.730354,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Tarcila Neves"
+  },
+  {
+    "Name": "Goblin Camp",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.3491032,
+    "Long": -115.7299037,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Sophie Meyer, Chuk Moran, Sam Cooler, Ian Baker, & team"
+  },
+  {
+    "Name": "Mamacita Junior the 3rd",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.347695,
+    "Long": -115.732962,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Kariño Arrr"
+  },
+  {
+    "Name": "Birth, Life and Becoming",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.3531868,
+    "Long": -115.7312113,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Catus Chaos"
+  },
+  {
+    "Name": "Sandy Shores Trailer Park",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.34955605,
+    "Long": -115.731857,
+    "Installations/Art pieces": "",
+    "Artist(s)": "Katrina Brown"
   }
 ]

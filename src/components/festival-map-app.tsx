@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { APIProvider, Map, AdvancedMarker, AdvancedMarkerAnchorPoint } from "@vis.gl/react-google-maps";
 import { dayLabels, eventTypeLabels } from "@/data/festival";
 import { EventType, FestivalDay, FestivalEvent, Venue } from "@/types/festival";
@@ -135,6 +135,22 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [mapCenter, setMapCenter] = useState(MAP_CENTER);
   const [mapZoom, setMapZoom] = useState(MAP_DEFAULT_ZOOM);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [allowOutOfBoundsNavigation, setAllowOutOfBoundsNavigation] = useState(false);
+  const [geolocationStatus, setGeolocationStatus] = useState<
+    "idle" | "requesting" | "ready" | "denied" | "unavailable" | "error"
+  >("idle");
+  const hasCenteredOnUserRef = useRef(false);
+
+  const geolocationHint =
+    geolocationStatus === "requesting"
+      ? "Locating..."
+      : geolocationStatus === "denied"
+        ? "Location access denied"
+        : geolocationStatus === "unavailable"
+          ? "Geolocation unavailable"
+          : geolocationStatus === "error"
+            ? "Location lookup failed"
+            : "";
 
   const selectedVenue = venues.find((venue) => venue.id === selectedVenueId) ?? null;
   const venueById = venues.reduce<globalThis.Map<string, Venue>>((acc, venue) => {
@@ -234,7 +250,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
 
   const selectedVenueSchedule = selectedVenue
     ? events
-        .filter((event) => event.venueId === selectedVenue.id)
+        .filter((event) => event.venueId === selectedVenue.id && activeDays.includes(event.day))
         .sort(sortScheduleEvents)
     : [];
   const selectedVenueObjectEvents = selectedVenueSchedule.filter((event) => event.type === "object");
@@ -281,6 +297,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     setSelectedVenueId(venue.id);
     setLastInteractedVenueId(venue.id);
     setSelectedEventId(null);
+    setAllowOutOfBoundsNavigation(false);
     setMapCenter({ lat, lng });
     setMapZoom(zoom);
   }
@@ -304,23 +321,45 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     if (venue) {
       setSelectedVenueId(venue.id);
       setLastInteractedVenueId(venue.id);
+      setAllowOutOfBoundsNavigation(false);
     }
 
     setSelectedEventId(event.id);
   }
 
   useEffect(() => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      setGeolocationStatus("unavailable");
+      return;
+    }
+
+    setGeolocationStatus("requesting");
 
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
-        setUserLocation({
+        const nextLocation = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
-        });
+        };
+        setUserLocation(nextLocation);
+        setGeolocationStatus("ready");
+        if (!hasCenteredOnUserRef.current) {
+          setMapCenter(nextLocation);
+          setMapZoom((current) => Math.max(current, 17.2));
+          setAllowOutOfBoundsNavigation(true);
+          hasCenteredOnUserRef.current = true;
+        }
       },
-      () => {
-        // Ignore permission and device errors silently; map remains fully usable.
+      (error: GeolocationPositionError) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          setGeolocationStatus("denied");
+          return;
+        }
+        if (error.code === error.POSITION_UNAVAILABLE) {
+          setGeolocationStatus("unavailable");
+          return;
+        }
+        setGeolocationStatus("error");
       },
       {
         enableHighAccuracy: true,
@@ -357,6 +396,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
               onClick={() => {
                 setSelectedVenueId(null);
                 setSelectedEventId(null);
+                setAllowOutOfBoundsNavigation(false);
                 setMapCenter(MAP_CENTER);
                 setMapZoom(MAP_DEFAULT_ZOOM);
               }}
@@ -389,18 +429,20 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
             >
               Street
             </button>
-            {userLocation ? (
-              <button
-                className="legacy-chip"
-                type="button"
-                onClick={() => {
-                  setMapCenter(userLocation);
-                  setMapZoom(Math.max(mapZoom, 17.2));
-                }}
-              >
-                My Location
-              </button>
-            ) : null}
+            <button
+              className={`legacy-chip ${allowOutOfBoundsNavigation && userLocation ? "active" : ""}`}
+              type="button"
+              disabled={!userLocation}
+              onClick={() => {
+                if (!userLocation) return;
+                setAllowOutOfBoundsNavigation(true);
+                setMapCenter(userLocation);
+                setMapZoom(Math.max(mapZoom, 17.2));
+              }}
+            >
+              {geolocationStatus === "requesting" ? "Locating..." : "My Location"}
+            </button>
+            {geolocationHint ? <span className="legacy-geo-status">{geolocationHint}</span> : null}
             <button
               className={`legacy-chip ${locationFilter === "all" ? "active" : ""}`}
               type="button"
@@ -443,8 +485,12 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
               onCameraChanged={(ev) => {
                 const nextCenter = ev.detail.center;
                 const nextZoom = ev.detail.zoom;
+                const canMoveOutsideFence =
+                  allowOutOfBoundsNavigation && userLocation
+                    ? distanceMeters(userLocation.lat, userLocation.lng, nextCenter.lat, nextCenter.lng) <= 3000
+                    : false;
                 if (
-                  isInsideGeofence(nextCenter.lat, nextCenter.lng) &&
+                  (isInsideGeofence(nextCenter.lat, nextCenter.lng) || canMoveOutsideFence) &&
                   hasCameraChanged(mapCenter, nextCenter, mapZoom, nextZoom)
                 ) {
                   setMapCenter(nextCenter);
@@ -455,7 +501,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
               }}
               style={{ width: "100%", height: "100%" }}
             >
-              {visibleMappableVenues.slice(0, 100).map((venue) => {
+              {visibleMappableVenues.slice(0, 300).map((venue) => {
                 return (
                   <AdvancedMarker
                     key={venue.id}
@@ -483,7 +529,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                 );
               })}
               {userLocation ? (
-                <AdvancedMarker position={userLocation} anchorPoint={AdvancedMarkerAnchorPoint.CENTER}>
+                <AdvancedMarker position={userLocation} anchorPoint={AdvancedMarkerAnchorPoint.CENTER} zIndex={1000}>
                   <div className="legacy-user-dot" aria-label="Your location" />
                 </AdvancedMarker>
               ) : null}
