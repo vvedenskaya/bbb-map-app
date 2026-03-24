@@ -59,6 +59,12 @@ The repository now includes a runnable Next.js prototype with:
 - `pnpm build`
 - `pnpm lint`
 
+## Location Data Files
+
+- `locations.json` is the canonical location dataset used by the app.
+- `locations_2024.json` is the archived 2024 dataset retained for reference.
+- `new_locations.json` has been retired and should not be referenced in code.
+
 ## MVP Data Pipeline (CSV -> Airtable)
 
 The prototype can now load schedule events from:

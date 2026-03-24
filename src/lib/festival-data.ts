@@ -32,8 +32,7 @@ type AirtableExport = {
   records?: AirtableExportRecord[];
 };
 
-const LOCATIONS_PATH = path.join(process.cwd(), "new_locations.json");
-const LEGACY_LOCATIONS_PATH = path.join(process.cwd(), "locations.json");
+const LOCATIONS_PATH = path.join(process.cwd(), "locations.json");
 const AIRTABLE_DUMP_PATH = path.join(process.cwd(), "tmp_airtable_table.json");
 
 function asString(value: unknown): string {
@@ -135,20 +134,15 @@ function findMatchingLocation(locationName: string, byNormalizedName: Map<string
 
 export async function getFestivalData(): Promise<FestivalDataResult> {
   try {
-    const [locationsRaw, legacyLocationsRaw, airtableRaw] = await Promise.all([
+    const [locationsRaw, airtableRaw] = await Promise.all([
       readFile(LOCATIONS_PATH, "utf-8"),
-      readFile(LEGACY_LOCATIONS_PATH, "utf-8"),
       readFile(AIRTABLE_DUMP_PATH, "utf-8"),
     ]);
 
     const parsedLocations = JSON.parse(locationsRaw) as unknown;
-    const parsedLegacyLocations = JSON.parse(legacyLocationsRaw) as unknown;
     const parsedAirtable = JSON.parse(airtableRaw) as unknown;
 
     if (!Array.isArray(parsedLocations)) {
-      throw new Error("new_locations.json must be an array");
-    }
-    if (!Array.isArray(parsedLegacyLocations)) {
       throw new Error("locations.json must be an array");
     }
     if (!parsedAirtable || typeof parsedAirtable !== "object" || !Array.isArray((parsedAirtable as AirtableExport).records)) {
@@ -156,11 +150,9 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
     }
 
     const locationRows = parsedLocations as LocationRow[];
-    const legacyLocationRows = parsedLegacyLocations as LocationRow[];
     const airtableRecords = (parsedAirtable as AirtableExport).records ?? [];
     const byNormalizedName = new Map<string, LocationRow>();
     const allLocations: LocationRow[] = [];
-    const legacyCategoryByName = new Map<string, string>();
 
     for (const locationRow of locationRows) {
       const name = asString(locationRow.Name);
@@ -173,14 +165,6 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
       if (!normalized) continue;
       byNormalizedName.set(normalized, locationRow);
       allLocations.push(locationRow);
-    }
-
-    for (const legacyRow of legacyLocationRows) {
-      const legacyName = asString(legacyRow.Name);
-      const legacyCategory = asString(legacyRow.Category);
-      const normalized = normalizeText(legacyName);
-      if (!normalized || !legacyCategory) continue;
-      legacyCategoryByName.set(normalized, legacyCategory);
     }
 
     const usedIds = new Set<string>();
@@ -219,8 +203,8 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
           name: params.name,
           label: params.hasLocation ? "Venue" : "Unmapped location",
           shortDescription: params.hasLocation
-            ? "Lookup from new_locations.json"
-            : "No coordinates found in new_locations.json",
+            ? "Lookup from locations.json"
+            : "No coordinates found in locations.json",
           description: `Mapped from Location (Internal): ${params.locationInternalRaw || "(empty)"}`,
           x: 0,
           y: 0,
@@ -270,7 +254,7 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
           lat = parsedLat;
           lng = parsedLng;
           const venueKey = `mapped:${normalizeText(venueName)}`;
-          const legacyCategory = legacyCategoryByName.get(normalizeText(venueName)) || "Venue";
+          const locationCategory = asString(matchedLocation.Category) || "Venue";
           venueId = ensureVenue({
             key: venueKey,
             name: venueName,
@@ -281,7 +265,7 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
           });
           const existingVenue = venuesById.get(venueId);
           if (existingVenue) {
-            existingVenue.label = legacyCategory;
+            existingVenue.label = locationCategory;
           }
         } else {
           const fallbackName = locationInternalRaw || "Unassigned location";
@@ -331,7 +315,7 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
       });
     }
 
-    // Also expose every coordinate from new_locations.json as a mappable venue.
+    // Also expose every coordinate from locations.json as a mappable venue.
     // This keeps the map in sync when coordinates are added before Airtable rows reference them.
     for (const locationRow of allLocations) {
       const venueName = asString(locationRow.Name);
@@ -343,7 +327,7 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
 
       const normalized = normalizeText(venueName);
       const venueKey = `mapped:${normalized}`;
-      const legacyCategory = legacyCategoryByName.get(normalized) || "Venue";
+      const locationCategory = asString(locationRow.Category) || "Venue";
       const venueId = ensureVenue({
         key: venueKey,
         name: venueName,
@@ -354,9 +338,9 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
       });
       const existingVenue = venuesById.get(venueId);
       if (existingVenue) {
-        existingVenue.label = legacyCategory;
+        existingVenue.label = locationCategory;
         if (!existingVenue.shortDescription) {
-          existingVenue.shortDescription = "Lookup from new_locations.json";
+          existingVenue.shortDescription = "Lookup from locations.json";
         }
       }
     }
@@ -364,7 +348,7 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
     return {
       venues,
       events,
-      sourceLabel: "tmp_airtable_table.json + new_locations.json",
+      sourceLabel: "tmp_airtable_table.json + locations.json",
       debug: {
         totalRows: airtableRecords.length,
         confirmedRows: rowsWithLocation,
@@ -379,7 +363,7 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
   return {
     venues: [],
     events: [],
-    sourceLabel: "tmp_airtable_table.json/new_locations.json unavailable",
+    sourceLabel: "tmp_airtable_table.json/locations.json unavailable",
     debug: {
       totalRows: 0,
       confirmedRows: 0,
