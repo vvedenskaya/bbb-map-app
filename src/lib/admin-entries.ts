@@ -49,6 +49,25 @@ function parseType(value: unknown): EventType {
   return VALID_TYPES.includes(type as EventType) ? (type as EventType) : "venue";
 }
 
+function parseTypeList(value: unknown): EventType[] {
+  if (Array.isArray(value)) {
+    const parsed = value
+      .map((entry) => parseType(entry))
+      .filter((entry, index, all) => all.indexOf(entry) === index);
+    return parsed;
+  }
+
+  if (typeof value === "string") {
+    const parts = value
+      .split(/[,/|+&]/)
+      .map((part) => parseType(part))
+      .filter((entry, index, all) => all.indexOf(entry) === index);
+    return parts;
+  }
+
+  return [];
+}
+
 function parseServiceType(value: unknown): ServiceType | undefined {
   const service = asString(value).toLowerCase();
   return VALID_SERVICES.includes(service as ServiceType) ? (service as ServiceType) : undefined;
@@ -61,6 +80,11 @@ function normalizeEntry(raw: unknown, index: number): AdminEntry | null {
   const lng = asNumber(obj.lng);
   const hasLocation = typeof obj.hasLocation === "boolean" ? obj.hasLocation : lat !== undefined && lng !== undefined;
   const projectType = parseType(obj.projectType ?? obj.type);
+  const parsedProjectTypes = parseTypeList(obj.projectTypes);
+  const mergedProjectTypes = [
+    projectType,
+    ...parsedProjectTypes,
+  ].filter((entry, index, all) => all.indexOf(entry) === index);
   const serviceType = parseServiceType(obj.serviceType);
   const fallbackName = serviceType
     ? `${serviceType.charAt(0).toUpperCase()}${serviceType.slice(1)}`
@@ -74,6 +98,12 @@ function normalizeEntry(raw: unknown, index: number): AdminEntry | null {
     artist: asString(obj.artist),
     locationInternal: asString(obj.locationInternal ?? obj.location),
     projectType: projectType === "services" || serviceType ? "services" : projectType,
+    projectTypes:
+      projectType === "services" || serviceType
+        ? undefined
+        : mergedProjectTypes.length > 1
+          ? mergedProjectTypes
+          : undefined,
     serviceType,
     abridgedProjectText: asString(obj.abridgedProjectText),
     day: parseDay(obj.day),

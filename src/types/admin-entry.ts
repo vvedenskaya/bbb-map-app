@@ -8,6 +8,7 @@ export type AdminEntry = {
   artist: string;
   locationInternal: string;
   projectType: EventType;
+  projectTypes?: EventType[];
   serviceType?: ServiceType;
   abridgedProjectText: string;
   day: FestivalDay;

@@ -204,6 +204,15 @@ function getVenueLabelProjectTypes(venue: Venue): EventType[] {
   return [...types];
 }
 
+function getEventProjectTypes(event: FestivalEvent): EventType[] {
+  const merged = [event.type, ...(event.projectTypes ?? [])];
+  return [...new Set(merged)];
+}
+
+function eventMatchesProjectTypeFilter(event: FestivalEvent, activeTypes: EventType[]): boolean {
+  return getEventProjectTypes(event).some((type) => activeTypes.includes(type));
+}
+
 function sortScheduleEvents(a: FestivalEvent, b: FestivalEvent): number {
   const dayDelta = DAY_SORT_ORDER[a.day] - DAY_SORT_ORDER[b.day];
   if (dayDelta !== 0) return dayDelta;
@@ -470,13 +479,13 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     const labelProjectTypes = getVenueLabelProjectTypes(venue);
     const matchesProjectType = hasActiveProjectTypeFilter
       ? labelProjectTypes.some((type) => activeProjectTypes.includes(type)) ||
-        venueEvents.some((event) => activeProjectTypes.includes(event.type))
+        venueEvents.some((event) => eventMatchesProjectTypeFilter(event, activeProjectTypes))
       : true;
 
     const matchesSearch = lowerQuery
       ? venue.name.toLowerCase().includes(lowerQuery) ||
         venueEvents.some((event) => {
-          if (!activeDayFilter.includes(event.day) || !activeProjectTypes.includes(event.type)) {
+          if (!activeDayFilter.includes(event.day) || !eventMatchesProjectTypeFilter(event, activeProjectTypes)) {
             return false;
           }
           return (
@@ -499,7 +508,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
         return false;
       }
       const matchesDay = activeDayFilter.includes(event.day);
-      const matchesProjectType = activeProjectTypes.includes(event.type);
+      const matchesProjectType = eventMatchesProjectTypeFilter(event, activeProjectTypes);
 
       const matchesSearch = lowerQuery
         ? event.title.toLowerCase().includes(lowerQuery) ||
@@ -516,7 +525,12 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
 
   const selectedVenueEvents = selectedVenue
     ? events
-        .filter((event) => event.venueId === selectedVenue.id && activeDayFilter.includes(event.day) && event.type !== "services")
+        .filter(
+          (event) =>
+            event.venueId === selectedVenue.id &&
+            activeDayFilter.includes(event.day) &&
+            !getEventProjectTypes(event).includes("services")
+        )
         .filter((event) => showPastEvents || !now || !isPastEvent(event, now))
         .sort(sortScheduleEvents)
     : [];
@@ -867,7 +881,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                 const serviceIcon = getServiceIcon(venue.serviceType);
                 const venueSchedulePreview = (eventsByVenueId.get(venue.id) ?? [])
                   .filter((event) => !isUnscheduledEvent(event))
-                  .filter((event) => activeDayFilter.includes(event.day) && activeProjectTypes.includes(event.type))
+                  .filter((event) => activeDayFilter.includes(event.day) && eventMatchesProjectTypeFilter(event, activeProjectTypes))
                   .filter((event) => showPastEvents || !now || !isPastEvent(event, now))
                   .sort(sortScheduleEvents);
                 const previewItems = venueSchedulePreview.slice(0, 2);
@@ -1076,12 +1090,17 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                                 onClick={() => focusEvent(event)}
                               >
                                 <div className="legacy-popup-event-head">
-                                  <span
-                                    className={`type-chip type-${event.type}`}
-                                    style={{ backgroundColor: getProjectTypeColor(event.type) }}
-                                  >
-                                    {eventTypeLabels[event.type]}
-                                  </span>
+                                  <div className="legacy-type-chip-group">
+                                    {getEventProjectTypes(event).map((type) => (
+                                      <span
+                                        key={`${event.id}-popup-type-${type}`}
+                                        className={`type-chip type-${type}`}
+                                        style={{ backgroundColor: getProjectTypeColor(type) }}
+                                      >
+                                        {eventTypeLabels[type]}
+                                      </span>
+                                    ))}
+                                  </div>
                                   {!isUnscheduledEvent(event) ? (
                                     <span className="legacy-popup-meta">
                                       {dayLabels[event.day]} | {event.startTime} - {event.endTime}
@@ -1110,12 +1129,17 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                         return (
                           <div key={event.id} className="legacy-popup-event">
                             <div className="legacy-popup-event-head">
-                              <span
-                                className={`type-chip type-${event.type}`}
-                                style={{ backgroundColor: getProjectTypeColor(event.type) }}
-                              >
-                                {eventTypeLabels[event.type]}
-                              </span>
+                              <div className="legacy-type-chip-group">
+                                {getEventProjectTypes(event).map((type) => (
+                                  <span
+                                    key={`${event.id}-popup-unscheduled-type-${type}`}
+                                    className={`type-chip type-${type}`}
+                                    style={{ backgroundColor: getProjectTypeColor(type) }}
+                                  >
+                                    {eventTypeLabels[type]}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
                             <strong>{event.title}</strong>
                             <p>{event.host}</p>
@@ -1321,12 +1345,17 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                                 type="button"
                                 onClick={() => focusEvent(event)}
                               >
-                                <span
-                                  className={`type-chip type-${event.type}`}
-                                  style={{ backgroundColor: getProjectTypeColor(event.type) }}
-                                >
-                                  {eventTypeLabels[event.type]}
-                                </span>
+                                <div className="legacy-type-chip-group">
+                                  {getEventProjectTypes(event).map((type) => (
+                                    <span
+                                      key={`${event.id}-list-type-${type}`}
+                                      className={`type-chip type-${type}`}
+                                      style={{ backgroundColor: getProjectTypeColor(type) }}
+                                    >
+                                      {eventTypeLabels[type]}
+                                    </span>
+                                  ))}
+                                </div>
                                 <strong>{event.title}</strong>
                                 <small>{venue?.name ?? "Unknown venue"}</small>
                                 {event.airtableRecordId ? <small className="legacy-event-reconciled">Matched Airtable event</small> : null}

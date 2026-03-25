@@ -42,6 +42,7 @@ export type FestivalEvent = {
   startTime: string;
   endTime: string;
   type: EventType;
+  projectTypes?: EventType[];
   thumbnailUrl: string;
   lat?: number;
   lng?: number;

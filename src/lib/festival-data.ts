@@ -78,6 +78,23 @@ function asString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function asStringList(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value
+      .map((entry) => asString(entry))
+      .filter(Boolean);
+  }
+
+  const single = asString(value);
+  if (!single) return [];
+  if (!/[|;,\n]/.test(single)) return [single];
+
+  return single
+    .split(/\s*(?:\||;|,|\n)\s*/)
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
 function asNumber(value: unknown): number | null {
   if (typeof value === "number" && !Number.isNaN(value)) return value;
   if (typeof value === "string" && value.trim()) {
@@ -107,8 +124,9 @@ function slugify(value: string): string {
   return normalizeText(value).replace(/\s+/g, "-").replace(/^-+|-+$/g, "") || "location";
 }
 
-function parseEventType(value: string): FestivalEvent["type"] {
+function parseEventTypes(value: string): FestivalEvent["type"][] {
   const normalized = value.toLowerCase();
+  const types = new Set<FestivalEvent["type"]>();
   if (
     normalized.includes("garbage") ||
     normalized.includes("trash") ||
@@ -119,20 +137,38 @@ function parseEventType(value: string): FestivalEvent["type"] {
     normalized.includes("medical") ||
     normalized.includes("first aid")
   ) {
-    return "services";
+    types.add("services");
   }
-  if (normalized.includes("music")) return "music";
-  if (normalized.includes("performance")) return "performance";
-  if (normalized.includes("installation")) return "installation";
-  if (normalized.includes("lecture") || normalized.includes("talk")) return "lecture";
-  if (normalized.includes("object")) return "object";
-  if (normalized.includes("film")) return "film";
-  if (normalized.includes("experience") || normalized.includes("facilitated")) return "experience";
-  if (normalized.includes("social gathering")) return "social";
-  if (normalized.includes("dj")) return "dj";
-  if (normalized.includes("venue")) return "venue";
-  if (normalized.includes("food") || normalized.includes("beverage")) return "food";
-  return "community";
+  if (normalized.includes("music")) types.add("music");
+  if (normalized.includes("performance")) types.add("performance");
+  if (normalized.includes("installation") || normalized.includes("gallery") || normalized.includes("activation")) {
+    types.add("installation");
+  }
+  if (normalized.includes("lecture") || normalized.includes("talk") || normalized.includes("philosophy")) {
+    types.add("lecture");
+  }
+  if (normalized.includes("object")) types.add("object");
+  if (normalized.includes("film")) types.add("film");
+  if (normalized.includes("experience") || normalized.includes("facilitated") || normalized.includes("hang")) {
+    types.add("experience");
+  }
+  if (normalized.includes("social gathering")) {
+    types.add("social");
+  }
+  if (normalized.includes("after hours") || normalized.includes("dj") || normalized.includes("live music")) {
+    types.add("dj");
+  }
+  if (normalized.includes("venue")) types.add("venue");
+  if (normalized.includes("food") || normalized.includes("beverage") || normalized.includes("meal")) {
+    types.add("food");
+  }
+  if (normalized.includes("community")) types.add("community");
+  if (types.size === 0) types.add("community");
+  return [...types];
+}
+
+function parseEventType(value: string): FestivalEvent["type"] {
+  return parseEventTypes(value)[0];
 }
 
 function parseDayFromIsoDate(rawDate: string): FestivalDay {
@@ -190,15 +226,7 @@ function normalizeScheduleDate(rawDate: string, preferredDay: FestivalDay | null
 }
 
 function parseScheduleCategoryToType(category: string): FestivalEvent["type"] {
-  const normalized = normalizeText(category);
-  if (normalized.includes("food") || normalized.includes("meal")) return "food";
-  if (normalized.includes("live music") || normalized.includes("after hours")) return "dj";
-  if (normalized.includes("film")) return "film";
-  if (normalized.includes("gallery") || normalized.includes("activation")) return "installation";
-  if (normalized.includes("philosophy")) return "lecture";
-  if (normalized.includes("performance")) return "performance";
-  if (normalized.includes("experience") || normalized.includes("hang")) return "experience";
-  return "community";
+  return parseEventType(normalizeText(category));
 }
 
 function extractHostFromScheduleCellText(rawText: string): string {
@@ -249,11 +277,13 @@ function findMatchingLocation(
 }
 
 function getLocationDisplayName(locationRow: LocationRow, fallbackName = ""): string {
-  return asString(locationRow.Alias) || asString(locationRow.Name) || fallbackName;
+  const aliases = asStringList(locationRow.Alias);
+  return aliases[0] || asString(locationRow.Name) || fallbackName;
 }
 
 function getLocationCanonicalKey(locationRow: LocationRow, fallbackName = ""): string {
-  return normalizeText(asString(locationRow.Name) || asString(locationRow.Alias) || fallbackName);
+  const aliases = asStringList(locationRow.Alias);
+  return normalizeText(asString(locationRow.Name) || aliases[0] || fallbackName);
 }
 
 function getLocationArtist(locationRow: LocationRow): string {
@@ -343,8 +373,10 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
       const lng = asNumber(locationRow.Long);
       if (!name || lat === null || lng === null) continue;
       byNormalizedName.set(normalizeText(name), locationRow);
-      const alias = asString(locationRow.Alias);
-      if (alias) byNormalizedName.set(normalizeText(alias), locationRow);
+      const aliases = asStringList(locationRow.Alias);
+      for (const alias of aliases) {
+        byNormalizedName.set(normalizeText(alias), locationRow);
+      }
       allLocations.push(locationRow);
     }
 
@@ -451,6 +483,9 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
       const hostFromAirtable = asString(matchedAirtableFields["Artist Name"]) || asString(airtableMatch?.artist_name);
       const hostFromScheduleCell = extractHostFromScheduleCellText(rawText);
       const typeFromAirtable = asString(matchedAirtableFields["Project Type"]) || asString(airtableMatch?.project_type);
+      const parsedAirtableTypes = typeFromAirtable ? parseEventTypes(typeFromAirtable) : [];
+      const parsedScheduleCategoryTypes = scheduleCategory ? parseEventTypes(scheduleCategory) : [];
+      const resolvedProjectTypes = parsedAirtableTypes.length > 0 ? parsedAirtableTypes : parsedScheduleCategoryTypes;
       const abridgedFromAirtable = asString(matchedAirtableFields["Abridged Project Text"]);
       const projectDescriptionFromAirtable = asString(matchedAirtableFields["Project Description"]);
 
@@ -514,9 +549,8 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
           day,
           startTime,
           endTime,
-          type: typeFromAirtable
-            ? parseEventType(typeFromAirtable)
-            : parseScheduleCategoryToType(scheduleCategory),
+          type: resolvedProjectTypes[0] ?? "community",
+          projectTypes: resolvedProjectTypes.length > 1 ? resolvedProjectTypes : undefined,
           thumbnailUrl: "/map-layers/image_BB_map.jpg",
           lat: eventLat,
           lng: eventLng,
@@ -564,9 +598,8 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
         day,
         startTime,
         endTime,
-        type: typeFromAirtable
-          ? parseEventType(typeFromAirtable)
-          : parseScheduleCategoryToType(scheduleCategory),
+        type: resolvedProjectTypes[0] ?? "community",
+        projectTypes: resolvedProjectTypes.length > 1 ? resolvedProjectTypes : undefined,
         thumbnailUrl: "/map-layers/image_BB_map.jpg",
         lat: eventLat,
         lng: eventLng,
@@ -625,6 +658,7 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
         startTime: entry.startTime || "TBD",
         endTime: entry.endTime || "TBD",
         type: entry.projectType,
+        projectTypes: entry.projectTypes && entry.projectTypes.length > 1 ? entry.projectTypes : undefined,
         thumbnailUrl: "/map-layers/image_BB_map.jpg",
         lat: entry.lat,
         lng: entry.lng,

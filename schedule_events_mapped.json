@@ -702,7 +702,7 @@
       "time_slot": "20:00",
       "title": "Opening Party",
       "scheduled_time": "8:30 PM-12 AM",
-      "category": "Live Music",
+      "category": "Music, DJ",
       "location_hint": "Bombay Bliss Beach Club",
       "location_match": {
         "location_name": "Bombay Bliss Beach Club",
@@ -1530,7 +1530,7 @@
       "time_slot": "18:00",
       "title": "Worldjourney",
       "scheduled_time": "6-8 PM",
-      "category": "Live Music",
+      "category": "Music",
       "location_hint": "Bombay Bliss Beach Club",
       "location_match": {
         "location_name": "Bombay Bliss Beach Club",
@@ -2016,7 +2016,7 @@
       "time_slot": "21:00",
       "title": "Jerzy del Mar",
       "scheduled_time": "9-11:30 PM",
-      "category": "Hangs/Experiences",
+      "category": "Music, DJ",
       "location_hint": "Sub Club",
       "location_match": {
         "location_name": "Beach: The Sub Club",
@@ -2329,7 +2329,7 @@
       "time_slot": "23:00",
       "title": "Late Night Bliss",
       "scheduled_time": "11 PM-3 AM",
-      "category": "Hangs/Experiences",
+      "category": "Music, DJ",
       "location_hint": "Bombay Bliss Beach Club",
       "location_match": {
         "location_name": "Bombay Bliss Beach Club",
@@ -2383,7 +2383,7 @@
       "time_slot": "23:00",
       "title": "Heidi Lawden & LoveFingers (B2B)",
       "scheduled_time": "11:30 PM-3 AM",
-      "category": "Hangs/Experiences",
+      "category": "Music, DJ",
       "location_hint": "Sub Club",
       "location_match": {
         "location_name": "Beach: The Sub Club",
@@ -2410,7 +2410,7 @@
       "time_slot": "00:00",
       "title": "Heidi Lawden & LoveFingers (B2B)",
       "scheduled_time": "11:30 PM-3 AM",
-      "category": "Hangs/Experiences",
+      "category": "Music, DJ",
       "location_hint": "Sub Club",
       "location_match": {
         "location_name": "Beach: The Sub Club",
@@ -2608,7 +2608,7 @@
       "time_slot": "00:00",
       "title": "Late Night Bliss",
       "scheduled_time": "11 PM-3 AM",
-      "category": "Hangs/Experiences",
+      "category": "Music, DJ",
       "location_hint": "Bombay Bliss Beach Club",
       "location_match": {
         "location_name": "Bombay Bliss Beach Club",
@@ -3418,7 +3418,7 @@
       "time_slot": "13:00",
       "title": "How to Freestyle Rap",
       "scheduled_time": "1:30-2:30 PM",
-      "category": "Hangs/Experiences",
+      "category": "Music, DJ",
       "location_hint": "Sub Club",
       "location_match": {
         "location_name": "Beach: The Sub Club",
@@ -3434,7 +3434,7 @@
       "airtable_match": {
         "airtable_id": "recAIvDb9xNOn8jGC",
         "project_name": "How to Freestyle Rap",
-        "project_type": "Facilitated Experience",
+        "project_type": "Facilitated Experience, Music",
         "artist_name": "Rob Zaleski",
         "location_internal": "Beach: The Sub Club/The Underground",
         "status": "Confirmed",
@@ -3571,7 +3571,7 @@
       "time_slot": "15:00",
       "title": "TILAPIA TANK\": An Improv Business Game Show for the End Times",
       "scheduled_time": "3-5 PM",
-      "category": "Art Galleries/Openings/Activations",
+      "category": "Facilitated Experience",
       "location_hint": "Sub Club",
       "location_match": {
         "location_name": "Beach: The Sub Club",
@@ -3849,7 +3849,7 @@
       "time_slot": "17:00",
       "title": "Charlie Chaplin Pop-Up Bar",
       "scheduled_time": "5-8 PM",
-      "category": "Live Music",
+      "category": "Music",
       "location_hint": "Bombay Bliss Beach Club",
       "location_match": {
         "location_name": "Bombay Bliss Beach Club",
@@ -5045,7 +5045,7 @@
       "time_slot": "22:00",
       "title": "Martian Takeover",
       "scheduled_time": "10 PM-2 AM",
-      "category": "Hangs/Experiences",
+      "category": "Music, DJ",
       "location_hint": "Bombay Bliss Beach Club",
       "location_match": {
         "location_name": "Bombay Bliss Beach Club",
@@ -5207,7 +5207,7 @@
       "time_slot": "23:00",
       "title": "Adam Freeland",
       "scheduled_time": "11 PM-1 AM",
-      "category": "Hangs/Experiences",
+      "category": "Music, DJ",
       "location_hint": "Sub Club",
       "location_match": {
         "location_name": "Beach: The Sub Club",
@@ -5351,7 +5351,7 @@
       "time_slot": "23:00",
       "title": "Martian Takeover",
       "scheduled_time": "10 PM-2 AM",
-      "category": "Hangs/Experiences",
+      "category": "Music, DJ",
       "location_hint": "Bombay Bliss Beach Club",
       "location_match": {
         "location_name": "Bombay Bliss Beach Club",
@@ -5405,7 +5405,7 @@
       "time_slot": "00:00",
       "title": "Adam Freeland",
       "scheduled_time": "11 PM-1 AM",
-      "category": "Hangs/Experiences",
+      "category": "Music, DJ",
       "location_hint": "Sub Club",
       "location_match": {
         "location_name": "Beach: The Sub Club",
@@ -5522,7 +5522,7 @@
       "time_slot": "00:00",
       "title": "Martian Takeover",
       "scheduled_time": "10 PM-2 AM",
-      "category": "Hangs/Experiences",
+      "category": "Music",
       "location_hint": "Bombay Bliss Beach Club",
       "location_match": {
         "location_name": "Bombay Bliss Beach Club",
@@ -5729,7 +5729,7 @@
       "time_slot": "01:00",
       "title": "Danna Habbibi Takeover",
       "scheduled_time": "1-3 AM",
-      "category": "Hangs/Experiences",
+      "category": "Music, DJ",
       "location_hint": "Sub Club",
       "location_match": {
         "location_name": "Beach: The Sub Club",
@@ -5783,7 +5783,7 @@
       "time_slot": "03:00",
       "title": "Sean Horton",
       "scheduled_time": "3-5 AM",
-      "category": "Hangs/Experiences",
+      "category": "Music, DJ",
       "location_hint": "Sub Club",
       "location_match": {
         "location_name": "Beach: The Sub Club",
@@ -5810,7 +5810,7 @@
       "time_slot": "05:00",
       "title": "Melissa EMRT",
       "scheduled_time": "5-7 AM",
-      "category": "Hangs/Experiences",
+      "category": "Music, DJ",
       "location_hint": "Sub Club",
       "location_match": {
         "location_name": "Beach: The Sub Club",
@@ -5891,7 +5891,7 @@
       "time_slot": "07:00",
       "title": "Luna 1341",
       "scheduled_time": "7-9 AM",
-      "category": "Hangs/Experiences",
+      "category": "Music, DJ",
       "location_hint": "Sub Club",
       "location_match": {
         "location_name": "Beach: The Sub Club",

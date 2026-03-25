@@ -826,6 +826,12 @@ a {
   gap: 8px;
 }
 
+.legacy-type-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
 .legacy-popup-event p {
   margin: 0;
   color: #5f5a52;

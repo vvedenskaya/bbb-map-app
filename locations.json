@@ -1,6 +1,7 @@
 [
   {
     "Name": "BBB Parking Lot",
+    "Alias": ["The Parking Lot", "Parking Lot"],
     "Category": "Services",
     "Artist Website": "",
     "Lat": 33.354693,
@@ -9,6 +10,7 @@
 
   {
     "Name": "San Litio (Saint Lithium)",
+    "Alias": ["Saint Lithium", "San Litio"],
     "Address": "Corner of First Ave and Isle of Palms, on the way to Mars College",
     "Category": "Art Installation",
     "Lat": 33.354255,
@@ -37,6 +39,7 @@
   },
   {
     "Name": "Atlantis Inn Collective",
+    "Alias": ["Atlantis Inn", "The Atlantis Inn", "Atlantis"],
     "Address": "",
     "Category": "Venue",
     "Lat": 33.3489563,
@@ -65,6 +68,7 @@
   },
   {
     "Name": "Beach: Lemonade Stand",
+    "Alias": ["Lemonade Stand", "The Lemonade Stand"],
     "Address": "Near the Lemonade Stand on the Beach",
     "Category": "Art Installation",
     "Lat": 33.34749,
@@ -72,6 +76,7 @@
   },
   {
     "Name": "Beach: Tesseract",
+    "Alias": ["Tesseract", "The Tesseract"],
     "Address": "Tesseract lot. Tao already ok\u2019d",
     "Category": "Art Installation",
     "Lat": 33.34837,
@@ -79,6 +84,7 @@
   },
   {
     "Name": "Beach: The Lighthouse",
+    "Alias": ["The Lighthouse", "Lighthouse"],
     "Address": "",
     "Category": "Art Installation",
     "Lat": 33.3475925,
@@ -87,6 +93,7 @@
   {
     "Name": "Beach: The Sub Club",
     "Address": "Sub Club",
+    "Alias": ["Sub Club", "The Sub Club"],
     "Category": "Venue",
     "Lat": 33.34825936,
     "Long": -115.7293901
@@ -100,6 +107,7 @@
   },
   {
     "Name": "Bombay Beach Yacht Club",
+    "Alias": ["Yacht Club", "The Yacht Club"],
     "Address": "",
     "Category": "Venue",
     "Lat": 33.3531109,
@@ -107,6 +115,7 @@
   },
   {
     "Name": "Bombay Bliss Beach Club",
+    "Alias": "Bliss Club",
     "Address": "Near Bliss Beach Club",
     "Category": "Venue",
     "Lat": 33.34735,
@@ -143,6 +152,7 @@
   },
   {
     "Name": "Get Lost Gallery",
+    "Alias": ["Rapha Lots", "Raphalots", "The Rapha Lots"],
     "Address": "The project utilizes a hybrid \"scattered-site\" model across Bombay Beach:  Central Hub & Gallery Venue: The Electric Lounge.  Satellite Archive Sites: 10 solar-powered beacon locations positioned on vacant lots and in collaboration with local mural sites throughout the town (specific coordinates to be finalized with the BBB placement team).",
     "Category": "Venue",
     "Lat": 33.34908,
@@ -171,6 +181,7 @@
   },
   {
     "Name": "Limbo Lounge Gallery",
+    "Alias": ["Limbo Lounge", "The Limbo Lounge"],
     "Address": "",
     "Category": "Venue",
     "Lat": 33.351666302074975,
@@ -242,7 +253,7 @@
   },
   {
     "Name": "The Bombay Beach Estates",
-    "Alias": "Estates",
+    "Alias": ["Estates", "The Estates"],
     "Address": "",
     "Category": "Venue",
     "Lat": 33.3489844,
@@ -250,6 +261,7 @@
   },
   {
     "Name": "The Butterfly Pavillion",
+    "Alias": "Butterfly Pavillion",
     "Address": "9550 Avenue E",
     "Category": "Venue",
     "Lat": 33.35017332280115,
@@ -257,6 +269,7 @@
   },
   {
     "Name": "The Escapes",
+    "Alias": "Escapes",
     "Address": "Raphas' Lot",
     "Category": "Venue",
     "Lat": 33.34901578879867,
@@ -271,6 +284,7 @@
   },
   {
     "Name": "The Poetry House",
+    "Alias": "Poetry House",
     "Address": "The Poetry House",
     "Category": "Venue",
     "Lat": 33.349535,
@@ -292,6 +306,7 @@
   },
   {
     "Name": "The Ski Inn",
+    "Alias": "Ski Inn",
     "Address": "",
     "Category": "Local Business",
     "Lat": 33.3535831,
@@ -320,6 +335,7 @@
   },
   {
     "Name": "Department of Redundancy Dept. (The Dord)",
+    "Alias": ["Dord", "The Dord", "DORD", "The DORD"],
     "Address": "",
     "Category": "Venue",
     "Lat": 33.3489844,
@@ -334,6 +350,7 @@
   },
   {
     "Name": "The Bombay Beach Drive-In",
+    "Alias": ["Drive-In", "The Drive-In"],
     "Address": "",
     "Category": "Venue",
     "Lat": 33.3517231,
@@ -341,6 +358,7 @@
   },
   {
     "Name": "Museum of Unwanted Architecture",
+    "Alias": ["MUWA", "MoUA", "The Museum of Unwanted Architecture"],
     "Address": "",
     "Category": "Venue",
     "Lat": 33.34965,
@@ -362,6 +380,7 @@
   },
   {
     "Name": "The Opera House",
+    "Alias": ["Opera House", "The Opera House"],
     "Address": "",
     "Category": "Venue",
     "Lat": 33.349746,
@@ -397,6 +416,7 @@
   },
   {
     "Name": "The Last Resort",
+    "Alias": ["Last Resort", "The Last Resort"],
     "Address": "",
     "Category": "Art Installation",
     "Lat": 33.35415658,
@@ -425,6 +445,7 @@
   },
   {
     "Name": "Bombay Beach International Space Station (previously Lodestar)",
+    "Alias": ["Bombay Beach International Space Station", "Lodestar"],
     "Address": "",
     "Category": "Art Installation",
     "Lat": 33.354147,
@@ -432,10 +453,11 @@
   },
   {
     "Name": "Bombay Beach Metro Station",
+    "Alias": ["Metro Station"],
     "Address": "",
     "Category": "Art Installation",
     "Lat": 33.34825936,
-    "Long": -115.7293901
+    "Long": -115.72941
   },
   {
     "Name": "da Vinci Fish",
@@ -474,6 +496,7 @@
   },
   {
     "Name": "Shig Memorial Pyramids",
+    "Alias": "Shig's Memorials",
     "Address": "",
     "Category": "Art Installation",
     "Lat": 33.347844,
@@ -508,7 +531,7 @@
     "Long": -115.7254687
   },
   {
-    "Name": "World\u2019s Tallest Ghosts",
+    "Name": "World's Tallest Ghosts",
     "Address": "",
     "Category": "Art Installation",
     "Lat": 33.3493065,
@@ -574,6 +597,7 @@
   },
   {
     "Name": "Westlandia Desert Oasis",
+    "Alias": ["Westlandia", "The Westlandia Desert Oasis"],
     "Address": "",
     "Category": "Art Installation",
     "Lat": 33.348581,
@@ -581,6 +605,7 @@
   },
   {
     "Name": "Grotto Heaven (@bliss club)",
+    "Alias": ["Grotto Heaven", "The Grotto Heaven"],
     "Address": "",
     "Category": "Art Installation",
     "Lat": 33.34809,
@@ -709,6 +734,7 @@
   },
   {
     "Name": "Bombay Bathroom Club - Public Restroom",
+    "Alias": ["Bombay Bathroom Club", "The Bombay Bathroom Club"],
     "Address": "",
     "Category": "Services",
     "Lat": 33.35326262,
@@ -716,6 +742,7 @@
   },
   {
     "Name": "KDEZ RADIO TRAILER",
+    "Alias": ["Radio Trailer", "The KDEZ Radio Trailer", "KDEZ"],
     "Address": "",
     "Category": "Venue",
     "Lat": 33.349076,
@@ -745,6 +772,7 @@
   },
   {
     "Name": "Kevin's Lit Landing",
+    "Alias": ["Lit Landing"],
     "Address": "",
     "Category": "Venue",
     "Lat": 33.34458,
