@@ -298,8 +298,8 @@ export function PinEditor({ initialData, locationOptions = [] }: PinEditorProps)
               style={{ width: "100%", padding: "0.5rem", border: "1px solid #ccc", borderRadius: "4px" }}
             />
             <datalist id="predefined-locations">
-              {locationOptions.map((option) => (
-                <option key={`${option.name}:${option.lat}:${option.lng}`} value={option.name}>
+              {locationOptions.map((option, index) => (
+                <option key={`${option.name}:${option.lat}:${option.lng}:${index}`} value={option.name}>
                   {option.category}
                 </option>
               ))}
