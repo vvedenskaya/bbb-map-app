@@ -1398,10 +1398,10 @@
       "category": "Hangs/Experiences",
       "location_hint": "The Drive-In",
       "location_match": {
-        "location_name": "Bombay Beach Museum of Bombay Beach",
+        "location_name": "The Bombay Beach Drive-In",
         "location_category": "Venue",
-        "lat": 33.34898,
-        "long": -115.72611,
+        "lat": 33.35176385219806, 
+        "long": -115.72965823051716,
         "score": 85.3,
         "confidence": "high",
         "matched_on": "variant",
