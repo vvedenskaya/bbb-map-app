@@ -135,6 +135,13 @@ function sortScheduleEvents(a: FestivalEvent, b: FestivalEvent): number {
   return a.title.localeCompare(b.title);
 }
 
+function getVisibleEventDescription(event: FestivalEvent): string {
+  const description = (event.description || "").trim();
+  if (!description) return "";
+  if (description === "No abridged text provided.") return "";
+  return description;
+}
+
 type FestivalMapAppProps = {
   venues: Venue[];
   events: FestivalEvent[];
@@ -601,23 +608,29 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                       <details className="legacy-popup-section is-schedule" open>
                         <summary className="legacy-popup-section-title">Schedule</summary>
                         <div className="legacy-popup-event-list">
-                          {selectedVenueSchedule.map((event) => (
-                            <article key={event.id} className="legacy-popup-event">
-                              <div className="legacy-popup-event-head">
-                                <span
-                                  className={`type-chip type-${event.type}`}
-                                  style={{ backgroundColor: getProjectTypeColor(event.type) }}
-                                >
-                                  {eventTypeLabels[event.type]}
-                                </span>
-                                <span className="legacy-popup-meta">
-                                  {dayLabels[event.day]} | {event.startTime} - {event.endTime}
-                                </span>
-                              </div>
-                              <strong>{event.title}</strong>
-                              <p>{event.host}</p>
-                            </article>
-                          ))}
+                          {selectedVenueSchedule.map((event) => {
+                            const visibleDescription = getVisibleEventDescription(event);
+                            return (
+                              <article key={event.id} className="legacy-popup-event">
+                                <div className="legacy-popup-event-head">
+                                  <span
+                                    className={`type-chip type-${event.type}`}
+                                    style={{ backgroundColor: getProjectTypeColor(event.type) }}
+                                  >
+                                    {eventTypeLabels[event.type]}
+                                  </span>
+                                  <span className="legacy-popup-meta">
+                                    {dayLabels[event.day]} | {event.startTime} - {event.endTime}
+                                  </span>
+                                </div>
+                                <strong>{event.title}</strong>
+                                <p>{event.host}</p>
+                                {visibleDescription ? (
+                                  <p className="legacy-popup-description">{visibleDescription}</p>
+                                ) : null}
+                              </article>
+                            );
+                          })}
                         </div>
                       </details>
 
@@ -678,6 +691,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                   </div>
                   {group.events.map((event) => {
                     const venue = venueById.get(event.venueId);
+                    const visibleDescription = getVisibleEventDescription(event);
                     return (
                       <button
                         key={event.id}
@@ -696,6 +710,9 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                           {dayLabels[event.day]} | {event.startTime} - {event.endTime}
                         </small>
                         <small>{venue?.name ?? "Unknown venue"}</small>
+                        {visibleDescription ? (
+                          <small className="legacy-event-description">{visibleDescription}</small>
+                        ) : null}
                       </button>
                     );
                   })}

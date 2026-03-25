@@ -291,6 +291,11 @@ a {
   color: #676767;
 }
 
+.legacy-event-description {
+  color: #524f48;
+  line-height: 1.35;
+}
+
 .legacy-pin {
   position: relative;
   width: 18px;
@@ -573,6 +578,11 @@ a {
   margin: 0;
   color: #5f5a52;
   font-size: 11px;
+}
+
+.legacy-popup-description {
+  color: #4a453d;
+  line-height: 1.4;
 }
 
 .legacy-popup-mini-list {
