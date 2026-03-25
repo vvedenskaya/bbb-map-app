@@ -111,12 +111,14 @@ function parseEventType(value: string): FestivalEvent["type"] {
   if (normalized.includes("music")) return "music";
   if (normalized.includes("performance")) return "performance";
   if (normalized.includes("installation")) return "installation";
-  if (normalized.includes("lecture")) return "lecture";
+  if (normalized.includes("lecture") || normalized.includes("talk")) return "lecture";
   if (normalized.includes("object")) return "object";
+  if (normalized.includes("film")) return "film";
   if (normalized.includes("experience") || normalized.includes("facilitated")) return "experience";
+  if (normalized.includes("social gathering")) return "social";
   if (normalized.includes("dj")) return "dj";
   if (normalized.includes("venue")) return "venue";
-  if (normalized.includes("food")) return "food";
+  if (normalized.includes("food") || normalized.includes("beverage")) return "food";
   return "community";
 }
 

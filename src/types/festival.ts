@@ -6,8 +6,10 @@ export type EventType =
   | "installation"
   | "lecture"
   | "community"
+  | "social"
   | "object"
   | "experience"
+  | "film"
   | "dj"
   | "venue"
   | "food";

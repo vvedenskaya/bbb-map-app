@@ -22,26 +22,36 @@ const PROJECT_TYPE_COLORS: Record<EventType, string> = {
   installation: "#f59e0b",
   lecture: "#14b8a6",
   community: "#8b5cf6",
+  social: "#6366f1",
   object: "#ec4899",
   experience: "#22c55e",
+  film: "#0ea5e9",
   dj: "#a855f7",
   venue: "#0ea5e9",
   food: "#f97316",
 };
 
 const UNCATEGORIZED_KEY = "uncategorized";
-const CATEGORY_SORT_ORDER = [
-  "local business",
-  "community hub",
-  "venue",
-  "gallery",
-  "art installation",
-  "museum",
-  "studio",
-  "parking",
-  "bathroom",
-  UNCATEGORIZED_KEY,
+const SERVICES_KEY = "services";
+const LOCAL_BUSINESS_KEY = "local business";
+const COMMUNITY_HUB_KEY = "community hub";
+const VENUE_KEY = "venue";
+const ART_INSTALLATION_KEY = "art installation";
+const PIN_CATEGORY_ORDER = [
+  SERVICES_KEY,
+  COMMUNITY_HUB_KEY,
+  LOCAL_BUSINESS_KEY,
+  VENUE_KEY,
+  ART_INSTALLATION_KEY,
 ];
+const PIN_CATEGORY_COLORS: Record<string, string> = {
+  [SERVICES_KEY]: "#f97316",
+  [COMMUNITY_HUB_KEY]: "#8b5cf6",
+  [LOCAL_BUSINESS_KEY]: "#0ea5e9",
+  [VENUE_KEY]: "#3b82f6",
+  [ART_INSTALLATION_KEY]: "#ec4899",
+  [UNCATEGORIZED_KEY]: "#6b7280",
+};
 
 function toRadians(deg: number): number {
   return (deg * Math.PI) / 180;
@@ -74,18 +84,36 @@ function hasCameraChanged(
   );
 }
 
-function getLegacyCategory(venue: Venue): string {
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+function getModalSafeCenter(target: { lat: number; lng: number }, zoom: number): { lat: number; lng: number } {
+  if (typeof window === "undefined") return target;
+
+  // Keep selected markers visible above the centered venue modal.
+  const viewportHeight = window.innerHeight || 900;
+  const popupHeight = Math.min(viewportHeight * 0.7, 560);
+  const yOffsetPixels = clamp(popupHeight * 0.42, 120, 220);
+  const metersPerPixel = (156543.03392 * Math.cos(toRadians(target.lat))) / Math.pow(2, zoom);
+  const latOffsetDegrees = (yOffsetPixels * metersPerPixel) / 111320;
+  return { lat: target.lat - latOffsetDegrees, lng: target.lng };
+}
+
+function getVenueCategoryKey(venue: Venue): string {
   const label = (venue.label || "").toLowerCase();
-  if (label.includes("parking")) return "parking";
-  if (label.includes("bathroom")) return "bathroom";
-  if (label.includes("local business")) return "local business";
-  if (label.includes("community")) return "community hub";
-  if (label.includes("museum")) return "museum";
-  if (label.includes("gallery")) return "gallery";
-  if (label.includes("studio")) return "studio";
-  if (label.includes("venue")) return "venue";
-  if (label.includes("art installation")) return "art installation";
-  return UNCATEGORIZED_KEY;
+  if (label.includes("service")) return SERVICES_KEY;
+  if (label.includes("community")) return COMMUNITY_HUB_KEY;
+  if (label.includes("local business")) return LOCAL_BUSINESS_KEY;
+  if (label.includes("object")) return ART_INSTALLATION_KEY;
+  if (label.includes("installation/immersive environment")) return ART_INSTALLATION_KEY;
+  if (label.includes("installation")) return ART_INSTALLATION_KEY;
+  if (label.includes("immersive")) return ART_INSTALLATION_KEY;
+  if (label.includes("facilitated experience")) return ART_INSTALLATION_KEY;
+  if (label.includes("venue")) return VENUE_KEY;
+  if (label.includes("art installation")) return ART_INSTALLATION_KEY;
+  // Keep all mappable pins in a canonical map category bucket.
+  return VENUE_KEY;
 }
 
 function getCategoryDisplayLabel(categoryKey: string): string {
@@ -97,11 +125,6 @@ function getCategoryDisplayLabel(categoryKey: string): string {
 
 function getProjectTypeColor(type: EventType): string {
   return PROJECT_TYPE_COLORS[type] || "#8b5cf6";
-}
-
-function getCategoryOrderIndex(category: string): number {
-  const index = CATEGORY_SORT_ORDER.indexOf(category);
-  return index === -1 ? CATEGORY_SORT_ORDER.length : index;
 }
 
 function sortScheduleEvents(a: FestivalEvent, b: FestivalEvent): number {
@@ -169,28 +192,14 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     return acc;
   }, new globalThis.Map());
 
+  const venueCategoryById = venues.reduce<globalThis.Map<string, string>>((acc, venue) => {
+    acc.set(venue.id, getVenueCategoryKey(venue));
+    return acc;
+  }, new globalThis.Map());
+
   const venueColorById = venues.reduce<globalThis.Map<string, string>>((acc, venue) => {
-    const venueEvents = eventsByVenueId.get(venue.id) ?? [];
-    if (venueEvents.length === 0) {
-      acc.set(venue.id, venue.accent || "#8b5cf6");
-      return acc;
-    }
-
-    const typeCounts = venueEvents.reduce<globalThis.Map<EventType, number>>((counts, event) => {
-      counts.set(event.type, (counts.get(event.type) ?? 0) + 1);
-      return counts;
-    }, new globalThis.Map());
-
-    let dominantType: EventType = venueEvents[0].type;
-    let dominantCount = typeCounts.get(dominantType) ?? 0;
-    for (const [type, count] of typeCounts.entries()) {
-      if (count > dominantCount) {
-        dominantType = type;
-        dominantCount = count;
-      }
-    }
-
-    acc.set(venue.id, getProjectTypeColor(dominantType));
+    const category = venueCategoryById.get(venue.id) ?? VENUE_KEY;
+    acc.set(venue.id, PIN_CATEGORY_COLORS[category] ?? PIN_CATEGORY_COLORS[VENUE_KEY]);
     return acc;
   }, new globalThis.Map());
 
@@ -198,8 +207,26 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     let matchesLocation = true;
     if (locationFilter === "placed") matchesLocation = venue.hasLocation !== false;
     if (locationFilter === "unplaced") matchesLocation = venue.hasLocation === false;
-    
-    const matchesSearch = lowerQuery ? venue.name.toLowerCase().includes(lowerQuery) : true;
+
+    const matchesSearch = lowerQuery
+      ? venue.name.toLowerCase().includes(lowerQuery) ||
+        (eventsByVenueId.get(venue.id) ?? []).some((event) => {
+          const eventMatchesLocation =
+            locationFilter === "placed"
+              ? event.hasLocation !== false
+              : locationFilter === "unplaced"
+                ? event.hasLocation === false
+                : true;
+          if (!eventMatchesLocation || !activeDays.includes(event.day)) {
+            return false;
+          }
+          return (
+            event.title.toLowerCase().includes(lowerQuery) ||
+            event.host.toLowerCase().includes(lowerQuery) ||
+            (event.description || "").toLowerCase().includes(lowerQuery)
+          );
+        })
+      : true;
     return matchesLocation && matchesSearch;
   });
 
@@ -222,7 +249,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
 
   const eventsByCategory = visibleEvents.reduce<globalThis.Map<string, FestivalEvent[]>>((acc, event) => {
     const venue = venueById.get(event.venueId);
-    const category = venue ? getLegacyCategory(venue) : UNCATEGORIZED_KEY;
+    const category = venue ? getVenueCategoryKey(venue) : VENUE_KEY;
     const existing = acc.get(category);
     if (existing) {
       existing.push(event);
@@ -232,38 +259,29 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     return acc;
   }, new globalThis.Map());
 
-  const sortedEventGroups = Array.from(eventsByCategory.entries())
-    .map(([category, categoryEvents]) => ({
-      category,
-      categoryLabel: getCategoryDisplayLabel(category),
-      events: [...categoryEvents].sort((a, b) => {
+  const sortedEventGroups = PIN_CATEGORY_ORDER.map((category) => ({
+    category,
+    categoryLabel: getCategoryDisplayLabel(category),
+    events: [...(eventsByCategory.get(category) ?? [])].sort((a, b) => {
         const timeDelta = (a.startTime || "").localeCompare(b.startTime || "");
         if (timeDelta !== 0) return timeDelta;
         return a.title.localeCompare(b.title);
       }),
-    }))
-    .sort((a, b) => {
-      const orderDelta = getCategoryOrderIndex(a.category) - getCategoryOrderIndex(b.category);
-      if (orderDelta !== 0) return orderDelta;
-      return a.categoryLabel.localeCompare(b.categoryLabel);
-    });
+  }));
+  const visibleCategorizedEventsCount = sortedEventGroups
+    .reduce((sum, group) => sum + group.events.length, 0);
 
   const selectedVenueSchedule = selectedVenue
     ? events
         .filter((event) => event.venueId === selectedVenue.id && activeDays.includes(event.day))
         .sort(sortScheduleEvents)
     : [];
-  const selectedVenueObjectEvents = selectedVenueSchedule.filter((event) => event.type === "object");
-  const selectedVenueDjEvents = selectedVenueSchedule.filter((event) => event.type === "dj");
-  const selectedVenueOtherEvents = selectedVenueSchedule.filter(
-    (event) => event.type !== "object" && event.type !== "dj"
-  );
   const visibleMappableVenues = visibleVenues.filter(
     (venue) => typeof venue.lat === "number" && typeof venue.lng === "number"
   );
 
   const venuesByCategory = visibleVenues.reduce<globalThis.Map<string, Venue[]>>((acc, venue) => {
-    const category = getLegacyCategory(venue);
+    const category = venueCategoryById.get(venue.id) ?? VENUE_KEY;
     const existing = acc.get(category);
     if (existing) {
       existing.push(venue);
@@ -273,17 +291,13 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     return acc;
   }, new globalThis.Map());
 
-  const sortedVenueGroups = Array.from(venuesByCategory.entries())
-    .map(([category, categoryVenues]) => ({
-      category,
-      categoryLabel: getCategoryDisplayLabel(category),
-      venues: [...categoryVenues].sort((a, b) => a.name.localeCompare(b.name)),
-    }))
-    .sort((a, b) => {
-      const orderDelta = getCategoryOrderIndex(a.category) - getCategoryOrderIndex(b.category);
-      if (orderDelta !== 0) return orderDelta;
-      return a.categoryLabel.localeCompare(b.categoryLabel);
-    });
+  const sortedVenueGroups = PIN_CATEGORY_ORDER.map((category) => ({
+    category,
+    categoryLabel: getCategoryDisplayLabel(category),
+    venues: [...(venuesByCategory.get(category) ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
+  }));
+  const visibleCategorizedVenuesCount = sortedVenueGroups
+    .reduce((sum, group) => sum + group.venues.length, 0);
 
   function toggleDay(day: FestivalDay) {
     setActiveDays((current) =>
@@ -294,11 +308,12 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   function focusVenue(venue: Venue, zoom = MAP_FOCUS_ZOOM) {
     const lat = venue.lat ?? MAP_CENTER.lat;
     const lng = venue.lng ?? MAP_CENTER.lng;
+    const center = getModalSafeCenter({ lat, lng }, zoom);
     setSelectedVenueId(venue.id);
     setLastInteractedVenueId(venue.id);
     setSelectedEventId(null);
     setAllowOutOfBoundsNavigation(false);
-    setMapCenter({ lat, lng });
+    setMapCenter(center);
     setMapZoom(zoom);
   }
 
@@ -306,16 +321,16 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     const venue = venues.find((entry) => entry.id === event.venueId) ?? null;
     // When selecting from the sidebar, center on the venue location first.
     if (typeof venue?.lat === "number" && typeof venue.lng === "number") {
-      setMapCenter({ lat: venue.lat, lng: venue.lng });
       setMapZoom(MAP_FOCUS_ZOOM);
+      setMapCenter(getModalSafeCenter({ lat: venue.lat, lng: venue.lng }, MAP_FOCUS_ZOOM));
     } else if (
       typeof event.lat === "number" &&
       typeof event.lng === "number" &&
       !Number.isNaN(event.lat) &&
       !Number.isNaN(event.lng)
     ) {
-      setMapCenter({ lat: event.lat, lng: event.lng });
       setMapZoom(MAP_FOCUS_ZOOM);
+      setMapCenter(getModalSafeCenter({ lat: event.lat, lng: event.lng }, MAP_FOCUS_ZOOM));
     }
 
     if (venue) {
@@ -430,7 +445,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
               Street
             </button>
             <button
-              className={`legacy-chip ${allowOutOfBoundsNavigation && userLocation ? "active" : ""}`}
+              className={`legacy-chip legacy-chip-geo ${allowOutOfBoundsNavigation && userLocation ? "active" : ""}`}
               type="button"
               disabled={!userLocation}
               onClick={() => {
@@ -606,49 +621,6 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                         </div>
                       </details>
 
-                      {selectedVenueObjectEvents.length > 0 ? (
-                        <details className="legacy-popup-section is-object" open>
-                          <summary className="legacy-popup-section-title">Objects</summary>
-                          <ul className="legacy-popup-mini-list">
-                            {selectedVenueObjectEvents.map((event) => (
-                              <li key={event.id}>
-                                <strong>{event.title}</strong>
-                                <span>{dayLabels[event.day]} | {event.startTime}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </details>
-                      ) : null}
-
-                      {selectedVenueDjEvents.length > 0 ? (
-                        <details className="legacy-popup-section is-dj" open>
-                          <summary className="legacy-popup-section-title">DJ Sets</summary>
-                          <ul className="legacy-popup-mini-list">
-                            {selectedVenueDjEvents.map((event) => (
-                              <li key={event.id}>
-                                <strong>{event.title}</strong>
-                                <span>{dayLabels[event.day]} | {event.startTime}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </details>
-                      ) : null}
-
-                      {selectedVenueOtherEvents.length > 0 ? (
-                        <details className="legacy-popup-section is-other" open>
-                          <summary className="legacy-popup-section-title">Other Events</summary>
-                          <ul className="legacy-popup-mini-list">
-                            {selectedVenueOtherEvents.map((event) => (
-                              <li key={event.id}>
-                                <strong>{event.title}</strong>
-                                <span>
-                                  {eventTypeLabels[event.type]} | {dayLabels[event.day]} | {event.startTime}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        </details>
-                      ) : null}
                     </>
                   ) : (
                     <p className="legacy-popup-empty">No scheduled events for this venue.</p>
@@ -663,7 +635,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
           <section className="legacy-list-block">
             <div className="legacy-list-title">
               <h2>{selectedVenue ? selectedVenue.name : "Venues"}</h2>
-              <span>{visibleVenues.length}</span>
+              <span>{visibleCategorizedVenuesCount}</span>
             </div>
             <div className="legacy-venue-list">
               {sortedVenueGroups.map((group) => (
@@ -694,7 +666,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
           <section className="legacy-list-block">
             <div className="legacy-list-title">
               <h2>Schedule</h2>
-              <span>{visibleEvents.length}</span>
+              <span>{visibleCategorizedEventsCount}</span>
             </div>
 
             <div className="legacy-event-list">

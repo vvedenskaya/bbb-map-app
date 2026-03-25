@@ -71,10 +71,12 @@ function parseEventType(value: string): FestivalEvent["type"] {
   if (normalized.includes("installation")) return "installation";
   if (normalized.includes("lecture") || normalized.includes("talk")) return "lecture";
   if (normalized.includes("object")) return "object";
+  if (normalized.includes("film")) return "film";
   if (normalized.includes("experience") || normalized.includes("facilitated")) return "experience";
+  if (normalized.includes("social gathering")) return "social";
   if (normalized.includes("dj")) return "dj";
   if (normalized.includes("venue")) return "venue";
-  if (normalized.includes("food")) return "food";
+  if (normalized.includes("food") || normalized.includes("beverage")) return "food";
   return "community";
 }
 
@@ -113,6 +115,20 @@ function splitLocationInternal(raw: string): string[] {
     .split(/[,\n;]/g)
     .map((value) => value.replace(/^"+|"+$/g, "").trim())
     .filter(Boolean);
+}
+
+function uniqueNonEmpty(values: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const value of values) {
+    const trimmed = value.trim();
+    if (!trimmed) continue;
+    const normalized = normalizeText(trimmed);
+    if (!normalized || seen.has(normalized)) continue;
+    seen.add(normalized);
+    result.push(trimmed);
+  }
+  return result;
 }
 
 function findMatchingLocation(locationName: string, byNormalizedName: Map<string, LocationRow>, all: LocationRow[]): LocationRow | null {
@@ -226,17 +242,41 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
       const projectName = asString(fields["Project Name"]) || `Untitled project ${index + 1}`;
       const locationInternalRaw = asString(fields["Location (Internal)"]);
       const locationCandidates = splitLocationInternal(locationInternalRaw);
+      const namedLocationCandidates = uniqueNonEmpty([
+        projectName,
+        asString(fields["Installations/Art pieces"]),
+      ]);
 
       if (locationCandidates.length > 0) {
         rowsWithLocation += 1;
       }
 
       let matchedLocation: LocationRow | null = null;
+      // Prefer explicit location names from source-of-truth location rows
+      // before trying internal grouping aliases.
+      for (const candidate of namedLocationCandidates) {
+        const exact = byNormalizedName.get(normalizeText(candidate));
+        if (exact) {
+          matchedLocation = exact;
+          break;
+        }
+      }
+      if (!matchedLocation) {
+        for (const candidate of namedLocationCandidates) {
+          matchedLocation = findMatchingLocation(candidate, byNormalizedName, allLocations);
+          if (matchedLocation) {
+            break;
+          }
+        }
+      }
+
+      if (!matchedLocation) {
       for (const candidate of locationCandidates) {
         matchedLocation = findMatchingLocation(candidate, byNormalizedName, allLocations);
         if (matchedLocation) {
           break;
         }
+      }
       }
 
       let venueId: string;
