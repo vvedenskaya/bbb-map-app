@@ -29,6 +29,13 @@ const PROJECT_TYPE_COLORS: Record<EventType, string> = {
   dj: "#a855f7",
   venue: "#0ea5e9",
   food: "#f97316",
+  services: "#4b5563",
+};
+const SERVICE_TYPE_COLORS: Record<"garbage" | "water" | "toilets" | "medic", string> = {
+  garbage: "#4b5563",
+  water: "#06b6d4",
+  toilets: "#8b5cf6",
+  medic: "#dc2626",
 };
 
 const UNCATEGORIZED_KEY = "uncategorized";
@@ -101,6 +108,7 @@ function getModalSafeCenter(target: { lat: number; lng: number }, zoom: number):
 }
 
 function getVenueCategoryKey(venue: Venue): string {
+  if (venue.serviceType) return SERVICES_KEY;
   const label = (venue.label || "").toLowerCase();
   if (label.includes("service")) return SERVICES_KEY;
   if (label.includes("community")) return COMMUNITY_HUB_KEY;
@@ -114,6 +122,14 @@ function getVenueCategoryKey(venue: Venue): string {
   if (label.includes("art installation")) return ART_INSTALLATION_KEY;
   // Keep all mappable pins in a canonical map category bucket.
   return VENUE_KEY;
+}
+
+function getServiceIcon(serviceType?: Venue["serviceType"]): string | null {
+  if (serviceType === "garbage") return "🗑";
+  if (serviceType === "water") return "💧";
+  if (serviceType === "toilets") return "🚻";
+  if (serviceType === "medic") return "✚";
+  return null;
 }
 
 function getCategoryDisplayLabel(categoryKey: string): string {
@@ -160,6 +176,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [activeDays, setActiveDays] = useState<FestivalDay[]>(ALL_DAYS);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [locationFilter, setLocationFilter] = useState<"all" | "placed" | "unplaced">("all");
+  const [serviceFilter, setServiceFilter] = useState<"all" | "garbage" | "water" | "toilets" | "medic">("all");
   const [mapType, setMapType] = useState<"satellite" | "roadmap">("satellite");
   const [searchQuery, setSearchQuery] = useState("");
   const [mapCenter, setMapCenter] = useState(MAP_CENTER);
@@ -205,6 +222,10 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   }, new globalThis.Map());
 
   const venueColorById = venues.reduce<globalThis.Map<string, string>>((acc, venue) => {
+    if (venue.serviceType) {
+      acc.set(venue.id, SERVICE_TYPE_COLORS[venue.serviceType]);
+      return acc;
+    }
     const category = venueCategoryById.get(venue.id) ?? VENUE_KEY;
     acc.set(venue.id, PIN_CATEGORY_COLORS[category] ?? PIN_CATEGORY_COLORS[VENUE_KEY]);
     return acc;
@@ -214,6 +235,10 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     let matchesLocation = true;
     if (locationFilter === "placed") matchesLocation = venue.hasLocation !== false;
     if (locationFilter === "unplaced") matchesLocation = venue.hasLocation === false;
+    const matchesService =
+      serviceFilter === "all"
+        ? true
+        : venue.serviceType === serviceFilter;
 
     const matchesSearch = lowerQuery
       ? venue.name.toLowerCase().includes(lowerQuery) ||
@@ -234,11 +259,15 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
           );
         })
       : true;
-    return matchesLocation && matchesSearch;
+    return matchesLocation && matchesService && matchesSearch;
   });
 
   const visibleEvents = events
     .filter((event) => {
+      const venue = venueById.get(event.venueId);
+      if (venue?.serviceType) {
+        return false;
+      }
       const matchesDay = activeDays.includes(event.day);
       
       let matchesLocation = true;
@@ -280,14 +309,19 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
 
   const selectedVenueSchedule = selectedVenue
     ? events
-        .filter((event) => event.venueId === selectedVenue.id && activeDays.includes(event.day))
+        .filter((event) => event.venueId === selectedVenue.id && activeDays.includes(event.day) && event.type !== "services")
         .sort(sortScheduleEvents)
     : [];
+  const selectedVenueDescription = selectedVenue
+    ? (selectedVenue.description || "").trim()
+    : "";
   const visibleMappableVenues = visibleVenues.filter(
     (venue) => typeof venue.lat === "number" && typeof venue.lng === "number"
   );
 
-  const venuesByCategory = visibleVenues.reduce<globalThis.Map<string, Venue[]>>((acc, venue) => {
+  const venuesByCategory = visibleVenues
+    .filter((venue) => !venue.serviceType)
+    .reduce<globalThis.Map<string, Venue[]>>((acc, venue) => {
     const category = venueCategoryById.get(venue.id) ?? VENUE_KEY;
     const existing = acc.get(category);
     if (existing) {
@@ -296,7 +330,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
       acc.set(category, [venue]);
     }
     return acc;
-  }, new globalThis.Map());
+    }, new globalThis.Map());
 
   const sortedVenueGroups = PIN_CATEGORY_ORDER.map((category) => ({
     category,
@@ -486,6 +520,41 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
             >
               Missing Coordinates
             </button>
+            <button
+              className={`legacy-chip ${serviceFilter === "all" ? "active" : ""}`}
+              type="button"
+              onClick={() => setServiceFilter("all")}
+            >
+              All Services
+            </button>
+            <button
+              className={`legacy-chip ${serviceFilter === "toilets" ? "active" : ""}`}
+              type="button"
+              onClick={() => setServiceFilter("toilets")}
+            >
+              Toilets
+            </button>
+            <button
+              className={`legacy-chip ${serviceFilter === "water" ? "active" : ""}`}
+              type="button"
+              onClick={() => setServiceFilter("water")}
+            >
+              Water
+            </button>
+            <button
+              className={`legacy-chip ${serviceFilter === "garbage" ? "active" : ""}`}
+              type="button"
+              onClick={() => setServiceFilter("garbage")}
+            >
+              Garbage
+            </button>
+            <button
+              className={`legacy-chip ${serviceFilter === "medic" ? "active" : ""}`}
+              type="button"
+              onClick={() => setServiceFilter("medic")}
+            >
+              Medic
+            </button>
           </div>
         </div>
       </header>
@@ -524,29 +593,42 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
               style={{ width: "100%", height: "100%" }}
             >
               {visibleMappableVenues.slice(0, 300).map((venue) => {
+                const serviceIcon = getServiceIcon(venue.serviceType);
                 return (
                   <AdvancedMarker
                     key={venue.id}
                     position={{ lat: venue.lat || 33.351, lng: venue.lng || -115.731 }}
                     anchorPoint={AdvancedMarkerAnchorPoint.CENTER}
                   >
-                    <button
-                      className={`legacy-pin ${selectedVenueId === venue.id ? "is-selected" : ""} ${lastInteractedVenueId === venue.id ? "is-last-interacted" : ""}`}
-                      type="button"
-                      aria-label={venue.name}
-                      style={{ "--pin-color": venueColorById.get(venue.id) || venue.accent || "#8b5cf6" } as CSSProperties}
-                      onMouseDown={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                      }}
-                      onClick={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        setSelectedVenueId(venue.id);
-                        setLastInteractedVenueId(venue.id);
-                        setSelectedEventId(null);
-                      }}
-                    />
+                    {serviceIcon ? (
+                      <div
+                        className="legacy-service-pin"
+                        aria-label={venue.name}
+                        style={{ "--pin-color": venueColorById.get(venue.id) || "#4b5563" } as CSSProperties}
+                      >
+                        <span className="legacy-pin-service-icon" aria-hidden="true">
+                          {serviceIcon}
+                        </span>
+                      </div>
+                    ) : (
+                      <button
+                        className={`legacy-pin ${selectedVenueId === venue.id ? "is-selected" : ""} ${lastInteractedVenueId === venue.id ? "is-last-interacted" : ""}`}
+                        type="button"
+                        aria-label={venue.name}
+                        style={{ "--pin-color": venueColorById.get(venue.id) || venue.accent || "#8b5cf6" } as CSSProperties}
+                        onMouseDown={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                        }}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          setSelectedVenueId(venue.id);
+                          setLastInteractedVenueId(venue.id);
+                          setSelectedEventId(null);
+                        }}
+                      />
+                    )}
                   </AdvancedMarker>
                 );
               })}
@@ -603,6 +685,9 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                   </button>
                 </div>
                 <div className="legacy-popup-content">
+                  {selectedVenueDescription ? (
+                    <p className="legacy-popup-description">{selectedVenueDescription}</p>
+                  ) : null}
                   {selectedVenueSchedule.length > 0 ? (
                     <>
                       <details className="legacy-popup-section is-schedule" open>
@@ -668,7 +753,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                         className="legacy-venue-dot"
                         style={{ "--pin-color": venueColorById.get(venue.id) || venue.accent || "#8b5cf6" } as CSSProperties}
                       />
-                      <span>{venue.name}</span>
+                      <span>{getServiceIcon(venue.serviceType) ? `${getServiceIcon(venue.serviceType)} ` : ""}{venue.name}</span>
                     </button>
                   ))}
                 </div>

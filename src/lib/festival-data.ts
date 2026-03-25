@@ -1,6 +1,7 @@
 import { FestivalDay, FestivalEvent, Venue } from "@/types/festival";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { readAdminEntries } from "@/lib/admin-entries";
 
 export type LocationMatchDebug = {
   totalRows: number;
@@ -66,6 +67,18 @@ function slugify(value: string): string {
 
 function parseEventType(value: string): FestivalEvent["type"] {
   const normalized = value.toLowerCase();
+  if (
+    normalized.includes("garbage") ||
+    normalized.includes("trash") ||
+    normalized.includes("water") ||
+    normalized.includes("toilet") ||
+    normalized.includes("restroom") ||
+    normalized.includes("medic") ||
+    normalized.includes("medical") ||
+    normalized.includes("first aid")
+  ) {
+    return "services";
+  }
   if (normalized.includes("music")) return "music";
   if (normalized.includes("performance")) return "performance";
   if (normalized.includes("installation")) return "installation";
@@ -385,10 +398,54 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
       }
     }
 
+    const adminEntries = await readAdminEntries();
+    for (const entry of adminEntries) {
+      const venueKey = `admin:${normalizeText(entry.name)}:${entry.id}`;
+      const venueId = ensureVenue({
+        key: venueKey,
+        name: entry.name,
+        lat: entry.lat,
+        lng: entry.lng,
+        hasLocation: entry.hasLocation,
+        locationInternalRaw: entry.name,
+      });
+      const existingVenue = venuesById.get(venueId);
+      if (existingVenue) {
+        existingVenue.label = entry.projectType === "services" ? "Services" : "Venue";
+        existingVenue.shortDescription = entry.artist ? `By ${entry.artist}` : "Manually added from admin dashboard";
+        existingVenue.description = entry.abridgedProjectText || "No abridged text provided.";
+        existingVenue.permanence = entry.permanence || undefined;
+        existingVenue.hasLocation = entry.hasLocation;
+        existingVenue.lat = entry.lat;
+        existingVenue.lng = entry.lng;
+        existingVenue.serviceType = entry.serviceType;
+      }
+
+      if (entry.hasSchedule) {
+        events.push({
+          id: `event-${entry.id}`,
+          venueId,
+          title: entry.name,
+          host: entry.artist || "TBD",
+          description: entry.abridgedProjectText || "No abridged text provided.",
+          day: entry.day,
+          startTime: entry.startTime || "TBD",
+          endTime: entry.endTime || "TBD",
+          type: entry.projectType,
+          thumbnailUrl: "/map-layers/image_BB_map.jpg",
+          lat: entry.lat,
+          lng: entry.lng,
+          hasLocation: entry.hasLocation,
+          permanence: entry.permanence || undefined,
+          serviceType: entry.serviceType,
+        });
+      }
+    }
+
     return {
       venues,
       events,
-      sourceLabel: "tmp_airtable_table.json + locations.json",
+      sourceLabel: "tmp_airtable_table.json + locations.json + admin_entries.json",
       debug: {
         totalRows: airtableRecords.length,
         confirmedRows: rowsWithLocation,

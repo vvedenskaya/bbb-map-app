@@ -23,7 +23,8 @@ export const eventTypeLabels: Record<EventType, string> = {
   film: "Film",
   dj: "DJ",
   venue: "Venue",
-  food: "Food / Beverage"
+  food: "Food / Beverage",
+  services: "Services",
 };
 
 export const venues: Venue[] = [

@@ -1,14 +1,13 @@
 import Link from "next/link";
-import { fetchAirtableInstallations } from "@/lib/airtable";
+import { readAdminEntries } from "@/lib/admin-entries";
 
 export default async function AdminDashboardPage() {
-  const data = await fetchAirtableInstallations();
-  const venues = data?.venues || [];
+  const entries = await readAdminEntries();
 
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
-        <h1 style={{ fontSize: "1.5rem", fontWeight: 600 }}>Pins & Installations</h1>
+        <h1 style={{ fontSize: "1.5rem", fontWeight: 600 }}>Local Admin Entries</h1>
         <Link 
           href="/admin/new"
           style={{ 
@@ -35,30 +34,32 @@ export default async function AdminDashboardPage() {
             </tr>
           </thead>
           <tbody>
-            {venues.map((venue) => (
-              <tr key={venue.id} style={{ borderBottom: "1px solid #f3f4f6" }}>
-                <td style={{ padding: "1rem", fontWeight: 500 }}>{venue.name}</td>
+            {entries.map((entry) => (
+              <tr key={entry.id} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                <td style={{ padding: "1rem", fontWeight: 500 }}>{entry.name}</td>
                 <td style={{ padding: "1rem" }}>
                   <span style={{ 
                     display: "inline-block", 
                     padding: "0.25rem 0.75rem", 
                     borderRadius: "9999px", 
-                    backgroundColor: venue.accent,
+                    backgroundColor: entry.serviceType ? "#f97316" : "#8b5cf6",
                     color: "white",
                     fontSize: "0.75rem",
                     fontWeight: 600
                   }}>
-                    {venue.label}
+                    {entry.projectType === "services" && entry.serviceType
+                      ? `Services: ${entry.serviceType}`
+                      : entry.projectType}
                   </span>
                 </td>
                 <td style={{ padding: "1rem", color: "#6b7280", fontFamily: "monospace" }}>
-                  {venue.hasLocation && venue.lat !== undefined && venue.lng !== undefined 
-                    ? `${venue.lat.toFixed(5)}, ${venue.lng.toFixed(5)}` 
+                  {entry.hasLocation && entry.lat !== undefined && entry.lng !== undefined 
+                    ? `${entry.lat.toFixed(5)}, ${entry.lng.toFixed(5)}` 
                     : "Unplaced"}
                 </td>
                 <td style={{ padding: "1rem", textAlign: "right" }}>
                   <Link 
-                    href={`/admin/edit/${venue.id}`}
+                    href={`/admin/edit/${entry.id}`}
                     style={{ color: "#2563eb", textDecoration: "none", fontWeight: 500 }}
                   >
                     Edit

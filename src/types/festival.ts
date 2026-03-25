@@ -12,7 +12,8 @@ export type EventType =
   | "film"
   | "dj"
   | "venue"
-  | "food";
+  | "food"
+  | "services";
 
 export type Venue = {
   id: string;
@@ -26,6 +27,7 @@ export type Venue = {
   lng?: number;
   hasLocation?: boolean;
   permanence?: string;
+  serviceType?: "garbage" | "water" | "toilets" | "medic";
   thumbnailUrl: string;
   accent: string;
 };
@@ -45,4 +47,5 @@ export type FestivalEvent = {
   lng?: number;
   hasLocation?: boolean;
   permanence?: string;
+  serviceType?: "garbage" | "water" | "toilets" | "medic";
 };
