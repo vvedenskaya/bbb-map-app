@@ -6,6 +6,7 @@
     "Lat": 33.354693,
     "Long": -115.733349
   },
+
   {
     "Name": "San Litio (Saint Lithium)",
     "Address": "Corner of First Ave and Isle of Palms, on the way to Mars College",
@@ -188,13 +189,7 @@
     "Lat": 33.349540,
     "Long": -115.733670    
   },
-  {
-    "Name": "No Shoes",
-    "Address": "",
-    "Category": "Venue",
-    "Lat": 33.34911,
-    "Long": -115.726836
-  },
+
   {
     "Name": "Polaroid Museum",
     "Address": "Polaroid Museum?",
@@ -215,6 +210,20 @@
     "Category": "Venue",
     "Lat": 33.34822,
     "Long": -115.73305
+  },
+  {
+    "Name": "Pythia",
+    "Address": "",
+    "Category": "Venue",
+    "Lat": 33.35293095676242,
+    "Long": -115.7286677746994
+  },
+  {
+    "Name": "Star Sight Site",
+    "Address": "",
+    "Category": "Art Installation",
+    "Lat": 33.3552040,
+    "Long": -115.7238872
   },
   {
     "Name": "Temple to the Scientific Method",
