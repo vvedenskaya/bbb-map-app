@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { APIProvider, Map, AdvancedMarker, AdvancedMarkerAnchorPoint } from "@vis.gl/react-google-maps";
 import { dayLabels, eventTypeLabels } from "@/data/festival";
 import { EventType, FestivalDay, FestivalEvent, Venue } from "@/types/festival";
+import banner1080 from "../../assets/banner/biennale-banner1080.jpg";
+import banner2560 from "../../assets/banner/biennale-banner2560.jpg";
 
 const ALL_DAYS: FestivalDay[] = ["fri", "sat", "sun"];
 const DAY_SORT_ORDER: Record<FestivalDay, number> = { fri: 0, sat: 1, sun: 2 };
@@ -51,6 +53,21 @@ const PIN_CATEGORY_ORDER = [
   VENUE_KEY,
   ART_INSTALLATION_KEY,
 ];
+const PROJECT_TYPE_FILTER_OPTIONS: Array<{ id: string; label: string; types: EventType[] }> = [
+  { id: "music", label: eventTypeLabels.music, types: ["music"] },
+  { id: "performance", label: eventTypeLabels.performance, types: ["performance"] },
+  { id: "installation", label: eventTypeLabels.installation, types: ["installation"] },
+  { id: "lecture", label: eventTypeLabels.lecture, types: ["lecture"] },
+  { id: "social", label: eventTypeLabels.social, types: ["community", "social"] },
+  { id: "object", label: eventTypeLabels.object, types: ["object"] },
+  { id: "experience", label: eventTypeLabels.experience, types: ["experience"] },
+  { id: "film", label: eventTypeLabels.film, types: ["film"] },
+  { id: "dj", label: eventTypeLabels.dj, types: ["dj"] },
+  { id: "venue", label: eventTypeLabels.venue, types: ["venue"] },
+  { id: "food", label: eventTypeLabels.food, types: ["food"] },
+  { id: "services", label: eventTypeLabels.services, types: ["services"] },
+];
+const ALL_PROJECT_TYPES = PROJECT_TYPE_FILTER_OPTIONS.flatMap((option) => option.types);
 const PIN_CATEGORY_COLORS: Record<string, string> = {
   [SERVICES_KEY]: "#f97316",
   [COMMUNITY_HUB_KEY]: "#8b5cf6",
@@ -175,8 +192,8 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [lastInteractedVenueId, setLastInteractedVenueId] = useState<string | null>(null);
   const [activeDays, setActiveDays] = useState<FestivalDay[]>(ALL_DAYS);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [locationFilter, setLocationFilter] = useState<"all" | "placed" | "unplaced">("all");
-  const [serviceFilter, setServiceFilter] = useState<"all" | "garbage" | "water" | "toilets" | "medic">("all");
+  const [activeProjectTypes, setActiveProjectTypes] = useState<EventType[]>(ALL_PROJECT_TYPES);
+  const [isProjectTypeMenuOpen, setIsProjectTypeMenuOpen] = useState(false);
   const [mapType, setMapType] = useState<"satellite" | "roadmap">("satellite");
   const [searchQuery, setSearchQuery] = useState("");
   const [mapCenter, setMapCenter] = useState(MAP_CENTER);
@@ -231,25 +248,20 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     return acc;
   }, new globalThis.Map());
 
+  const hasActiveProjectTypeFilter = activeProjectTypes.length < ALL_PROJECT_TYPES.length;
+
   const visibleVenues = venues.filter((venue) => {
-    let matchesLocation = true;
-    if (locationFilter === "placed") matchesLocation = venue.hasLocation !== false;
-    if (locationFilter === "unplaced") matchesLocation = venue.hasLocation === false;
-    const matchesService =
-      serviceFilter === "all"
-        ? true
-        : venue.serviceType === serviceFilter;
+    const venueEvents = eventsByVenueId.get(venue.id) ?? [];
+    const matchesProjectType = venue.serviceType
+      ? activeProjectTypes.includes("services")
+      : hasActiveProjectTypeFilter
+        ? venueEvents.some((event) => activeProjectTypes.includes(event.type))
+        : true;
 
     const matchesSearch = lowerQuery
       ? venue.name.toLowerCase().includes(lowerQuery) ||
-        (eventsByVenueId.get(venue.id) ?? []).some((event) => {
-          const eventMatchesLocation =
-            locationFilter === "placed"
-              ? event.hasLocation !== false
-              : locationFilter === "unplaced"
-                ? event.hasLocation === false
-                : true;
-          if (!eventMatchesLocation || !activeDays.includes(event.day)) {
+        venueEvents.some((event) => {
+          if (!activeDays.includes(event.day) || !activeProjectTypes.includes(event.type)) {
             return false;
           }
           return (
@@ -259,7 +271,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
           );
         })
       : true;
-    return matchesLocation && matchesService && matchesSearch;
+    return matchesProjectType && matchesSearch;
   });
 
   const visibleEvents = events
@@ -269,17 +281,14 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
         return false;
       }
       const matchesDay = activeDays.includes(event.day);
-      
-      let matchesLocation = true;
-      if (locationFilter === "placed") matchesLocation = event.hasLocation !== false;
-      if (locationFilter === "unplaced") matchesLocation = event.hasLocation === false;
+      const matchesProjectType = activeProjectTypes.includes(event.type);
 
       const matchesSearch = lowerQuery
         ? event.title.toLowerCase().includes(lowerQuery) ||
           event.host.toLowerCase().includes(lowerQuery) ||
           (event.description || "").toLowerCase().includes(lowerQuery)
         : true;
-      return matchesDay && matchesLocation && matchesSearch;
+      return matchesDay && matchesProjectType && matchesSearch;
     })
     .sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""));
 
@@ -344,6 +353,22 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     setActiveDays((current) =>
       current.includes(day) ? current.filter((entry) => entry !== day) : [...current, day]
     );
+  }
+
+  function toggleProjectType(types: EventType[]) {
+    setActiveProjectTypes((current) => {
+      const isSelected = types.every((type) => current.includes(type));
+      if (isSelected) {
+        return current.filter((entry) => !types.includes(entry));
+      }
+      const merged = [...current];
+      types.forEach((type) => {
+        if (!merged.includes(type)) {
+          merged.push(type);
+        }
+      });
+      return merged;
+    });
   }
 
   function focusVenue(venue: Venue, zoom = MAP_FOCUS_ZOOM) {
@@ -433,129 +458,16 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     <main className="legacy-app">
       <header className="legacy-banner">
         <div className="legacy-banner-title">
-          <span className="legacy-kicker">Bombay Beach Biennale 2026</span>
-          <h1>Art Map + Schedule</h1>
-          {dataSourceLabel ? <p>Data source: {dataSourceLabel}</p> : null}
-        </div>
-        <div className="legacy-banner-controls">
-          <input
-            type="search"
-            placeholder="Search venues or events..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="legacy-search"
-          />
-          <div className="legacy-control-row">
-            <button
-              className={`legacy-chip ${selectedVenueId === null ? "active" : ""}`}
-              type="button"
-              onClick={() => {
-                setSelectedVenueId(null);
-                setSelectedEventId(null);
-                setAllowOutOfBoundsNavigation(false);
-                setMapCenter(MAP_CENTER);
-                setMapZoom(MAP_DEFAULT_ZOOM);
-              }}
-            >
-              All Venues
-            </button>
-            {ALL_DAYS.map((day) => (
-              <button
-                key={day}
-                className={`legacy-chip ${activeDays.includes(day) ? "active" : ""}`}
-                type="button"
-                onClick={() => toggleDay(day)}
-              >
-                {dayLabels[day]}
-              </button>
-            ))}
-          </div>
-          <div className="legacy-control-row">
-            <button
-              className={`legacy-chip ${mapType === "satellite" ? "active" : ""}`}
-              type="button"
-              onClick={() => setMapType("satellite")}
-            >
-              Satellite
-            </button>
-            <button
-              className={`legacy-chip ${mapType === "roadmap" ? "active" : ""}`}
-              type="button"
-              onClick={() => setMapType("roadmap")}
-            >
-              Street
-            </button>
-            <button
-              className={`legacy-chip legacy-chip-geo ${allowOutOfBoundsNavigation && userLocation ? "active" : ""}`}
-              type="button"
-              disabled={!userLocation}
-              onClick={() => {
-                if (!userLocation) return;
-                setAllowOutOfBoundsNavigation(true);
-                setMapCenter(userLocation);
-                setMapZoom(Math.max(mapZoom, 17.2));
-              }}
-            >
-              {geolocationStatus === "requesting" ? "Locating..." : "My Location"}
-            </button>
-            {geolocationHint ? <span className="legacy-geo-status">{geolocationHint}</span> : null}
-            <button
-              className={`legacy-chip ${locationFilter === "all" ? "active" : ""}`}
-              type="button"
-              onClick={() => setLocationFilter("all")}
-            >
-              All Locations
-            </button>
-            <button
-              className={`legacy-chip ${locationFilter === "placed" ? "active" : ""}`}
-              type="button"
-              onClick={() => setLocationFilter("placed")}
-            >
-              Mapped
-            </button>
-            <button
-              className={`legacy-chip ${locationFilter === "unplaced" ? "active" : ""}`}
-              type="button"
-              onClick={() => setLocationFilter("unplaced")}
-            >
-              Missing Coordinates
-            </button>
-            <button
-              className={`legacy-chip ${serviceFilter === "all" ? "active" : ""}`}
-              type="button"
-              onClick={() => setServiceFilter("all")}
-            >
-              All Services
-            </button>
-            <button
-              className={`legacy-chip ${serviceFilter === "toilets" ? "active" : ""}`}
-              type="button"
-              onClick={() => setServiceFilter("toilets")}
-            >
-              Toilets
-            </button>
-            <button
-              className={`legacy-chip ${serviceFilter === "water" ? "active" : ""}`}
-              type="button"
-              onClick={() => setServiceFilter("water")}
-            >
-              Water
-            </button>
-            <button
-              className={`legacy-chip ${serviceFilter === "garbage" ? "active" : ""}`}
-              type="button"
-              onClick={() => setServiceFilter("garbage")}
-            >
-              Garbage
-            </button>
-            <button
-              className={`legacy-chip ${serviceFilter === "medic" ? "active" : ""}`}
-              type="button"
-              onClick={() => setServiceFilter("medic")}
-            >
-              Medic
-            </button>
-          </div>
+          <picture className="legacy-banner-art">
+            <source media="(min-width: 900px)" srcSet={banner2560.src} />
+            <img
+              src={banner1080.src}
+              alt="Bombay Beach Biennale 2026"
+              width={banner1080.width}
+              height={banner1080.height}
+            />
+          </picture>
+          {dataSourceLabel ? <p className="legacy-banner-source">Data source: {dataSourceLabel}</p> : null}
         </div>
       </header>
 
@@ -639,6 +551,53 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
               ) : null}
             </Map>
           </APIProvider>
+          <div className="legacy-map-controls">
+            <div className="legacy-control-row">
+              <button
+                className={`legacy-chip ${mapType === "satellite" ? "active" : ""}`}
+                type="button"
+                onClick={() => setMapType("satellite")}
+              >
+                Satellite
+              </button>
+              <button
+                className={`legacy-chip ${mapType === "roadmap" ? "active" : ""}`}
+                type="button"
+                onClick={() => setMapType("roadmap")}
+              >
+                Street
+              </button>
+            </div>
+            <button
+              className={`legacy-chip legacy-chip-geo ${allowOutOfBoundsNavigation && userLocation ? "active" : ""}`}
+              type="button"
+              disabled={!userLocation}
+              onClick={() => {
+                if (!userLocation) return;
+                setAllowOutOfBoundsNavigation(true);
+                setMapCenter(userLocation);
+                setMapZoom(Math.max(mapZoom, 17.2));
+              }}
+            >
+              {geolocationStatus === "requesting" ? "Locating..." : "My Location"}
+            </button>
+            <div className="legacy-control-row">
+              <button
+                className={`legacy-chip ${selectedVenueId === null ? "active" : ""}`}
+                type="button"
+                onClick={() => {
+                  setSelectedVenueId(null);
+                  setSelectedEventId(null);
+                  setAllowOutOfBoundsNavigation(false);
+                  setMapCenter(MAP_CENTER);
+                  setMapZoom(MAP_DEFAULT_ZOOM);
+                }}
+              >
+                Reset
+              </button>
+            </div>
+            {geolocationHint ? <span className="legacy-geo-status">{geolocationHint}</span> : null}
+          </div>
           {selectedVenue ? (
             <div
               className="legacy-map-modal-overlay"
@@ -730,6 +689,89 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
         </section>
 
         <aside className="legacy-list-panel">
+          <section className="legacy-list-block legacy-list-controls">
+            <div className="legacy-search-row">
+              <input
+                type="search"
+                placeholder="Search venues or events..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="legacy-search"
+              />
+              <div className="legacy-project-filters">
+                <button
+                  type="button"
+                  className={`legacy-chip legacy-icon-button ${hasActiveProjectTypeFilter ? "active" : ""}`}
+                  onClick={() => setIsProjectTypeMenuOpen((current) => !current)}
+                  aria-expanded={isProjectTypeMenuOpen}
+                  aria-haspopup="true"
+                  aria-label="Project type filters"
+                >
+                  <span className="legacy-filter-icon" aria-hidden="true">
+                    <span />
+                    <span />
+                    <span />
+                  </span>
+                </button>
+                {isProjectTypeMenuOpen ? (
+                  <div className="legacy-project-filters-popover" role="dialog" aria-label="Project type filters">
+                    <div className="legacy-project-filters-head">
+                      <strong>Project types</strong>
+                      <button
+                        type="button"
+                        className="legacy-popup-close"
+                        aria-label="Close filters"
+                        onClick={() => setIsProjectTypeMenuOpen(false)}
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <div className="legacy-project-filters-list">
+                      {PROJECT_TYPE_FILTER_OPTIONS.map((option) => (
+                        <label key={option.id} className="legacy-filter-option">
+                          <input
+                            type="checkbox"
+                            checked={option.types.every((type) => activeProjectTypes.includes(type))}
+                            onChange={() => toggleProjectType(option.types)}
+                          />
+                          <span>{option.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                    <div className="legacy-project-filters-actions">
+                      <button
+                        type="button"
+                        className="legacy-chip"
+                        onClick={() => setActiveProjectTypes(ALL_PROJECT_TYPES)}
+                      >
+                        Select all
+                      </button>
+                      <button
+                        type="button"
+                        className="legacy-chip"
+                        onClick={() => setActiveProjectTypes([])}
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+            <div className="legacy-checkbox-row">
+              {ALL_DAYS.map((day) => (
+                <label key={day} className="legacy-filter-option">
+                  <input
+                    type="checkbox"
+                    checked={activeDays.includes(day)}
+                    onChange={() => toggleDay(day)}
+                  />
+                  <span>{dayLabels[day]}</span>
+                </label>
+              ))}
+            </div>
+          </section>
+
           <section className="legacy-list-block">
             <div className="legacy-list-title">
               <h2>{selectedVenue ? selectedVenue.name : "Venues"}</h2>

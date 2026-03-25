@@ -54,65 +54,65 @@ a {
 }
 
 .legacy-app {
+  height: 100vh;
   min-height: 100vh;
   padding: 0;
   background: #fffdf3;
   color: #141414;
   font-family: "Fira Mono", "Courier New", monospace;
+  display: flex;
+  flex-direction: column;
 }
 
 .legacy-banner {
+  flex: 0 0 auto;
   min-height: 42px;
-  padding: 10px 14px;
+  padding: 8px 0 6px;
   border-bottom: 1px solid #ded8c8;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 14px;
+  justify-content: center;
   background: #fffdf3;
 }
 
 .legacy-banner-title {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+  justify-items: center;
 }
 
-.legacy-banner-title h1 {
-  font-size: 1rem;
-  line-height: 1;
-  margin: 0;
-  font-weight: 600;
+.legacy-banner-art {
+  display: block;
+  width: 100%;
+  max-width: none;
 }
 
-.legacy-banner-title p {
+.legacy-banner-art img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.legacy-banner-source {
   margin: 0;
   font-size: 0.74rem;
   color: #666;
-}
-
-.legacy-kicker {
-  font-size: 0.7rem;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.legacy-banner-controls {
-  display: grid;
-  gap: 6px;
-  justify-items: end;
+  text-align: center;
 }
 
 .legacy-control-row {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .legacy-search {
-  width: min(360px, 42vw);
+  width: 100%;
   border: 1px solid #d9d4c5;
   border-radius: 4px;
   background: #fffeef;
@@ -170,13 +170,25 @@ a {
 
 .legacy-shell {
   display: flex;
-  height: calc(100vh - 63px);
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .legacy-map-panel {
   flex: 1 1 auto;
   min-width: 0;
   position: relative;
+}
+
+.legacy-map-controls {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+  max-width: min(90vw, 320px);
 }
 
 .legacy-list-panel {
@@ -193,6 +205,117 @@ a {
 .legacy-list-block {
   border: 1px solid #dcd6c8;
   background: #fffef5;
+}
+
+.legacy-list-controls {
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 12;
+  background: #fffef5;
+  border-bottom: 1px solid #e6e0d3;
+}
+
+.legacy-search-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: start;
+}
+
+.legacy-checkbox-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+}
+
+.legacy-filter-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+}
+
+.legacy-filter-option input {
+  width: 14px;
+  height: 14px;
+}
+
+.legacy-project-filters {
+  position: relative;
+}
+
+.legacy-project-filters-popover {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  width: min(280px, 72vw);
+  border: 1px solid #d9d4c5;
+  border-radius: 8px;
+  background: #fffef5;
+  box-shadow: 0 12px 22px rgba(20, 20, 20, 0.16);
+  padding: 8px;
+  z-index: 20;
+  display: grid;
+  gap: 8px;
+}
+
+.legacy-icon-button {
+  width: 34px;
+  min-width: 34px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.legacy-filter-icon {
+  display: grid;
+  gap: 3px;
+  width: 14px;
+}
+
+.legacy-filter-icon span {
+  height: 2px;
+  background: currentColor;
+  border-radius: 999px;
+}
+
+.legacy-filter-icon span:nth-child(1) {
+  width: 14px;
+}
+
+.legacy-filter-icon span:nth-child(2) {
+  width: 10px;
+  justify-self: end;
+}
+
+.legacy-filter-icon span:nth-child(3) {
+  width: 12px;
+}
+
+.legacy-project-filters-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.legacy-project-filters-list {
+  display: grid;
+  gap: 6px;
+  max-height: 220px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.legacy-project-filters-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
 }
 
 .legacy-list-title {
@@ -1183,20 +1306,17 @@ a {
 }
 
 @media (max-width: 1080px) {
+  .legacy-app {
+    height: auto;
+  }
+
   .legacy-banner {
-    flex-direction: column;
-    align-items: flex-start;
+    padding: 8px 0 6px;
   }
 
-  .legacy-banner-controls,
-  .legacy-control-row {
+  .legacy-banner-title {
     width: 100%;
-    justify-content: flex-start;
-    justify-items: start;
-  }
-
-  .legacy-search {
-    width: 100%;
+    min-width: 0;
   }
 
   .legacy-shell {
@@ -1214,6 +1334,12 @@ a {
     border-left: 0;
     border-top: 1px solid #ded8c8;
     max-height: none;
+  }
+
+  .legacy-map-controls {
+    top: 10px;
+    right: 10px;
+    max-width: calc(100% - 20px);
   }
 
   .legacy-popup {
