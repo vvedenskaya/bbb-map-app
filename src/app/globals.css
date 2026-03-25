@@ -471,6 +471,54 @@ a {
   transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
 }
 
+.legacy-pin-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.legacy-pin-hover-card {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 14px);
+  transform: translateX(-50%);
+  width: min(240px, 56vw);
+  background: rgba(255, 253, 245, 0.98);
+  border: 1px solid #d8d0bf;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(27, 24, 18, 0.28);
+  padding: 8px;
+  z-index: 8;
+  pointer-events: none;
+  display: grid;
+  gap: 6px;
+}
+
+.legacy-pin-hover-card::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 10px;
+  height: 10px;
+  background: rgba(255, 253, 245, 0.98);
+  border-right: 1px solid #d8d0bf;
+  border-bottom: 1px solid #d8d0bf;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.legacy-pin-hover-card > strong {
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
+
+.legacy-pin-hover-empty,
+.legacy-pin-hover-more {
+  display: block;
+  font-size: 0.66rem;
+  color: #5f584f;
+}
+
 .legacy-pin-service-icon {
   position: relative;
   z-index: 1;
@@ -1019,10 +1067,10 @@ a {
 
 .legacy-popup-mini-list {
   display: grid;
-  gap: 6px;
+  gap: 4px;
   list-style: none;
   margin: 0;
-  padding: 8px;
+  padding: 0;
 }
 
 .legacy-popup-mini-list li {
@@ -1037,6 +1085,12 @@ a {
 .legacy-popup-mini-list span {
   color: #6c665e;
   font-size: 11px;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .legacy-pin-hover-card {
+    display: none;
+  }
 }
 
 .legacy-popup-empty {

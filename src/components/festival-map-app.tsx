@@ -378,6 +378,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [mapZoom, setMapZoom] = useState(MAP_DEFAULT_ZOOM);
   const [timelineZoom, setTimelineZoom] = useState(TIMELINE_DEFAULT_ZOOM);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [hoveredVenueId, setHoveredVenueId] = useState<string | null>(null);
   const [allowOutOfBoundsNavigation, setAllowOutOfBoundsNavigation] = useState(false);
   const [geolocationStatus, setGeolocationStatus] = useState<
     "idle" | "requesting" | "ready" | "denied" | "unavailable" | "error"
@@ -385,6 +386,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const hasCenteredOnUserRef = useRef(false);
   const timelineScrollRef = useRef<HTMLDivElement | null>(null);
   const hasAutoScrolledTimelineRef = useRef(false);
+  const supportsHoverRef = useRef(false);
 
   const geolocationHint =
     geolocationStatus === "requesting"
@@ -727,6 +729,22 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const media = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const applySupport = () => {
+      supportsHoverRef.current = media.matches;
+      if (!media.matches) {
+        setHoveredVenueId(null);
+      }
+    };
+    applySupport();
+    media.addEventListener("change", applySupport);
+    return () => {
+      media.removeEventListener("change", applySupport);
+    };
+  }, []);
+
+  useEffect(() => {
     const timer = window.setInterval(() => {
       setNow(new Date());
     }, 60000);
@@ -760,6 +778,12 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     timelineScrollRef.current.scrollTo({ top: desiredTop, behavior: "smooth" });
     hasAutoScrolledTimelineRef.current = true;
   }, [isTimelineOpen, now, currentDayByNow, currentMinutesByNow, timelineDays, timelineStart, timelinePixelsPerMinute]);
+
+  useEffect(() => {
+    if (selectedVenueId) {
+      setHoveredVenueId(null);
+    }
+  }, [selectedVenueId]);
 
   return (
     <main className="legacy-app">
@@ -812,6 +836,13 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
             >
               {visibleMappableVenues.slice(0, 300).map((venue) => {
                 const serviceIcon = getServiceIcon(venue.serviceType);
+                const venueSchedulePreview = (eventsByVenueId.get(venue.id) ?? [])
+                  .filter((event) => !isUnscheduledEvent(event))
+                  .filter((event) => activeDayFilter.includes(event.day) && activeProjectTypes.includes(event.type))
+                  .filter((event) => showPastEvents || !now || !isPastEvent(event, now))
+                  .sort(sortScheduleEvents);
+                const previewItems = venueSchedulePreview.slice(0, 2);
+                const remainingCount = Math.max(venueSchedulePreview.length - previewItems.length, 0);
                 return (
                   <AdvancedMarker
                     key={venue.id}
@@ -829,23 +860,54 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                         </span>
                       </div>
                     ) : (
-                      <button
-                        className={`legacy-pin ${selectedVenueId === venue.id ? "is-selected" : ""} ${lastInteractedVenueId === venue.id ? "is-last-interacted" : ""}`}
-                        type="button"
-                        aria-label={venue.name}
-                        style={{ "--pin-color": venueColorById.get(venue.id) || venue.accent || "#8b5cf6" } as CSSProperties}
-                        onMouseDown={(event) => {
-                          event.preventDefault();
-                          event.stopPropagation();
+                      <div
+                        className="legacy-pin-wrap"
+                        onMouseEnter={() => {
+                          if (!supportsHoverRef.current || selectedVenueId) return;
+                          setHoveredVenueId(venue.id);
                         }}
-                        onClick={(event) => {
-                          event.preventDefault();
-                          event.stopPropagation();
-                          setSelectedVenueId(venue.id);
-                          setLastInteractedVenueId(venue.id);
-                          setSelectedEventId(null);
+                        onMouseLeave={() => {
+                          setHoveredVenueId((current) => (current === venue.id ? null : current));
                         }}
-                      />
+                      >
+                        <button
+                          className={`legacy-pin ${selectedVenueId === venue.id ? "is-selected" : ""} ${lastInteractedVenueId === venue.id ? "is-last-interacted" : ""}`}
+                          type="button"
+                          aria-label={venue.name}
+                          style={{ "--pin-color": venueColorById.get(venue.id) || venue.accent || "#8b5cf6" } as CSSProperties}
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                          }}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            setSelectedVenueId(venue.id);
+                            setLastInteractedVenueId(venue.id);
+                            setSelectedEventId(null);
+                          }}
+                        />
+                        {hoveredVenueId === venue.id ? (
+                          <div className="legacy-pin-hover-card" role="status" aria-live="polite">
+                            <strong>{venue.name}</strong>
+                            {previewItems.length > 0 ? (
+                              <ul className="legacy-popup-mini-list">
+                                {previewItems.map((event) => (
+                                  <li key={event.id}>
+                                    <strong>{event.title}</strong>
+                                    <span>{dayLabels[event.day]} | {event.startTime} - {event.endTime}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <span className="legacy-pin-hover-empty">No upcoming scheduled events</span>
+                            )}
+                            {remainingCount > 0 ? (
+                              <span className="legacy-pin-hover-more">+{remainingCount} more</span>
+                            ) : null}
+                          </div>
+                        ) : null}
+                      </div>
                     )}
                   </AdvancedMarker>
                 );
