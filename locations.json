@@ -197,8 +197,8 @@
     "Name": "Neptune",
     "Address": "Neptune",
     "Category": "Venue",
-    "Lat": 33.349543,
-    "Long": -115.731895
+    "Lat": 33.349540,
+    "Long": -115.733670    
   },
   {
     "Name": "No Shoes",
@@ -565,7 +565,7 @@
     "Long": -115.731389
   },
   {
-    "Name": "Westlandia Bar and Lounge",
+    "Name": "Westlandia Desert Oasis",
     "Address": "",
     "Category": "Art Installation",
     "Lat": 33.348581,
