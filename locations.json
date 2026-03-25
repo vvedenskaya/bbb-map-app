@@ -135,6 +135,7 @@
   },
   {
     "Name": "Foundation Foundation",
+    "Alias": "Foundation",
     "Address": "Indoor Biennale gallery/group exhibition venue (assigned by BBB), Bombay Beach, CA 92233",
     "Category": "Venue",
     "Lat": 33.3500821,
@@ -553,7 +554,16 @@
     "Address": "",
     "Category": "Art Installation",
     "Lat": 33.347361,
-    "Long": -115.733389
+    "Long": -115.733389,
+    "Artist Name": "Frauke Huber & Uwe H. Martin",
+    "Abridged Project Text": "Missing Link is a tall, vertical aquarium tube installed on the beach in Bombay Beach at the shore of the Salton Sea in Southern California. It is filled with fresh, clean water distilled from the Salton Sea. Missing Link is a testimony to the drying lake. And a summoning of what is needed to revive it. The permanent installation invites the public to reflect on what we value and how easily it is lost."
+  },
+  {
+    "Name": "Bombay North",
+    "Address": "",
+    "Category": "Venue",
+    "Lat": 33.35503355763313, 
+    "Long": -115.73334893263541
   },
   {
     "Name": "Mapping the Sacrifice Zone",

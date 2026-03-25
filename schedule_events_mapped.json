@@ -33,6 +33,7 @@
         "row": 49,
         "col": 5,
         "title": "The Magic Carpet Ride",
+        "location_name": "Love Buggin",
         "scheduled_time": "6-10 PM",
         "raw_text": "The Magic Carpet Ride 6-10 PM TBD AV Experience"
       },
@@ -578,7 +579,7 @@
       "category": "Hangs/Experiences",
       "location_hint": "TBD",
       "location_match": {
-        "location_name": "Temple to the Scientific Method",
+        "location_name": "Love Buggin",
         "location_category": "Venue",
         "lat": 33.35263116,
         "long": -115.7280142,
@@ -593,7 +594,7 @@
         "project_name": "Magic Carpet Ride",
         "project_type": "Object ",
         "artist_name": "Melanie Pincus",
-        "location_internal": null,
+        "location_internal": "Love Buggin",
         "status": "Confirmed",
         "score": 84.8,
         "confidence": "medium"
@@ -794,15 +795,15 @@
       "category": "Philosophy Conference",
       "location_hint": "Star Sight Site, Bombay North",
       "location_match": {
-        "location_name": "Bro need: Loss at the Salton Sea",
+        "location_name": "Star Sight Site",
         "location_category": "Art Installation",
-        "lat": 33.34777,
-        "long": -115.73263,
-        "score": 61.7,
-        "confidence": "medium",
-        "matched_on": "variant",
-        "matched_variant": "salton sea",
-        "method": "text_fuzzy"
+        "lat": 33.355204,
+        "long": -115.7238872,
+        "score": 88.0,
+        "confidence": "high",
+        "matched_on": "manual_override",
+        "matched_variant": "star sight site",
+        "method": "manual_override"
       },
       "airtable_match": {
         "airtable_id": "reclCtl6JYqRc3hVn",
@@ -857,7 +858,7 @@
       "category": "Hangs/Experiences",
       "location_hint": "BBAC",
       "location_match": {
-        "location_name": "Bro need: Loss at the Salton Sea",
+        "location_name": "BBAC",
         "location_category": "Art Installation",
         "lat": 33.34777,
         "long": -115.73263,
@@ -1613,7 +1614,7 @@
       "category": "Hangs/Experiences",
       "location_hint": "TBD",
       "location_match": {
-        "location_name": "Temple to the Scientific Method",
+        "location_name": "Love Buggin",
         "location_category": "Venue",
         "lat": 33.35263116,
         "long": -115.7280142,
@@ -1910,7 +1911,7 @@
       "category": "Hangs/Experiences",
       "location_hint": "Start Sight Site, Bombay North",
       "location_match": {
-        "location_name": "Bro need: Loss at the Salton Sea",
+        "location_name": "Bombay North",
         "location_category": "Art Installation",
         "lat": 33.34777,
         "long": -115.73263,
@@ -2574,7 +2575,7 @@
       "category": "Hangs/Experiences",
       "location_hint": "TBD",
       "location_match": {
-        "location_name": "Temple to the Scientific Method",
+        "location_name": "Love Buggin",
         "location_category": "Venue",
         "lat": 33.35263116,
         "long": -115.7280142,
@@ -2754,7 +2755,7 @@
       "category": "Hangs/Experiences",
       "location_hint": "BBAC",
       "location_match": {
-        "location_name": "Bro need: Loss at the Salton Sea",
+        "location_name": "BBAC",
         "location_category": "Art Installation",
         "lat": 33.34777,
         "long": -115.73263,
@@ -4067,7 +4068,7 @@
       "category": "Hangs/Experiences",
       "location_hint": "TBD",
       "location_match": {
-        "location_name": "Temple to the Scientific Method",
+        "location_name": "Love Buggin",
         "location_category": "Venue",
         "lat": 33.35263116,
         "long": -115.7280142,
@@ -4082,7 +4083,7 @@
         "project_name": "Magic Carpet Ride",
         "project_type": "Object ",
         "artist_name": "Melanie Pincus",
-        "location_internal": null,
+        "location_internal": "Love Buggin",
         "status": "Confirmed",
         "score": 84.5,
         "confidence": "medium"
@@ -4454,10 +4455,10 @@
       "category": "Hangs/Experiences",
       "location_hint": "Start Sight Site, Bombay North",
       "location_match": {
-        "location_name": "Bro need: Loss at the Salton Sea",
-        "location_category": "Art Installation",
-        "lat": 33.34777,
-        "long": -115.73263,
+        "location_name": "Bombay North",
+        "location_catego  ry": "Art Installation",
+        "lat": 33.35503355763313, 
+        "long": -115.73334893263541,
         "score": 72.3,
         "confidence": "high",
         "matched_on": "variant",

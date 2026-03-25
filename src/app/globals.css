@@ -979,6 +979,21 @@ a {
   color: #6f6a61;
 }
 
+.legacy-timeline-event-host {
+  font-weight: 700;
+  color: #3f372e !important;
+}
+
+.legacy-timeline-event-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+  color: #4d463d !important;
+}
+
 .legacy-mobile-timeline-fab {
   display: none;
 }

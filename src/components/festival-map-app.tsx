@@ -184,6 +184,15 @@ function getVisibleEventDescription(event: FestivalEvent): string {
   return description;
 }
 
+function isPlaceholderTimeLabel(value: string): boolean {
+  const normalized = (value || "").trim().toUpperCase();
+  return !normalized || normalized === "TBD";
+}
+
+function isUnscheduledEvent(event: FestivalEvent): boolean {
+  return isPlaceholderTimeLabel(event.startTime) && isPlaceholderTimeLabel(event.endTime);
+}
+
 function getDefaultActiveDays(events: FestivalEvent[]): FestivalDay[] {
   const available = Array.from(new Set(events.map((event) => event.day)));
   const sorted = DAY_DISPLAY_ORDER.filter((day) => available.includes(day));
@@ -447,6 +456,9 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
       if (venue?.serviceType) {
         return false;
       }
+      if (isUnscheduledEvent(event)) {
+        return false;
+      }
       const matchesDay = activeDayFilter.includes(event.day);
       const matchesProjectType = activeProjectTypes.includes(event.type);
 
@@ -463,15 +475,28 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     .filter((event) => showPastEvents || !now || !isPastEvent(event, now))
     .sort(sortScheduleEvents);
 
-  const selectedVenueSchedule = selectedVenue
+  const selectedVenueEvents = selectedVenue
     ? events
         .filter((event) => event.venueId === selectedVenue.id && activeDayFilter.includes(event.day) && event.type !== "services")
         .filter((event) => showPastEvents || !now || !isPastEvent(event, now))
         .sort(sortScheduleEvents)
     : [];
-  const selectedVenueDescription = selectedVenue
-    ? (selectedVenue.description || "").trim()
-    : "";
+  const selectedVenueScheduledEvents = selectedVenueEvents.filter((event) => !isUnscheduledEvent(event));
+  const selectedVenueUnscheduledEvents = selectedVenueEvents.filter((event) => isUnscheduledEvent(event));
+  const hasUnscheduledOnlyView = selectedVenueScheduledEvents.length === 0 && selectedVenueUnscheduledEvents.length > 0;
+  const selectedVenueDescription = (() => {
+    if (!selectedVenue) return "";
+    const venueDescription = (selectedVenue.description || "").trim();
+    const hasGenericLocationDescription = /^Mapped from locations\.json\b/i.test(venueDescription);
+    if (venueDescription && !hasGenericLocationDescription) {
+      return venueDescription;
+    }
+    const unscheduledFallback = selectedVenueUnscheduledEvents
+      .filter((event) => isUnscheduledEvent(event))
+      .map((event) => getVisibleEventDescription(event))
+      .find(Boolean);
+    return unscheduledFallback || venueDescription;
+  })();
   const visibleMappableVenues = visibleVenues.filter(
     (venue) => typeof venue.lat === "number" && typeof venue.lng === "number"
   );
@@ -873,7 +898,11 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                   <div>
                     <h3>{selectedVenue.name}</h3>
                     <p className="legacy-popup-subtitle">
-                      {selectedVenueSchedule.length} scheduled {selectedVenueSchedule.length === 1 ? "event" : "events"}
+                      {selectedVenueScheduledEvents.length > 0
+                        ? `${selectedVenueScheduledEvents.length} scheduled ${selectedVenueScheduledEvents.length === 1 ? "event" : "events"}`
+                        : selectedVenueUnscheduledEvents.length > 0
+                          ? "Installation details"
+                          : "0 scheduled events"}
                     </p>
                   </div>
                   <button
@@ -891,15 +920,15 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                   </button>
                 </div>
                 <div className="legacy-popup-content">
-                  {selectedVenueDescription ? (
+                  {selectedVenueDescription && !hasUnscheduledOnlyView ? (
                     <p className="legacy-popup-description">{selectedVenueDescription}</p>
                   ) : null}
-                  {selectedVenueSchedule.length > 0 ? (
+                  {selectedVenueScheduledEvents.length > 0 ? (
                     <>
                       <details className="legacy-popup-section is-schedule" open>
                         <summary className="legacy-popup-section-title">Schedule</summary>
                         <div className="legacy-popup-event-list">
-                          {selectedVenueSchedule.map((event) => {
+                          {selectedVenueScheduledEvents.map((event) => {
                             const visibleDescription = getVisibleEventDescription(event);
                             return (
                               <button
@@ -915,9 +944,11 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                                   >
                                     {eventTypeLabels[event.type]}
                                   </span>
-                                  <span className="legacy-popup-meta">
-                                    {dayLabels[event.day]} | {event.startTime} - {event.endTime}
-                                  </span>
+                                  {!isUnscheduledEvent(event) ? (
+                                    <span className="legacy-popup-meta">
+                                      {dayLabels[event.day]} | {event.startTime} - {event.endTime}
+                                    </span>
+                                  ) : null}
                                 </div>
                                 <strong>{event.title}</strong>
                                 <p>{event.host}</p>
@@ -934,6 +965,29 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                       </details>
 
                     </>
+                  ) : selectedVenueUnscheduledEvents.length > 0 ? (
+                    <div className="legacy-popup-event-list">
+                      {selectedVenueUnscheduledEvents.map((event) => {
+                        const visibleDescription = getVisibleEventDescription(event);
+                        return (
+                          <div key={event.id} className="legacy-popup-event">
+                            <div className="legacy-popup-event-head">
+                              <span
+                                className={`type-chip type-${event.type}`}
+                                style={{ backgroundColor: getProjectTypeColor(event.type) }}
+                              >
+                                {eventTypeLabels[event.type]}
+                              </span>
+                            </div>
+                            <strong>{event.title}</strong>
+                            <p>{event.host}</p>
+                            {visibleDescription ? (
+                              <p className="legacy-popup-description">{visibleDescription}</p>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
                   ) : (
                     <p className="legacy-popup-empty">No scheduled events for this venue.</p>
                   )}
@@ -1238,6 +1292,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                             const width = 100 / Math.max(block.groupColumns, 1);
                             const left = block.column * width;
                             const venue = venueById.get(block.event.venueId);
+                            const visibleDescription = getVisibleEventDescription(block.event);
                             return (
                               <button
                                 key={block.event.id}
@@ -1260,7 +1315,13 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                                   {block.event.startTime} - {block.event.endTime}
                                 </span>
                                 <strong>{block.event.title}</strong>
+                                {block.event.host && block.event.host !== "TBD" ? (
+                                  <small className="legacy-timeline-event-host">{block.event.host}</small>
+                                ) : null}
                                 <small>{venue?.name ?? "Unknown venue"}</small>
+                                {visibleDescription ? (
+                                  <small className="legacy-timeline-event-description">{visibleDescription}</small>
+                                ) : null}
                               </button>
                             );
                           })}
