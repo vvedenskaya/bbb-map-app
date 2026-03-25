@@ -467,7 +467,6 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
               height={banner1080.height}
             />
           </picture>
-          {dataSourceLabel ? <p className="legacy-banner-source">Data source: {dataSourceLabel}</p> : null}
         </div>
       </header>
 
