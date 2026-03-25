@@ -176,6 +176,34 @@ function getProjectTypeColor(type: EventType): string {
   return PROJECT_TYPE_COLORS[type] || "#8b5cf6";
 }
 
+function getVenueLabelProjectTypes(venue: Venue): EventType[] {
+  const types = new Set<EventType>();
+  if (venue.serviceType) types.add("services");
+
+  const normalizedLabel = (venue.label || "").toLowerCase();
+  if (normalizedLabel.includes("venue")) types.add("venue");
+  if (normalizedLabel.includes("service")) types.add("services");
+  if (normalizedLabel.includes("community") || normalizedLabel.includes("social gathering")) types.add("community");
+  if (normalizedLabel.includes("social")) types.add("social");
+  if (normalizedLabel.includes("food") || normalizedLabel.includes("beverage")) types.add("food");
+  if (normalizedLabel.includes("music")) types.add("music");
+  if (normalizedLabel.includes("performance")) types.add("performance");
+  if (normalizedLabel.includes("lecture") || normalizedLabel.includes("talk")) types.add("lecture");
+  if (normalizedLabel.includes("object")) types.add("object");
+  if (normalizedLabel.includes("installation")) types.add("installation");
+  if (
+    normalizedLabel.includes("immersive") ||
+    normalizedLabel.includes("facilitated experience") ||
+    normalizedLabel.includes("experience")
+  ) {
+    types.add("experience");
+  }
+  if (normalizedLabel.includes("film")) types.add("film");
+  if (normalizedLabel.includes("dj")) types.add("dj");
+
+  return [...types];
+}
+
 function sortScheduleEvents(a: FestivalEvent, b: FestivalEvent): number {
   const dayDelta = DAY_SORT_ORDER[a.day] - DAY_SORT_ORDER[b.day];
   if (dayDelta !== 0) return dayDelta;
@@ -400,6 +428,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
             : "";
 
   const selectedVenue = venues.find((venue) => venue.id === selectedVenueId) ?? null;
+  const selectedVenueLabelProjectTypes = selectedVenue ? getVenueLabelProjectTypes(selectedVenue) : [];
   const venueById = venues.reduce<globalThis.Map<string, Venue>>((acc, venue) => {
     acc.set(venue.id, venue);
     return acc;
@@ -438,11 +467,11 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
 
   const visibleVenues = venues.filter((venue) => {
     const venueEvents = eventsByVenueId.get(venue.id) ?? [];
-    const matchesProjectType = venue.serviceType
-      ? activeProjectTypes.includes("services")
-      : hasActiveProjectTypeFilter
-        ? venueEvents.some((event) => activeProjectTypes.includes(event.type))
-        : true;
+    const labelProjectTypes = getVenueLabelProjectTypes(venue);
+    const matchesProjectType = hasActiveProjectTypeFilter
+      ? labelProjectTypes.some((type) => activeProjectTypes.includes(type)) ||
+        venueEvents.some((event) => activeProjectTypes.includes(event.type))
+      : true;
 
     const matchesSearch = lowerQuery
       ? venue.name.toLowerCase().includes(lowerQuery) ||
@@ -1000,6 +1029,19 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                           ? "Installation details"
                           : "0 scheduled events"}
                     </p>
+                    {selectedVenueLabelProjectTypes.length > 0 ? (
+                      <div className="legacy-popup-type-tags">
+                        {selectedVenueLabelProjectTypes.map((type) => (
+                          <span
+                            key={`venue-type-${type}`}
+                            className={`type-chip type-${type}`}
+                            style={{ backgroundColor: getProjectTypeColor(type) }}
+                          >
+                            {eventTypeLabels[type]}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                   <button
                     type="button"
