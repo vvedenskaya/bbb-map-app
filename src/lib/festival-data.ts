@@ -161,6 +161,15 @@ function findMatchingLocation(locationName: string, byNormalizedName: Map<string
   return null;
 }
 
+function getAdminVenueLabel(projectType: FestivalEvent["type"]): string {
+  if (projectType === "services") return "Services";
+  if (projectType === "installation") return "Installation";
+  if (projectType === "object") return "Object";
+  if (projectType === "experience") return "Facilitated Experience";
+  if (projectType === "venue") return "Venue";
+  return "Venue";
+}
+
 export async function getFestivalData(): Promise<FestivalDataResult> {
   try {
     const [locationsRaw, airtableRaw] = await Promise.all([
@@ -400,24 +409,33 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
 
     const adminEntries = await readAdminEntries();
     for (const entry of adminEntries) {
+      const matchedAdminLocation = entry.locationInternal
+        ? findMatchingLocation(entry.locationInternal, byNormalizedName, allLocations)
+        : null;
+      const matchedAdminLat = matchedAdminLocation ? asNumber(matchedAdminLocation.Lat) : null;
+      const matchedAdminLng = matchedAdminLocation ? asNumber(matchedAdminLocation.Long) : null;
+      const hasMappedAdminLocation = matchedAdminLat !== null && matchedAdminLng !== null;
+      const resolvedLat = hasMappedAdminLocation ? matchedAdminLat ?? undefined : entry.lat;
+      const resolvedLng = hasMappedAdminLocation ? matchedAdminLng ?? undefined : entry.lng;
+      const resolvedHasLocation = hasMappedAdminLocation || entry.hasLocation;
       const venueKey = `admin:${normalizeText(entry.name)}:${entry.id}`;
       const venueId = ensureVenue({
         key: venueKey,
         name: entry.name,
-        lat: entry.lat,
-        lng: entry.lng,
-        hasLocation: entry.hasLocation,
-        locationInternalRaw: entry.name,
+        lat: resolvedLat,
+        lng: resolvedLng,
+        hasLocation: resolvedHasLocation,
+        locationInternalRaw: entry.locationInternal || entry.name,
       });
       const existingVenue = venuesById.get(venueId);
       if (existingVenue) {
-        existingVenue.label = entry.projectType === "services" ? "Services" : "Venue";
+        existingVenue.label = getAdminVenueLabel(entry.projectType);
         existingVenue.shortDescription = entry.artist ? `By ${entry.artist}` : "Manually added from admin dashboard";
         existingVenue.description = entry.abridgedProjectText || "No abridged text provided.";
         existingVenue.permanence = entry.permanence || undefined;
-        existingVenue.hasLocation = entry.hasLocation;
-        existingVenue.lat = entry.lat;
-        existingVenue.lng = entry.lng;
+        existingVenue.hasLocation = resolvedHasLocation;
+        existingVenue.lat = resolvedLat;
+        existingVenue.lng = resolvedLng;
         existingVenue.serviceType = entry.serviceType;
       }
 

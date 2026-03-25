@@ -239,6 +239,21 @@
       "lat": 33.348800186474676,
       "lng": -115.72578055727747,
       "hasLocation": true
+    },
+    {
+      "id": "admin-202a963e-1be7-4fc8-9601-e3c49d15a93f",
+      "name": "Soteria",
+      "artist": "Debra Berger",
+      "projectType": "installation",
+      "abridgedProjectText": "",
+      "day": "fri",
+      "startTime": "",
+      "endTime": "",
+      "hasSchedule": false,
+      "permanence": "",
+      "lat": 33.35255958752479,
+      "lng": -115.72861045220938,
+      "hasLocation": true
     }
   ]
 }

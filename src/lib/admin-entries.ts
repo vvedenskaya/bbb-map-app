@@ -72,6 +72,7 @@ function normalizeEntry(raw: unknown, index: number): AdminEntry | null {
     id: asString(obj.id) || `admin-${index + 1}`,
     name,
     artist: asString(obj.artist),
+    locationInternal: asString(obj.locationInternal ?? obj.location),
     projectType: projectType === "services" || serviceType ? "services" : projectType,
     serviceType,
     abridgedProjectText: asString(obj.abridgedProjectText),

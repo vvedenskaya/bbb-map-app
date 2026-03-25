@@ -5,12 +5,32 @@ import { useRouter } from "next/navigation";
 import { APIProvider, Map, AdvancedMarker, MapMouseEvent } from "@vis.gl/react-google-maps";
 import { AdminEntry, ServiceType } from "@/types/admin-entry";
 import { EventType, FestivalDay } from "@/types/festival";
+import { PredefinedLocation } from "@/lib/predefined-locations";
 
 type PinEditorProps = {
   initialData?: AdminEntry;
+  locationOptions?: PredefinedLocation[];
 };
 
-export function PinEditor({ initialData }: PinEditorProps) {
+function normalizeText(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[\u2019']/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\bthe\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function findLocationByName(input: string, options: PredefinedLocation[]): PredefinedLocation | null {
+  const normalized = normalizeText(input);
+  if (!normalized) return null;
+  const exact = options.find((option) => normalizeText(option.name) === normalized);
+  if (exact) return exact;
+  return null;
+}
+
+export function PinEditor({ initialData, locationOptions = [] }: PinEditorProps) {
   const projectTypeOptions: EventType[] = [
     "installation",
     "performance",
@@ -37,6 +57,7 @@ export function PinEditor({ initialData }: PinEditorProps) {
   const [formData, setFormData] = useState({
     name: initialData?.name ?? "",
     artist: initialData?.artist ?? "",
+    locationInternal: initialData?.locationInternal ?? "",
     projectType: initialData?.projectType ?? "installation",
     serviceType: initialData?.serviceType ?? "",
     abridgedProjectText: initialData?.abridgedProjectText ?? "",
@@ -46,6 +67,7 @@ export function PinEditor({ initialData }: PinEditorProps) {
     endTime: initialData?.endTime ?? "",
     permanence: initialData?.permanence || "",
   });
+  const matchedPredefinedLocation = findLocationByName(formData.locationInternal, locationOptions);
 
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     initialData && initialData.hasLocation && initialData.lat !== undefined && initialData.lng !== undefined
@@ -182,6 +204,7 @@ export function PinEditor({ initialData }: PinEditorProps) {
     const payloadEntry = {
       name: formData.name,
       artist: formData.artist,
+      locationInternal: formData.locationInternal,
       projectType: formData.projectType,
       serviceType:
         formData.projectType === "services"
@@ -253,6 +276,39 @@ export function PinEditor({ initialData }: PinEditorProps) {
           <div>
             <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: 500 }}>Artist / Host</label>
             <input type="text" value={formData.artist} onChange={e => setFormData(f => ({ ...f, artist: e.target.value }))} style={{ width: "100%", padding: "0.5rem", border: "1px solid #ccc", borderRadius: "4px" }} />
+          </div>
+        )}
+
+        {!isServicesBatchMode && (
+          <div>
+            <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: 500 }}>Location (Internal)</label>
+            <input
+              type="text"
+              list="predefined-locations"
+              value={formData.locationInternal}
+              onChange={(e) => {
+                const nextValue = e.target.value;
+                setFormData((f) => ({ ...f, locationInternal: nextValue }));
+                const matched = findLocationByName(nextValue, locationOptions);
+                if (matched) {
+                  setLocation({ lat: matched.lat, lng: matched.lng });
+                }
+              }}
+              placeholder="Choose or type a location from locations.json"
+              style={{ width: "100%", padding: "0.5rem", border: "1px solid #ccc", borderRadius: "4px" }}
+            />
+            <datalist id="predefined-locations">
+              {locationOptions.map((option) => (
+                <option key={`${option.name}:${option.lat}:${option.lng}`} value={option.name}>
+                  {option.category}
+                </option>
+              ))}
+            </datalist>
+            <p style={{ margin: "0.4rem 0 0", fontSize: "0.8rem", color: "#6b7280" }}>
+              {matchedPredefinedLocation
+                ? `Mapped to ${matchedPredefinedLocation.category}: ${matchedPredefinedLocation.lat.toFixed(5)}, ${matchedPredefinedLocation.lng.toFixed(5)}`
+                : "Selecting a predefined location auto-fills map coordinates."}
+            </p>
           </div>
         )}
 

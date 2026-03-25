@@ -1,5 +1,7 @@
 import { PinEditor } from "@/components/admin/pin-editor";
+import { readPredefinedLocations } from "@/lib/predefined-locations";
 
-export default function NewPinPage() {
-  return <PinEditor />;
+export default async function NewPinPage() {
+  const locationOptions = await readPredefinedLocations();
+  return <PinEditor locationOptions={locationOptions} />;
 }

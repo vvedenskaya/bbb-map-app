@@ -29,6 +29,7 @@ export default async function AdminDashboardPage() {
             <tr style={{ backgroundColor: "#f9fafb", borderBottom: "1px solid #f3f4f6" }}>
               <th style={{ padding: "1rem", fontWeight: 500, color: "#6b7280" }}>Name</th>
               <th style={{ padding: "1rem", fontWeight: 500, color: "#6b7280" }}>Type</th>
+              <th style={{ padding: "1rem", fontWeight: 500, color: "#6b7280" }}>Location (Internal)</th>
               <th style={{ padding: "1rem", fontWeight: 500, color: "#6b7280" }}>Coordinates</th>
               <th style={{ padding: "1rem", fontWeight: 500, color: "#6b7280", textAlign: "right" }}>Actions</th>
             </tr>
@@ -51,6 +52,9 @@ export default async function AdminDashboardPage() {
                       ? `Services: ${entry.serviceType}`
                       : entry.projectType}
                   </span>
+                </td>
+                <td style={{ padding: "1rem", color: "#374151" }}>
+                  {entry.locationInternal || "—"}
                 </td>
                 <td style={{ padding: "1rem", color: "#6b7280", fontFamily: "monospace" }}>
                   {entry.hasLocation && entry.lat !== undefined && entry.lng !== undefined 

@@ -6,6 +6,7 @@ export type AdminEntry = {
   id: string;
   name: string;
   artist: string;
+  locationInternal: string;
   projectType: EventType;
   serviceType?: ServiceType;
   abridgedProjectText: string;
