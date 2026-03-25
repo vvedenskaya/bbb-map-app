@@ -7,6 +7,18 @@
     "Long": -115.733349
   },
   {
+    "Name": "Medics",
+    "Category": "Services",
+    "Artist Website": "",
+    "Lat": 33.348973,
+    "Long": -115.725432
+
+  },
+
+
+
+
+  {
     "Name": "San Litio (Saint Lithium)",
     "Address": "Corner of First Ave and Isle of Palms, on the way to Mars College",
     "Category": "Art Installation",
@@ -189,7 +201,7 @@
     "Long": -115.731895
   },
   {
-    "Name": "Dry West \u2014 Moonscape",
+    "Name": "No Shoes",
     "Address": "",
     "Category": "Venue",
     "Lat": 33.34911,
