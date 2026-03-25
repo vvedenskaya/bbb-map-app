@@ -1,4 +1,4 @@
-export type FestivalDay = "fri" | "sat" | "sun";
+export type FestivalDay = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
 
 export type EventType =
   | "music"
@@ -48,4 +48,9 @@ export type FestivalEvent = {
   hasLocation?: boolean;
   permanence?: string;
   serviceType?: "garbage" | "water" | "toilets" | "medic";
+  source?: "schedule" | "airtable" | "admin";
+  scheduleDate?: string;
+  scheduleCategory?: string;
+  airtableRecordId?: string;
+  airtableProjectName?: string;
 };

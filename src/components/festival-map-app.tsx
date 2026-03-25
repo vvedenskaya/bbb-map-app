@@ -6,9 +6,18 @@ import { dayLabels, eventTypeLabels } from "@/data/festival";
 import { EventType, FestivalDay, FestivalEvent, Venue } from "@/types/festival";
 import banner1080 from "../../assets/banner/biennale-banner1080.jpg";
 import banner2560 from "../../assets/banner/biennale-banner2560.jpg";
+import { createPortal } from "react-dom";
 
-const ALL_DAYS: FestivalDay[] = ["fri", "sat", "sun"];
-const DAY_SORT_ORDER: Record<FestivalDay, number> = { fri: 0, sat: 1, sun: 2 };
+const DAY_DISPLAY_ORDER: FestivalDay[] = ["wed", "thu", "fri", "sat", "sun", "mon", "tue"];
+const DAY_SORT_ORDER: Record<FestivalDay, number> = {
+  wed: 0,
+  thu: 1,
+  fri: 2,
+  sat: 3,
+  sun: 4,
+  mon: 5,
+  tue: 6,
+};
 const MAP_CENTER = { lat: 33.351508, lng: -115.729625 };
 const MAP_DEFAULT_ZOOM = 16.9;
 const MAP_FOCUS_ZOOM = 17.8;
@@ -175,6 +184,154 @@ function getVisibleEventDescription(event: FestivalEvent): string {
   return description;
 }
 
+function getDefaultActiveDays(events: FestivalEvent[]): FestivalDay[] {
+  const available = Array.from(new Set(events.map((event) => event.day)));
+  const sorted = DAY_DISPLAY_ORDER.filter((day) => available.includes(day));
+  return sorted.length > 0 ? sorted : ["fri", "sat", "sun"];
+}
+
+function parseTimeToMinutes(raw: string): number | null {
+  const value = raw.trim().toUpperCase();
+  const match = value.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/);
+  if (!match) return null;
+  let hour = Number(match[1]);
+  const minute = Number(match[2] ?? "0");
+  if (Number.isNaN(hour) || Number.isNaN(minute)) return null;
+  if (hour === 12) hour = 0;
+  if (match[3] === "PM") hour += 12;
+  return hour * 60 + minute;
+}
+
+function parseEventDateTime(scheduleDate: string | undefined, timeLabel: string): Date | null {
+  if (!scheduleDate) return null;
+  const minutes = parseTimeToMinutes(timeLabel);
+  if (minutes === null) return null;
+  const date = new Date(`${scheduleDate}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return null;
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  date.setHours(hours, mins, 0, 0);
+  return date;
+}
+
+function isPastEvent(event: FestivalEvent, now: Date): boolean {
+  const end = parseEventDateTime(event.scheduleDate, event.endTime);
+  if (end) return end.getTime() < now.getTime();
+  const start = parseEventDateTime(event.scheduleDate, event.startTime);
+  if (!start) return false;
+  const inferredEnd = new Date(start.getTime() + 60 * 60 * 1000);
+  return inferredEnd.getTime() < now.getTime();
+}
+
+type TimelineEventBlock = {
+  event: FestivalEvent;
+  start: number;
+  end: number;
+  column: number;
+  groupColumns: number;
+};
+
+function getEventMinuteRange(event: FestivalEvent): { start: number; end: number } | null {
+  const start = parseTimeToMinutes(event.startTime);
+  if (start === null) return null;
+  const parsedEnd = parseTimeToMinutes(event.endTime);
+  const fallbackEnd = start + 60;
+  let end = parsedEnd ?? fallbackEnd;
+  if (end <= start) end += 24 * 60;
+  return { start, end };
+}
+
+function formatMinutesLabel(totalMinutes: number): string {
+  const minutesInDay = ((totalMinutes % (24 * 60)) + 24 * 60) % (24 * 60);
+  const hours = Math.floor(minutesInDay / 60);
+  const mins = minutesInDay % 60;
+  const suffix = hours >= 12 ? "PM" : "AM";
+  const displayHour = hours % 12 === 0 ? 12 : hours % 12;
+  return mins === 0 ? `${displayHour} ${suffix}` : `${displayHour}:${String(mins).padStart(2, "0")} ${suffix}`;
+}
+
+function buildTimelineLayout(events: FestivalEvent[]): { blocks: TimelineEventBlock[]; columns: number } {
+  const ranged = events
+    .map((event) => {
+      const range = getEventMinuteRange(event);
+      return range ? { event, ...range } : null;
+    })
+    .filter((entry): entry is { event: FestivalEvent; start: number; end: number } => entry !== null)
+    .sort((a, b) => a.start - b.start || a.end - b.end);
+
+  const active: Array<{ end: number; column: number }> = [];
+  const blocks: TimelineEventBlock[] = [];
+  let maxColumns = 1;
+  let groupBlockIndexes: number[] = [];
+  let groupMaxColumns = 1;
+
+  for (const item of ranged) {
+    for (let i = active.length - 1; i >= 0; i -= 1) {
+      if (active[i].end <= item.start) {
+        active.splice(i, 1);
+      }
+    }
+
+    if (active.length === 0 && groupBlockIndexes.length > 0) {
+      groupBlockIndexes.forEach((index) => {
+        blocks[index].groupColumns = groupMaxColumns;
+      });
+      groupBlockIndexes = [];
+      groupMaxColumns = 1;
+    }
+
+    const usedColumns = new Set(active.map((entry) => entry.column));
+    let column = 0;
+    while (usedColumns.has(column)) column += 1;
+
+    active.push({ end: item.end, column });
+    const concurrentColumns = Math.max(...active.map((entry) => entry.column), 0) + 1;
+    groupMaxColumns = Math.max(groupMaxColumns, concurrentColumns);
+    const blockIndex = blocks.push({
+      event: item.event,
+      start: item.start,
+      end: item.end,
+      column,
+      groupColumns: 1,
+    }) - 1;
+    groupBlockIndexes.push(blockIndex);
+
+    maxColumns = Math.max(maxColumns, concurrentColumns);
+  }
+
+  if (groupBlockIndexes.length > 0) {
+    groupBlockIndexes.forEach((index) => {
+      blocks[index].groupColumns = groupMaxColumns;
+    });
+  }
+
+  return { blocks, columns: maxColumns };
+}
+
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const normalized = hex.trim().replace("#", "");
+  const full = normalized.length === 3
+    ? normalized.split("").map((char) => `${char}${char}`).join("")
+    : normalized;
+  if (!/^[0-9a-fA-F]{6}$/.test(full)) return null;
+  const value = Number.parseInt(full, 16);
+  return {
+    r: (value >> 16) & 255,
+    g: (value >> 8) & 255,
+    b: value & 255,
+  };
+}
+
+function getTimelineFillColor(type: EventType): string {
+  const rgb = hexToRgb(getProjectTypeColor(type));
+  if (!rgb) return "#f3efe6";
+  const mix = 0.72;
+  const r = Math.round(255 - (255 - rgb.r) * (1 - mix));
+  const g = Math.round(255 - (255 - rgb.g) * (1 - mix));
+  const b = Math.round(255 - (255 - rgb.b) * (1 - mix));
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 type FestivalMapAppProps = {
   venues: Venue[];
   events: FestivalEvent[];
@@ -190,8 +347,13 @@ type FestivalMapAppProps = {
 export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: FestivalMapAppProps) {
   const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
   const [lastInteractedVenueId, setLastInteractedVenueId] = useState<string | null>(null);
-  const [activeDays, setActiveDays] = useState<FestivalDay[]>(ALL_DAYS);
+  const [activeDays, setActiveDays] = useState<FestivalDay[]>(() => getDefaultActiveDays(events));
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [listView, setListView] = useState<"venues" | "schedule">("schedule");
+  const [isTimelineOpen, setIsTimelineOpen] = useState(false);
+  const [showPastEvents, setShowPastEvents] = useState(false);
+  const [now, setNow] = useState<Date | null>(null);
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [activeProjectTypes, setActiveProjectTypes] = useState<EventType[]>(ALL_PROJECT_TYPES);
   const [isProjectTypeMenuOpen, setIsProjectTypeMenuOpen] = useState(false);
   const [mapType, setMapType] = useState<"satellite" | "roadmap">("satellite");
@@ -204,6 +366,8 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     "idle" | "requesting" | "ready" | "denied" | "unavailable" | "error"
   >("idle");
   const hasCenteredOnUserRef = useRef(false);
+  const timelineScrollRef = useRef<HTMLDivElement | null>(null);
+  const hasAutoScrolledTimelineRef = useRef(false);
 
   const geolocationHint =
     geolocationStatus === "requesting"
@@ -221,6 +385,9 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     acc.set(venue.id, venue);
     return acc;
   }, new globalThis.Map());
+  const availableDays = DAY_DISPLAY_ORDER.filter((day) => events.some((event) => event.day === day));
+  const effectiveActiveDays = activeDays.filter((day) => availableDays.includes(day));
+  const activeDayFilter = effectiveActiveDays.length > 0 ? effectiveActiveDays : availableDays;
 
   const lowerQuery = searchQuery.toLowerCase();
   const eventsByVenueId = events.reduce<globalThis.Map<string, FestivalEvent[]>>((acc, event) => {
@@ -261,7 +428,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     const matchesSearch = lowerQuery
       ? venue.name.toLowerCase().includes(lowerQuery) ||
         venueEvents.some((event) => {
-          if (!activeDays.includes(event.day) || !activeProjectTypes.includes(event.type)) {
+          if (!activeDayFilter.includes(event.day) || !activeProjectTypes.includes(event.type)) {
             return false;
           }
           return (
@@ -280,7 +447,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
       if (venue?.serviceType) {
         return false;
       }
-      const matchesDay = activeDays.includes(event.day);
+      const matchesDay = activeDayFilter.includes(event.day);
       const matchesProjectType = activeProjectTypes.includes(event.type);
 
       const matchesSearch = lowerQuery
@@ -292,33 +459,14 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     })
     .sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""));
 
-  const eventsByCategory = visibleEvents.reduce<globalThis.Map<string, FestivalEvent[]>>((acc, event) => {
-    const venue = venueById.get(event.venueId);
-    const category = venue ? getVenueCategoryKey(venue) : VENUE_KEY;
-    const existing = acc.get(category);
-    if (existing) {
-      existing.push(event);
-    } else {
-      acc.set(category, [event]);
-    }
-    return acc;
-  }, new globalThis.Map());
-
-  const sortedEventGroups = PIN_CATEGORY_ORDER.map((category) => ({
-    category,
-    categoryLabel: getCategoryDisplayLabel(category),
-    events: [...(eventsByCategory.get(category) ?? [])].sort((a, b) => {
-        const timeDelta = (a.startTime || "").localeCompare(b.startTime || "");
-        if (timeDelta !== 0) return timeDelta;
-        return a.title.localeCompare(b.title);
-      }),
-  }));
-  const visibleCategorizedEventsCount = sortedEventGroups
-    .reduce((sum, group) => sum + group.events.length, 0);
+  const scheduleVisibleEvents = visibleEvents
+    .filter((event) => showPastEvents || !now || !isPastEvent(event, now))
+    .sort(sortScheduleEvents);
 
   const selectedVenueSchedule = selectedVenue
     ? events
-        .filter((event) => event.venueId === selectedVenue.id && activeDays.includes(event.day) && event.type !== "services")
+        .filter((event) => event.venueId === selectedVenue.id && activeDayFilter.includes(event.day) && event.type !== "services")
+        .filter((event) => showPastEvents || !now || !isPastEvent(event, now))
         .sort(sortScheduleEvents)
     : [];
   const selectedVenueDescription = selectedVenue
@@ -348,6 +496,76 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   }));
   const visibleCategorizedVenuesCount = sortedVenueGroups
     .reduce((sum, group) => sum + group.venues.length, 0);
+
+  const scheduleByDay = DAY_DISPLAY_ORDER.map((day) => {
+    const dayEvents = scheduleVisibleEvents.filter((event) => event.day === day);
+    const bySlot = dayEvents.reduce<globalThis.Map<string, FestivalEvent[]>>((acc, event) => {
+      const key = `${event.startTime}__${event.endTime}`;
+      const existing = acc.get(key);
+      if (existing) {
+        existing.push(event);
+      } else {
+        acc.set(key, [event]);
+      }
+      return acc;
+    }, new globalThis.Map());
+
+    const slots = Array.from(bySlot.entries())
+      .map(([key, items]) => {
+        const [startTime, endTime] = key.split("__");
+        return {
+          key,
+          startTime,
+          endTime,
+          sortValue: parseTimeToMinutes(startTime) ?? Number.MAX_SAFE_INTEGER,
+          events: items.sort((a, b) => a.title.localeCompare(b.title)),
+        };
+      })
+      .sort((a, b) => a.sortValue - b.sortValue || a.startTime.localeCompare(b.startTime));
+
+    return {
+      day,
+      label: dayLabels[day],
+      slots,
+      count: dayEvents.length,
+    };
+  }).filter((entry) => entry.count > 0);
+
+  const timelineDays = scheduleByDay.map((entry) => entry.day);
+  const timelineLayoutsByDay = new globalThis.Map<FestivalDay, { blocks: TimelineEventBlock[]; columns: number }>();
+  for (const day of timelineDays) {
+    timelineLayoutsByDay.set(
+      day,
+      buildTimelineLayout(scheduleVisibleEvents.filter((event) => event.day === day))
+    );
+  }
+  const timelineRanges = scheduleVisibleEvents
+    .map((event) => getEventMinuteRange(event))
+    .filter((entry): entry is { start: number; end: number } => entry !== null);
+  const timelineStart = timelineRanges.length
+    ? Math.max(0, Math.floor(Math.min(...timelineRanges.map((entry) => entry.start)) / 60) * 60)
+    : 8 * 60;
+  const timelineEnd = timelineRanges.length
+    ? Math.min(26 * 60, Math.ceil(Math.max(...timelineRanges.map((entry) => entry.end)) / 60) * 60)
+    : 24 * 60;
+  const timelineHourMarks = Array.from(
+    { length: Math.max(Math.floor((timelineEnd - timelineStart) / 60) + 1, 1) },
+    (_, idx) => timelineStart + idx * 60
+  );
+  const timelinePixelsPerMinute = 1.2;
+  const timelineHeight = Math.max((timelineEnd - timelineStart) * timelinePixelsPerMinute, 360);
+  const currentDayByNow: FestivalDay | null = (() => {
+    if (!now) return null;
+    const day = now.getDay();
+    if (day === 0) return "sun";
+    if (day === 1) return "mon";
+    if (day === 2) return "tue";
+    if (day === 3) return "wed";
+    if (day === 4) return "thu";
+    if (day === 5) return "fri";
+    return "sat";
+  })();
+  const currentMinutesByNow = now ? now.getHours() * 60 + now.getMinutes() : null;
 
   function toggleDay(day: FestivalDay) {
     setActiveDays((current) =>
@@ -409,12 +627,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   }
 
   useEffect(() => {
-    if (!navigator.geolocation) {
-      setGeolocationStatus("unavailable");
-      return;
-    }
-
-    setGeolocationStatus("requesting");
+    if (!navigator.geolocation) return;
 
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
@@ -453,6 +666,41 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
       navigator.geolocation.clearWatch(watchId);
     };
   }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setNow(new Date());
+    }, 60000);
+    const kickoff = window.setTimeout(() => {
+      setNow(new Date());
+    }, 0);
+    return () => {
+      window.clearInterval(timer);
+      window.clearTimeout(kickoff);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isTimelineOpen) {
+      hasAutoScrolledTimelineRef.current = false;
+      return;
+    }
+    if (!timelineScrollRef.current || !now || hasAutoScrolledTimelineRef.current || !currentDayByNow) return;
+    if (!timelineDays.includes(currentDayByNow)) return;
+    if (currentMinutesByNow === null) return;
+
+    const section = timelineScrollRef.current.querySelector<HTMLElement>(
+      `[data-timeline-day="${currentDayByNow}"]`
+    );
+    if (!section) return;
+
+    const lineY = (currentMinutesByNow - timelineStart) * timelinePixelsPerMinute;
+    const sectionTop = section.offsetTop;
+    const toolbarOffset = 120;
+    const desiredTop = Math.max(sectionTop + lineY - toolbarOffset, 0);
+    timelineScrollRef.current.scrollTo({ top: desiredTop, behavior: "smooth" });
+    hasAutoScrolledTimelineRef.current = true;
+  }, [isTimelineOpen, now, currentDayByNow, currentMinutesByNow, timelineDays, timelineStart, timelinePixelsPerMinute]);
 
   return (
     <main className="legacy-app">
@@ -654,7 +902,12 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                           {selectedVenueSchedule.map((event) => {
                             const visibleDescription = getVisibleEventDescription(event);
                             return (
-                              <article key={event.id} className="legacy-popup-event">
+                              <button
+                                key={event.id}
+                                type="button"
+                                className="legacy-popup-event legacy-popup-event-button"
+                                onClick={() => focusEvent(event)}
+                              >
                                 <div className="legacy-popup-event-head">
                                   <span
                                     className={`type-chip type-${event.type}`}
@@ -668,10 +921,13 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                                 </div>
                                 <strong>{event.title}</strong>
                                 <p>{event.host}</p>
+                                {event.airtableRecordId ? (
+                                  <p className="legacy-popup-reconciled">Matched Airtable event</p>
+                                ) : null}
                                 {visibleDescription ? (
                                   <p className="legacy-popup-description">{visibleDescription}</p>
                                 ) : null}
-                              </article>
+                              </button>
                             );
                           })}
                         </div>
@@ -757,95 +1013,145 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                 ) : null}
               </div>
             </div>
-            <div className="legacy-checkbox-row">
-              {ALL_DAYS.map((day) => (
-                <label key={day} className="legacy-filter-option">
-                  <input
-                    type="checkbox"
-                    checked={activeDays.includes(day)}
-                    onChange={() => toggleDay(day)}
-                  />
-                  <span>{dayLabels[day]}</span>
-                </label>
-              ))}
+            <button
+              type="button"
+              className="legacy-chip legacy-mobile-filters-toggle"
+              onClick={() => setIsMobileFiltersOpen((current) => !current)}
+            >
+              {isMobileFiltersOpen ? "Hide filters" : "Show filters"}
+            </button>
+            <div className={`legacy-mobile-filter-body ${isMobileFiltersOpen ? "is-open" : ""}`}>
+              <div className="legacy-checkbox-row">
+                {availableDays.map((day) => (
+                  <label key={day} className="legacy-filter-option">
+                    <input
+                      type="checkbox"
+                      checked={activeDays.includes(day)}
+                      onChange={() => toggleDay(day)}
+                    />
+                    <span>{dayLabels[day]}</span>
+                  </label>
+                ))}
+              </div>
+              <label className="legacy-filter-option legacy-filter-toggle">
+                <input
+                  type="checkbox"
+                  checked={showPastEvents}
+                  onChange={() => setShowPastEvents((current) => !current)}
+                />
+                <span>Show past events</span>
+              </label>
+              <div className="legacy-control-row">
+                <button
+                  type="button"
+                  className={`legacy-chip ${listView === "schedule" ? "active" : ""}`}
+                  onClick={() => setListView("schedule")}
+                >
+                  Schedule
+                </button>
+                <button
+                  type="button"
+                  className={`legacy-chip ${listView === "venues" ? "active" : ""}`}
+                  onClick={() => setListView("venues")}
+                >
+                  Venues
+                </button>
+                <button
+                  type="button"
+                  className={`legacy-chip ${isTimelineOpen ? "active" : ""}`}
+                  onClick={() => setIsTimelineOpen(true)}
+                >
+                  Fullscreen timeline
+                </button>
+              </div>
             </div>
           </section>
 
-          <section className="legacy-list-block">
-            <div className="legacy-list-title">
-              <h2>{selectedVenue ? selectedVenue.name : "Venues"}</h2>
-              <span>{visibleCategorizedVenuesCount}</span>
-            </div>
-            <div className="legacy-venue-list">
-              {sortedVenueGroups.map((group) => (
-                <div key={group.category} className="legacy-venue-group">
-                  <div className="legacy-venue-group-header">
-                    <span>{group.categoryLabel}</span>
-                    <span>{group.venues.length}</span>
-                  </div>
-                  {group.venues.map((venue) => (
-                    <button
-                      key={venue.id}
-                      className={`legacy-venue-item ${selectedVenueId === venue.id ? "active" : ""}`}
-                      type="button"
-                      onClick={() => focusVenue(venue)}
-                    >
-                      <span
-                        className="legacy-venue-dot"
-                        style={{ "--pin-color": venueColorById.get(venue.id) || venue.accent || "#8b5cf6" } as CSSProperties}
-                      />
-                      <span>{getServiceIcon(venue.serviceType) ? `${getServiceIcon(venue.serviceType)} ` : ""}{venue.name}</span>
-                    </button>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="legacy-list-block">
-            <div className="legacy-list-title">
-              <h2>Schedule</h2>
-              <span>{visibleCategorizedEventsCount}</span>
-            </div>
-
-            <div className="legacy-event-list">
-              {sortedEventGroups.map((group) => (
-                <div key={group.category} className="legacy-venue-group">
-                  <div className="legacy-venue-group-header">
-                    <span>{group.categoryLabel}</span>
-                    <span>{group.events.length}</span>
-                  </div>
-                  {group.events.map((event) => {
-                    const venue = venueById.get(event.venueId);
-                    const visibleDescription = getVisibleEventDescription(event);
-                    return (
+          {listView === "venues" ? (
+            <section className="legacy-list-block">
+              <div className="legacy-list-title">
+                <h2>{selectedVenue ? selectedVenue.name : "Venues"}</h2>
+                <span>{visibleCategorizedVenuesCount}</span>
+              </div>
+              <div className="legacy-venue-list">
+                {sortedVenueGroups.map((group) => (
+                  <div key={group.category} className="legacy-venue-group">
+                    <div className="legacy-venue-group-header">
+                      <span>{group.categoryLabel}</span>
+                      <span>{group.venues.length}</span>
+                    </div>
+                    {group.venues.map((venue) => (
                       <button
-                        key={event.id}
-                        className={`legacy-event-item ${selectedEventId === event.id ? "active" : ""}`}
+                        key={venue.id}
+                        className={`legacy-venue-item ${selectedVenueId === venue.id ? "active" : ""}`}
                         type="button"
-                        onClick={() => focusEvent(event)}
+                        onClick={() => focusVenue(venue)}
                       >
                         <span
-                          className={`type-chip type-${event.type}`}
-                          style={{ backgroundColor: getProjectTypeColor(event.type) }}
-                        >
-                          {eventTypeLabels[event.type]}
-                        </span>
-                        <strong>{event.title}</strong>
-                        <small>
-                          {dayLabels[event.day]} | {event.startTime} - {event.endTime}
-                        </small>
-                        <small>{venue?.name ?? "Unknown venue"}</small>
-                        {visibleDescription ? (
-                          <small className="legacy-event-description">{visibleDescription}</small>
-                        ) : null}
+                          className="legacy-venue-dot"
+                          style={{ "--pin-color": venueColorById.get(venue.id) || venue.accent || "#8b5cf6" } as CSSProperties}
+                        />
+                        <span>{getServiceIcon(venue.serviceType) ? `${getServiceIcon(venue.serviceType)} ` : ""}{venue.name}</span>
                       </button>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-          </section>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : (
+            <section className="legacy-list-block">
+              <div className="legacy-list-title">
+                <h2>Schedule</h2>
+                <span>{scheduleVisibleEvents.length}</span>
+              </div>
+
+              <div className="legacy-event-list">
+                {scheduleByDay.map((dayGroup) => (
+                  <div key={dayGroup.day} className="legacy-venue-group">
+                    <div className="legacy-venue-group-header">
+                      <span>{dayGroup.label}</span>
+                      <span>{dayGroup.count}</span>
+                    </div>
+                    {dayGroup.slots.map((slot) => (
+                      <div key={slot.key} className="legacy-time-slot">
+                        <div className="legacy-time-slot-header">
+                          <strong>{slot.startTime} - {slot.endTime}</strong>
+                          <span>{slot.events.length}</span>
+                        </div>
+                        <div className="legacy-time-slot-events">
+                          {slot.events.map((event) => {
+                            const venue = venueById.get(event.venueId);
+                            const visibleDescription = getVisibleEventDescription(event);
+                            return (
+                              <button
+                                key={event.id}
+                                className={`legacy-event-item ${selectedEventId === event.id ? "active" : ""}`}
+                                type="button"
+                                onClick={() => focusEvent(event)}
+                              >
+                                <span
+                                  className={`type-chip type-${event.type}`}
+                                  style={{ backgroundColor: getProjectTypeColor(event.type) }}
+                                >
+                                  {eventTypeLabels[event.type]}
+                                </span>
+                                <strong>{event.title}</strong>
+                                <small>{venue?.name ?? "Unknown venue"}</small>
+                                {event.airtableRecordId ? <small className="legacy-event-reconciled">Matched Airtable event</small> : null}
+                                {visibleDescription ? (
+                                  <small className="legacy-event-description">{visibleDescription}</small>
+                                ) : null}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {debug ? (
             <details className="legacy-debug">
@@ -862,6 +1168,121 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
           ) : null}
         </aside>
       </div>
+
+      {isTimelineOpen && typeof document !== "undefined" ? createPortal((
+        <div className="legacy-timeline-overlay" role="dialog" aria-modal="true" aria-label="Fullscreen schedule timeline">
+          <div className="legacy-timeline-shell">
+            <div className="legacy-timeline-toolbar">
+              <div>
+                <strong>Schedule Timeline</strong>
+                <p>Simultaneous events shown side-by-side by time block.</p>
+              </div>
+              <button
+                type="button"
+                className="legacy-chip"
+                onClick={() => setIsTimelineOpen(false)}
+              >
+                Close
+              </button>
+            </div>
+            <div className="legacy-timeline-grid-wrap" ref={timelineScrollRef}>
+              {timelineDays.length === 0 ? (
+                <p className="legacy-popup-empty">No events available for timeline with current filters.</p>
+              ) : (
+                <div className="legacy-timeline-stack">
+                {timelineDays.map((day) => {
+                  const layout = timelineLayoutsByDay.get(day);
+                  if (!layout) return null;
+                  const showNowLine =
+                    day === currentDayByNow &&
+                    currentMinutesByNow !== null &&
+                    currentMinutesByNow >= timelineStart &&
+                    currentMinutesByNow <= timelineEnd;
+                  const nowLineTop = showNowLine
+                    ? (currentMinutesByNow - timelineStart) * timelinePixelsPerMinute
+                    : 0;
+                  return (
+                    <section key={day} className="legacy-timeline-day-section" data-timeline-day={day}>
+                      <div className="legacy-timeline-day-section-head">
+                        <strong>{dayLabels[day]}</strong>
+                        <span>{layout.blocks.length} events</span>
+                      </div>
+                      <div className="legacy-timeline-day-grid">
+                        <div className="legacy-timeline-time-col" style={{ height: `${timelineHeight}px` }}>
+                          {timelineHourMarks.map((minute) => (
+                            <div
+                              key={`${day}-time-${minute}`}
+                              className="legacy-timeline-time-mark"
+                              style={{ top: `${(minute - timelineStart) * timelinePixelsPerMinute}px` }}
+                            >
+                              {formatMinutesLabel(minute)}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="legacy-timeline-day-col" style={{ height: `${timelineHeight}px` }}>
+                          {timelineHourMarks.map((minute) => (
+                            <div
+                              key={`${day}-${minute}`}
+                              className="legacy-timeline-hour-line"
+                              style={{ top: `${(minute - timelineStart) * timelinePixelsPerMinute}px` }}
+                            />
+                          ))}
+                          {showNowLine ? (
+                            <div className="legacy-timeline-now-line" style={{ top: `${nowLineTop}px` }}>
+                              <span>Now</span>
+                            </div>
+                          ) : null}
+                          {layout.blocks.map((block) => {
+                            const top = (block.start - timelineStart) * timelinePixelsPerMinute;
+                            const height = Math.max((block.end - block.start) * timelinePixelsPerMinute, 26);
+                            const width = 100 / Math.max(block.groupColumns, 1);
+                            const left = block.column * width;
+                            const venue = venueById.get(block.event.venueId);
+                            return (
+                              <button
+                                key={block.event.id}
+                                type="button"
+                                className={`legacy-timeline-event ${selectedEventId === block.event.id ? "active" : ""}`}
+                                style={{
+                                  top: `${top}px`,
+                                  height: `${height}px`,
+                                  width: `calc(${width}% - 6px)`,
+                                  left: `calc(${left}% + 3px)`,
+                                  backgroundColor: getTimelineFillColor(block.event.type),
+                                  borderColor: getProjectTypeColor(block.event.type),
+                                }}
+                                onClick={() => {
+                                  focusEvent(block.event);
+                                  setIsTimelineOpen(false);
+                                }}
+                              >
+                                <span className="legacy-timeline-event-time">
+                                  {block.event.startTime} - {block.event.endTime}
+                                </span>
+                                <strong>{block.event.title}</strong>
+                                <small>{venue?.name ?? "Unknown venue"}</small>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </section>
+                  );
+                })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ), document.body) : null}
+
+      <button
+        type="button"
+        className="legacy-mobile-timeline-fab"
+        onClick={() => setIsTimelineOpen(true)}
+      >
+        Timeline
+      </button>
 
     </main>
   );

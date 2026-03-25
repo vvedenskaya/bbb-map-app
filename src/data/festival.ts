@@ -6,9 +6,13 @@ export const MAP_DIMENSIONS = {
 };
 
 export const dayLabels: Record<FestivalDay, string> = {
+  sun: "Sunday",
+  mon: "Monday",
+  tue: "Tuesday",
+  wed: "Wednesday",
+  thu: "Thursday",
   fri: "Friday",
   sat: "Saturday",
-  sun: "Sunday",
 };
 
 export const eventTypeLabels: Record<EventType, string> = {
