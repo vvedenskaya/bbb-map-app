@@ -26,6 +26,13 @@ const MAP_MAX_ZOOM = 19.2;
 const GEOFENCE_RADIUS_METERS = 1609.34; // 1 mile
 const CAMERA_EPSILON = 0.000001;
 const ZOOM_EPSILON = 0.001;
+const TIMELINE_ZOOM_MIN = 0.75;
+const TIMELINE_ZOOM_MAX = 2.4;
+const TIMELINE_ZOOM_STEP = 0.15;
+const TIMELINE_DEFAULT_ZOOM = 1.5;
+const TIMELINE_BASE_LANE_WIDTH = 124;
+const TIMELINE_EVENT_GAP = 6;
+const TIMELINE_TIME_COLUMN_WIDTH = 42;
 
 const PROJECT_TYPE_COLORS: Record<EventType, string> = {
   music: "#3b82f6",
@@ -369,6 +376,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [searchQuery, setSearchQuery] = useState("");
   const [mapCenter, setMapCenter] = useState(MAP_CENTER);
   const [mapZoom, setMapZoom] = useState(MAP_DEFAULT_ZOOM);
+  const [timelineZoom, setTimelineZoom] = useState(TIMELINE_DEFAULT_ZOOM);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [allowOutOfBoundsNavigation, setAllowOutOfBoundsNavigation] = useState(false);
   const [geolocationStatus, setGeolocationStatus] = useState<
@@ -579,6 +587,8 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   );
   const timelinePixelsPerMinute = 1.2;
   const timelineHeight = Math.max((timelineEnd - timelineStart) * timelinePixelsPerMinute, 360);
+  const timelineLaneWidth = Math.round(TIMELINE_BASE_LANE_WIDTH * timelineZoom);
+  const timelineZoomPercentLabel = `${Math.round(timelineZoom * 100)}%`;
   const currentDayByNow: FestivalDay | null = (() => {
     if (!now) return null;
     const day = now.getDay();
@@ -649,6 +659,30 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     }
 
     setSelectedEventId(event.id);
+  }
+
+  function adjustTimelineZoom(targetZoom: number, anchorClientX?: number) {
+    const clampedZoom = clamp(targetZoom, TIMELINE_ZOOM_MIN, TIMELINE_ZOOM_MAX);
+    if (Math.abs(clampedZoom - timelineZoom) < 0.001) return;
+
+    const scrollElement = timelineScrollRef.current;
+    if (!scrollElement) {
+      setTimelineZoom(clampedZoom);
+      return;
+    }
+
+    const rect = scrollElement.getBoundingClientRect();
+    const viewportX = anchorClientX !== undefined
+      ? clamp(anchorClientX - rect.left, 0, scrollElement.clientWidth)
+      : scrollElement.clientWidth / 2;
+    const contentX = scrollElement.scrollLeft + viewportX;
+    const zoomScale = clampedZoom / timelineZoom;
+    setTimelineZoom(clampedZoom);
+
+    window.requestAnimationFrame(() => {
+      if (!timelineScrollRef.current) return;
+      timelineScrollRef.current.scrollLeft = Math.max(contentX * zoomScale - viewportX, 0);
+    });
   }
 
   useEffect(() => {
@@ -1231,15 +1265,87 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                 <strong>Schedule Timeline</strong>
                 <p>Simultaneous events shown side-by-side by time block.</p>
               </div>
-              <button
-                type="button"
-                className="legacy-chip"
-                onClick={() => setIsTimelineOpen(false)}
-              >
-                Close
-              </button>
+              <div className="legacy-timeline-toolbar-actions">
+                <div className="legacy-timeline-zoom-controls" role="group" aria-label="Timeline zoom controls">
+                  <button
+                    type="button"
+                    className="legacy-chip"
+                    onClick={() => adjustTimelineZoom(timelineZoom - TIMELINE_ZOOM_STEP)}
+                    aria-label="Zoom out timeline"
+                  >
+                    -
+                  </button>
+                  <button
+                    type="button"
+                    className="legacy-chip legacy-timeline-zoom-label"
+                    onClick={() => adjustTimelineZoom(TIMELINE_DEFAULT_ZOOM)}
+                    aria-label="Reset timeline zoom"
+                  >
+                    {timelineZoomPercentLabel}
+                  </button>
+                  <button
+                    type="button"
+                    className="legacy-chip"
+                    onClick={() => adjustTimelineZoom(timelineZoom + TIMELINE_ZOOM_STEP)}
+                    aria-label="Zoom in timeline"
+                  >
+                    +
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  className="legacy-chip"
+                  onClick={() => setIsTimelineOpen(false)}
+                >
+                  Close
+                </button>
+              </div>
             </div>
-            <div className="legacy-timeline-grid-wrap" ref={timelineScrollRef}>
+            <div
+              className="legacy-timeline-grid-wrap"
+              ref={timelineScrollRef}
+              onWheel={(event) => {
+                if (!event.ctrlKey && !event.metaKey) return;
+                event.preventDefault();
+                const direction = event.deltaY > 0 ? -1 : 1;
+                adjustTimelineZoom(timelineZoom + direction * TIMELINE_ZOOM_STEP, event.clientX);
+              }}
+              onTouchMove={(event) => {
+                if (event.touches.length !== 2) return;
+                const [firstTouch, secondTouch] = [event.touches[0], event.touches[1]];
+                const dx = secondTouch.clientX - firstTouch.clientX;
+                const dy = secondTouch.clientY - firstTouch.clientY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (!Number.isFinite(distance) || distance <= 0) return;
+
+                const currentDistanceRef = (event.currentTarget as HTMLDivElement).dataset.pinchStartDistance;
+                const currentZoomRef = (event.currentTarget as HTMLDivElement).dataset.pinchStartZoom;
+                if (!currentDistanceRef || !currentZoomRef) return;
+
+                event.preventDefault();
+                const startDistance = Number(currentDistanceRef);
+                const startZoom = Number(currentZoomRef);
+                if (!Number.isFinite(startDistance) || startDistance <= 0 || !Number.isFinite(startZoom)) return;
+                const midpointX = (firstTouch.clientX + secondTouch.clientX) / 2;
+                adjustTimelineZoom(startZoom * (distance / startDistance), midpointX);
+              }}
+              onTouchStart={(event) => {
+                if (event.touches.length !== 2) return;
+                const [firstTouch, secondTouch] = [event.touches[0], event.touches[1]];
+                const dx = secondTouch.clientX - firstTouch.clientX;
+                const dy = secondTouch.clientY - firstTouch.clientY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (!Number.isFinite(distance) || distance <= 0) return;
+                (event.currentTarget as HTMLDivElement).dataset.pinchStartDistance = String(distance);
+                (event.currentTarget as HTMLDivElement).dataset.pinchStartZoom = String(timelineZoom);
+              }}
+              onTouchEnd={(event) => {
+                if (event.touches.length < 2) {
+                  delete (event.currentTarget as HTMLDivElement).dataset.pinchStartDistance;
+                  delete (event.currentTarget as HTMLDivElement).dataset.pinchStartZoom;
+                }
+              }}
+            >
               {timelineDays.length === 0 ? (
                 <p className="legacy-popup-empty">No events available for timeline with current filters.</p>
               ) : (
@@ -1255,13 +1361,20 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                   const nowLineTop = showNowLine
                     ? (currentMinutesByNow - timelineStart) * timelinePixelsPerMinute
                     : 0;
+                  const dayColumnWidth = Math.max(layout.columns, 1) * timelineLaneWidth;
+                  const showHost = timelineLaneWidth >= 130;
+                  const showVenue = timelineLaneWidth >= 104;
+                  const showDescription = timelineLaneWidth >= 176;
                   return (
                     <section key={day} className="legacy-timeline-day-section" data-timeline-day={day}>
                       <div className="legacy-timeline-day-section-head">
                         <strong>{dayLabels[day]}</strong>
                         <span>{layout.blocks.length} events</span>
                       </div>
-                      <div className="legacy-timeline-day-grid">
+                      <div
+                        className="legacy-timeline-day-grid"
+                        style={{ gridTemplateColumns: `${TIMELINE_TIME_COLUMN_WIDTH}px ${dayColumnWidth}px` }}
+                      >
                         <div className="legacy-timeline-time-col" style={{ height: `${timelineHeight}px` }}>
                           {timelineHourMarks.map((minute) => (
                             <div
@@ -1273,7 +1386,10 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                             </div>
                           ))}
                         </div>
-                        <div className="legacy-timeline-day-col" style={{ height: `${timelineHeight}px` }}>
+                        <div
+                          className="legacy-timeline-day-col"
+                          style={{ height: `${timelineHeight}px`, minWidth: `${dayColumnWidth}px` }}
+                        >
                           {timelineHourMarks.map((minute) => (
                             <div
                               key={`${day}-${minute}`}
@@ -1289,8 +1405,8 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                           {layout.blocks.map((block) => {
                             const top = (block.start - timelineStart) * timelinePixelsPerMinute;
                             const height = Math.max((block.end - block.start) * timelinePixelsPerMinute, 26);
-                            const width = 100 / Math.max(block.groupColumns, 1);
-                            const left = block.column * width;
+                            const width = Math.max(timelineLaneWidth - TIMELINE_EVENT_GAP, 42);
+                            const left = block.column * timelineLaneWidth + TIMELINE_EVENT_GAP / 2;
                             const venue = venueById.get(block.event.venueId);
                             const visibleDescription = getVisibleEventDescription(block.event);
                             return (
@@ -1301,8 +1417,8 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                                 style={{
                                   top: `${top}px`,
                                   height: `${height}px`,
-                                  width: `calc(${width}% - 6px)`,
-                                  left: `calc(${left}% + 3px)`,
+                                  width: `${width}px`,
+                                  left: `${left}px`,
                                   backgroundColor: getTimelineFillColor(block.event.type),
                                   borderColor: getProjectTypeColor(block.event.type),
                                 }}
@@ -1315,11 +1431,11 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                                   {block.event.startTime} - {block.event.endTime}
                                 </span>
                                 <strong>{block.event.title}</strong>
-                                {block.event.host && block.event.host !== "TBD" ? (
+                                {showHost && block.event.host && block.event.host !== "TBD" ? (
                                   <small className="legacy-timeline-event-host">{block.event.host}</small>
                                 ) : null}
-                                <small>{venue?.name ?? "Unknown venue"}</small>
-                                {visibleDescription ? (
+                                {showVenue ? <small>{venue?.name ?? "Unknown venue"}</small> : null}
+                                {showDescription && visibleDescription ? (
                                   <small className="legacy-timeline-event-description">{visibleDescription}</small>
                                 ) : null}
                               </button>

@@ -814,9 +814,27 @@ a {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
   padding: 10px 12px;
   border-bottom: 1px solid #e6decd;
+}
+
+.legacy-timeline-toolbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.legacy-timeline-zoom-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legacy-timeline-zoom-label {
+  min-width: 70px;
 }
 
 .legacy-timeline-toolbar p {
@@ -829,11 +847,13 @@ a {
   overflow: auto;
   padding: 10px;
   background: #f4efe2;
+  overscroll-behavior: contain;
 }
 
 .legacy-timeline-stack {
   display: grid;
   gap: 14px;
+  min-width: max-content;
 }
 
 .legacy-timeline-day-section {
@@ -856,7 +876,7 @@ a {
 
 .legacy-timeline-day-grid {
   display: grid;
-  grid-template-columns: 84px minmax(0, 1fr);
+  min-width: max-content;
 }
 
 .legacy-timeline-grid-head {
@@ -908,7 +928,6 @@ a {
   position: relative;
   border-right: 1px solid #e6decd;
   background: #fffef8;
-  min-width: 0;
 }
 
 .legacy-timeline-hour-line {
@@ -1758,6 +1777,6 @@ a {
   }
 
   .legacy-timeline-day-grid {
-    grid-template-columns: 72px minmax(0, 1fr);
+    min-width: max-content;
   }
 }
