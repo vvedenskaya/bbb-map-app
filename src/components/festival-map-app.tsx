@@ -38,6 +38,7 @@ const PROJECT_TYPE_COLORS: Record<EventType, string> = {
   music: "#3b82f6",
   performance: "#ef4444",
   installation: "#f59e0b",
+  exhibition: "#9333ea",
   lecture: "#14b8a6",
   community: "#8b5cf6",
   social: "#6366f1",
@@ -73,6 +74,7 @@ const PROJECT_TYPE_FILTER_OPTIONS: Array<{ id: string; label: string; types: Eve
   { id: "music", label: eventTypeLabels.music, types: ["music"] },
   { id: "performance", label: eventTypeLabels.performance, types: ["performance"] },
   { id: "installation", label: eventTypeLabels.installation, types: ["installation"] },
+  { id: "exhibition", label: eventTypeLabels.exhibition, types: ["exhibition"] },
   { id: "lecture", label: eventTypeLabels.lecture, types: ["lecture"] },
   { id: "social", label: eventTypeLabels.social, types: ["community", "social"] },
   { id: "object", label: eventTypeLabels.object, types: ["object"] },
@@ -225,6 +227,7 @@ function getVenueLabelProjectTypes(venue: Venue): EventType[] {
   if (normalizedLabel.includes("lecture") || normalizedLabel.includes("talk")) types.add("lecture");
   if (normalizedLabel.includes("object")) types.add("object");
   if (normalizedLabel.includes("installation")) types.add("installation");
+  if (normalizedLabel.includes("exhibition") || normalizedLabel.includes("gallery")) types.add("exhibition");
   if (
     normalizedLabel.includes("immersive") ||
     normalizedLabel.includes("facilitated experience") ||
@@ -265,6 +268,17 @@ function getVisibleEventDescription(event: FestivalEvent): string {
 function isPlaceholderTimeLabel(value: string): boolean {
   const normalized = (value || "").trim().toUpperCase();
   return !normalized || normalized === "TBD";
+}
+
+function isPlaceholderHostLabel(value: string): boolean {
+  const normalized = (value || "").trim().toUpperCase();
+  return !normalized || normalized === "TBD";
+}
+
+function hasUnscheduledEventDetails(event: FestivalEvent): boolean {
+  if (getVisibleEventDescription(event)) return true;
+  if (!isPlaceholderHostLabel(event.host)) return true;
+  return false;
 }
 
 function isUnscheduledEvent(event: FestivalEvent): boolean {
@@ -570,7 +584,11 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     : [];
   const selectedVenueScheduledEvents = selectedVenueEvents.filter((event) => !isUnscheduledEvent(event));
   const selectedVenueUnscheduledEvents = selectedVenueEvents.filter((event) => isUnscheduledEvent(event));
-  const hasUnscheduledOnlyView = selectedVenueScheduledEvents.length === 0 && selectedVenueUnscheduledEvents.length > 0;
+  const selectedVenueUnscheduledEventsWithDetails = selectedVenue
+    ? selectedVenueUnscheduledEvents.filter((event) => hasUnscheduledEventDetails(event))
+    : [];
+  const hasUnscheduledOnlyView =
+    selectedVenueScheduledEvents.length === 0 && selectedVenueUnscheduledEventsWithDetails.length > 0;
   const selectedVenueDescription = (() => {
     if (!selectedVenue) return "";
     const venueDescription = (selectedVenue.description || "").trim();
@@ -1100,7 +1118,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                     <p className="legacy-popup-subtitle">
                       {selectedVenueScheduledEvents.length > 0
                         ? `${selectedVenueScheduledEvents.length} scheduled ${selectedVenueScheduledEvents.length === 1 ? "event" : "events"}`
-                        : selectedVenueUnscheduledEvents.length > 0
+                        : selectedVenueUnscheduledEventsWithDetails.length > 0
                           ? "Installation details"
                           : "0 scheduled events"}
                     </p>
@@ -1169,7 +1187,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                                   ) : null}
                                 </div>
                                 <strong>{event.title}</strong>
-                                <p>{event.host}</p>
+                                {event.host ? <p>{event.host}</p> : null}
                                 {event.airtableRecordId ? (
                                   <p className="legacy-popup-reconciled">Matched Airtable event</p>
                                 ) : null}
@@ -1183,10 +1201,11 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                       </details>
 
                     </>
-                  ) : selectedVenueUnscheduledEvents.length > 0 ? (
+                  ) : selectedVenueUnscheduledEventsWithDetails.length > 0 ? (
                     <div className="legacy-popup-event-list">
-                      {selectedVenueUnscheduledEvents.map((event) => {
+                      {selectedVenueUnscheduledEventsWithDetails.map((event) => {
                         const visibleDescription = getVisibleEventDescription(event);
+                        const hasVisibleHost = !isPlaceholderHostLabel(event.host);
                         return (
                           <div key={event.id} className="legacy-popup-event">
                             <div className="legacy-popup-event-head">
@@ -1203,7 +1222,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                               </div>
                             </div>
                             <strong>{event.title}</strong>
-                            <p>{event.host}</p>
+                            {hasVisibleHost ? <p>{event.host}</p> : null}
                             {visibleDescription ? (
                               <p className="legacy-popup-description">{visibleDescription}</p>
                             ) : null}
@@ -1211,9 +1230,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                         );
                       })}
                     </div>
-                  ) : (
-                    <p className="legacy-popup-empty">No scheduled events for this venue.</p>
-                  )}
+                  ) : null}
                 </div>
               </article>
             </div>

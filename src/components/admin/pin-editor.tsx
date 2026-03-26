@@ -33,6 +33,7 @@ function findLocationByName(input: string, options: PredefinedLocation[]): Prede
 export function PinEditor({ initialData, locationOptions = [] }: PinEditorProps) {
   const projectTypeOptions: EventType[] = [
     "installation",
+    "exhibition",
     "performance",
     "music",
     "lecture",

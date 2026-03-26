@@ -10,6 +10,7 @@
   --music: #166534; /* dark green */
   --performance: #86efac; /* light green */
   --installation: #1e3a8a; /* dark blue */
+  --exhibition: #9333ea; /* violet */
   --object: #7dd3fc; /* light blue */
   --experience: #a855f7; /* purple */
   --dj: #fef08a; /* yellow */
@@ -1508,6 +1509,10 @@ a {
 
 .type-installation {
   background: var(--installation);
+}
+
+.type-exhibition {
+  background: var(--exhibition);
 }
 
 .type-lecture {

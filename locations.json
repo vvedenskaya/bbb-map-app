@@ -282,8 +282,16 @@
     "Long": -115.73026466688141
   },
   {
+    "Name": "Downtown Palm Springs",
+    "Address": "300 E Baristo Rd, Palm Springs, CA 92262",
+    "Category": "Venue",
+    "Lat": 33.81803061585426, 
+    "Long": -116.50993292036817
+  },
+  {
     "Name": "The Bombay Beach Institute of Particle Physics, Metaphysics & International Relations",
     "Label": "The Institute",
+    "Alias": ["Bombay Beach Institute", "The Institute"],
     "Address": "Robert Stivers Trailer",
     "Category": "Venue",
     "Lat": 33.3491567,

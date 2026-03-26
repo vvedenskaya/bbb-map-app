@@ -111,6 +111,7 @@ function parseEventTypes(value: string): FestivalEvent["type"][] {
   const types = new Set<FestivalEvent["type"]>();
   if (normalized.includes("music")) types.add("music");
   if (normalized.includes("performance")) types.add("performance");
+  if (normalized.includes("exhibition")) types.add("exhibition");
   if (normalized.includes("installation")) types.add("installation");
   if (normalized.includes("lecture") || normalized.includes("talk")) types.add("lecture");
   if (normalized.includes("object")) types.add("object");
@@ -330,7 +331,7 @@ export async function fetchAirtableInstallations(): Promise<AirtableInstallation
         id: `event-${record.id}`,
         venueId,
         title: projectName,
-        host: [artistName, additionalArtists].filter(Boolean).join(" — ") || "TBD",
+        host: [artistName, additionalArtists].filter(Boolean).join(" — ") || "",
         description: buildDescription(fields),
         day: parseDayFromSchedule(schedule),
         startTime: schedule || "TBD",

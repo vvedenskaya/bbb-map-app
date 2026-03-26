@@ -11,6 +11,7 @@ const VALID_TYPES: EventType[] = [
   "music",
   "performance",
   "installation",
+  "exhibition",
   "lecture",
   "community",
   "social",

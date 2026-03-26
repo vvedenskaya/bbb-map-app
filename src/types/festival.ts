@@ -4,6 +4,7 @@ export type EventType =
   | "music"
   | "performance"
   | "installation"
+  | "exhibition"
   | "lecture"
   | "community"
   | "social"

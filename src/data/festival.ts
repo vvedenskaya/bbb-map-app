@@ -19,6 +19,7 @@ export const eventTypeLabels: Record<EventType, string> = {
   music: "Music",
   performance: "Performance",
   installation: "Installation",
+  exhibition: "Exhibition",
   lecture: "Lecture / Talk",
   community: "Social Gathering",
   social: "Social Gathering",

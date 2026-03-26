@@ -125,6 +125,7 @@ function parseEventTypes(value: string): FestivalEvent["type"][] {
   }
   if (normalized.includes("music")) types.add("music");
   if (normalized.includes("performance")) types.add("performance");
+  if (normalized.includes("exhibition")) types.add("exhibition");
   if (normalized.includes("installation") || normalized.includes("gallery") || normalized.includes("activation")) {
     types.add("installation");
   }
@@ -261,6 +262,7 @@ function getLocationAbridgedText(locationRow: LocationRow): string {
 function getAdminVenueLabel(projectType: FestivalEvent["type"]): string {
   if (projectType === "services") return "Services";
   if (projectType === "installation") return "Installation";
+  if (projectType === "exhibition") return "Exhibition";
   if (projectType === "object") return "Object";
   if (projectType === "experience") return "Facilitated Experience";
   if (projectType === "venue") return "Venue";
@@ -321,6 +323,16 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
       }
       allLocations.push(locationRow);
     }
+
+    const getAirtableRecordByProjectNames = (names: string[]): AirtableExportRecord | null => {
+      for (const name of names) {
+        const normalized = normalizeText(name);
+        if (!normalized) continue;
+        const match = byAirtableProjectName.get(normalized);
+        if (match) return match;
+      }
+      return null;
+    };
 
     const usedIds = new Set<string>();
     const venueIdByKey = new Map<string, string>();
@@ -392,6 +404,11 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
       const category = asString(locationRow.Category) || "Venue";
       const locationArtist = getLocationArtist(locationRow);
       const locationAbridgedText = getLocationAbridgedText(locationRow);
+      const locationNamesForAirtableMatch = [asString(locationRow.Name), venueName, ...asStringList(locationRow.Alias)];
+      const matchedLocationAirtableRecord = getAirtableRecordByProjectNames(locationNamesForAirtableMatch);
+      const matchedLocationAirtableFields = matchedLocationAirtableRecord?.fields ?? {};
+      const airtableArtist = asString(matchedLocationAirtableFields["Artist Name"]);
+      const airtableAbridgedText = asString(matchedLocationAirtableFields["Abridged Project Text"]);
       ensureVenue({
         key: `mapped:${getLocationCanonicalKey(locationRow, venueName)}`,
         name: venueName,
@@ -400,11 +417,17 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
         hasLocation: true,
         categoryLabel: category,
         mapLabel: getLocationMapLabel(locationRow),
-        descriptionSource: locationAbridgedText || `Mapped from locations.json (${venueName})`,
+        descriptionSource: airtableAbridgedText || locationAbridgedText || `Mapped from locations.json (${venueName})`,
       });
       const seededVenue = venuesById.get(venueIdByKey.get(`mapped:${getLocationCanonicalKey(locationRow, venueName)}`) ?? "");
-      if (seededVenue && locationArtist) {
-        seededVenue.shortDescription = `By ${locationArtist}`;
+      if (seededVenue) {
+        const preferredArtist = airtableArtist || locationArtist;
+        if (preferredArtist) {
+          seededVenue.shortDescription = `By ${preferredArtist}`;
+        }
+        if (airtableAbridgedText) {
+          seededVenue.description = airtableAbridgedText;
+        }
       }
     }
 
@@ -496,9 +519,9 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
           id: `schedule-${sourceId}`,
           venueId,
           title,
-          host: hostFromAirtable || hostFromLocation || hostFromScheduleCell || "TBD",
+          host: hostFromAirtable || hostFromLocation || hostFromScheduleCell || "",
           // Prefer Airtable abridged text; then locations.json abridged text; then preserve XLSX cell text.
-          description: abridgedFromAirtable || abridgedFromLocation || rawText || projectDescriptionFromAirtable || "No abridged text provided.",
+          description: abridgedFromAirtable || abridgedFromLocation || rawText || projectDescriptionFromAirtable || "",
           day,
           startTime,
           endTime,
@@ -549,9 +572,9 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
         id: `schedule-${sourceId}`,
         venueId,
         title,
-        host: hostFromAirtable || hostFromScheduleCell || "TBD",
+        host: hostFromAirtable || hostFromScheduleCell || "",
         // Prefer Airtable abridged text; otherwise preserve XLSX cell text before long project descriptions.
-        description: abridgedFromAirtable || rawText || projectDescriptionFromAirtable || "No abridged text provided.",
+        description: abridgedFromAirtable || rawText || projectDescriptionFromAirtable || "",
         day,
         startTime,
         endTime,
@@ -596,7 +619,7 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
       if (existingVenue) {
         existingVenue.label = getAdminVenueLabel(entry.projectType);
         existingVenue.shortDescription = entry.artist ? `By ${entry.artist}` : "Manually added from admin dashboard";
-        existingVenue.description = entry.abridgedProjectText || "No abridged text provided.";
+        existingVenue.description = entry.abridgedProjectText || "";
         existingVenue.permanence = entry.permanence || undefined;
         existingVenue.hasLocation = resolvedHasLocation;
         existingVenue.lat = resolvedLat;
@@ -609,8 +632,8 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
         id: `event-${entry.id}`,
         venueId,
         title: entry.name,
-        host: entry.artist || "TBD",
-        description: entry.abridgedProjectText || "No abridged text provided.",
+        host: entry.artist || "",
+        description: entry.abridgedProjectText || "",
         day: entry.day,
         startTime: entry.startTime || "TBD",
         endTime: entry.endTime || "TBD",
@@ -656,11 +679,11 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
         continue;
       }
 
-      const host = getLocationArtist(locationRow) || "TBD";
-      const description = getLocationAbridgedText(locationRow) || "No abridged text provided.";
+      const host = getLocationArtist(locationRow) || "";
+      const description = getLocationAbridgedText(locationRow) || "";
       const existingVenue = venuesById.get(venueId);
       if (existingVenue) {
-        existingVenue.shortDescription = host !== "TBD" ? `By ${host}` : existingVenue.shortDescription;
+        existingVenue.shortDescription = host ? `By ${host}` : existingVenue.shortDescription;
         existingVenue.description = description;
       }
 
