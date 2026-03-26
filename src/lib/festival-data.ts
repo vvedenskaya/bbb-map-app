@@ -22,6 +22,9 @@ type LocationRow = {
   Alias?: unknown;
   Label?: unknown;
   Category?: unknown;
+  Address?: unknown;
+  "Location (Internal)"?: unknown;
+  location_internal?: unknown;
   "Artist Name"?: unknown;
   artist_name?: unknown;
   "Abridged Project Text"?: unknown;
@@ -294,6 +297,34 @@ function getLocationMapLabel(locationRow: LocationRow): string {
   return asString(locationRow.Label);
 }
 
+function getLocationInternalReference(locationRow: LocationRow): string {
+  return asString(locationRow["Location (Internal)"]) || asString(locationRow.location_internal);
+}
+
+function resolveLocationCoordinates(
+  locationRow: LocationRow,
+  byNormalizedName: Map<string, LocationRow>,
+  all: LocationRow[],
+  visited: WeakSet<LocationRow> = new WeakSet()
+): { lat: number; lng: number; anchor: LocationRow } | null {
+  if (visited.has(locationRow)) return null;
+  visited.add(locationRow);
+
+  const lat = asNumber(locationRow.Lat);
+  const lng = asNumber(locationRow.Long);
+  if (lat !== null && lng !== null) {
+    return { lat, lng, anchor: locationRow };
+  }
+
+  const locationInternal = getLocationInternalReference(locationRow);
+  if (!locationInternal) return null;
+
+  const mappedLocation = findMatchingLocation(locationInternal, byNormalizedName, all);
+  if (!mappedLocation) return null;
+
+  return resolveLocationCoordinates(mappedLocation, byNormalizedName, all, visited);
+}
+
 function getLocationArtist(locationRow: LocationRow): string {
   const direct = asString(locationRow["Artist Name"]) || asString(locationRow.artist_name);
   if (direct) return direct;
@@ -322,6 +353,10 @@ function getLocationAbridgedText(locationRow: LocationRow): string {
     }
   }
   return "";
+}
+
+function getLocationAddress(locationRow: LocationRow): string {
+  return asString(locationRow.Address);
 }
 
 function getAdminVenueLabel(projectType: FestivalEvent["type"]): string {
@@ -378,9 +413,7 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
 
     for (const locationRow of locationRows) {
       const name = asString(locationRow.Name);
-      const lat = asNumber(locationRow.Lat);
-      const lng = asNumber(locationRow.Long);
-      if (!name || lat === null || lng === null) continue;
+      if (!name) continue;
       byNormalizedName.set(normalizeText(name), locationRow);
       const aliases = asStringList(locationRow.Alias);
       for (const alias of aliases) {
@@ -544,24 +577,26 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
         const venueLocationKey = matchedLocation
           ? getLocationCanonicalKey(matchedLocation, locationName)
           : normalizeText(locationName);
-        const locationSource = matchedLocation;
-        const lat = asNumber((locationSource as { Lat?: unknown })?.Lat);
-        const lng = asNumber((locationSource as { Long?: unknown })?.Long);
-        if (lat !== null && lng !== null) {
+        const resolvedLocation = matchedLocation
+          ? resolveLocationCoordinates(matchedLocation, byNormalizedName, allLocations)
+          : null;
+        if (resolvedLocation) {
           hasLocation = true;
-          eventLat = lat;
-          eventLng = lng;
+          eventLat = resolvedLocation.lat;
+          eventLng = resolvedLocation.lng;
         }
+        const venueAnchor = resolvedLocation?.anchor ?? matchedLocation;
+        const venueAnchorName = venueAnchor ? getLocationDisplayName(venueAnchor, resolvedLocationName) : resolvedLocationName;
         const category = matchedLocation ? asString(matchedLocation.Category) || "Venue" : "Venue";
         venueId = ensureVenue({
-          key: `mapped:${venueLocationKey}`,
-          name: resolvedLocationName,
+          key: `mapped:${venueAnchor ? getLocationCanonicalKey(venueAnchor, venueAnchorName) : venueLocationKey}`,
+          name: venueAnchorName,
           lat: eventLat,
           lng: eventLng,
           hasLocation,
           categoryLabel: category,
-          mapLabel: matchedLocation ? getLocationMapLabel(matchedLocation) : undefined,
-          descriptionSource: abridgedFromLocation || `Mapped from schedule: ${resolvedLocationName}`,
+          mapLabel: venueAnchor ? getLocationMapLabel(venueAnchor) : undefined,
+          descriptionSource: abridgedFromLocation || `Mapped from schedule: ${venueAnchorName}`,
         });
         const matchedVenue = venuesById.get(venueId);
         if (matchedVenue && hostFromLocation && !matchedVenue.shortDescription.startsWith("By ")) {
@@ -738,19 +773,21 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
       const matchedLocation = findMatchingLocation(locationInternal, byNormalizedName, allLocations);
       if (!matchedLocation) continue;
 
-      const resolvedLocationName = getLocationDisplayName(matchedLocation, locationInternal);
-      const venueLocationKey = getLocationCanonicalKey(matchedLocation, locationInternal);
-      const lat = asNumber((matchedLocation as { Lat?: unknown }).Lat);
-      const lng = asNumber((matchedLocation as { Long?: unknown }).Long);
-      const hasLocation = lat !== null && lng !== null;
+      const resolvedLocation = resolveLocationCoordinates(matchedLocation, byNormalizedName, allLocations);
+      const venueAnchor = resolvedLocation?.anchor ?? matchedLocation;
+      const resolvedLocationName = getLocationDisplayName(venueAnchor, locationInternal);
+      const venueLocationKey = getLocationCanonicalKey(venueAnchor, locationInternal);
+      const lat = resolvedLocation?.lat ?? null;
+      const lng = resolvedLocation?.lng ?? null;
+      const hasLocation = resolvedLocation !== null;
       const venueId = ensureVenue({
         key: `mapped:${venueLocationKey}`,
         name: resolvedLocationName,
         lat: lat ?? undefined,
         lng: lng ?? undefined,
         hasLocation,
-        categoryLabel: asString(matchedLocation.Category) || "Venue",
-        mapLabel: getLocationMapLabel(matchedLocation),
+        categoryLabel: asString(venueAnchor.Category) || "Venue",
+        mapLabel: getLocationMapLabel(venueAnchor),
         descriptionSource: asString(fields["Abridged Project Text"]) || `Mapped from Airtable: ${projectName}`,
       });
 
@@ -771,7 +808,7 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
         description:
           asString(fields["Abridged Project Text"]) ||
           asString(fields["Project Description"]) ||
-          getLocationAbridgedText(matchedLocation),
+          getLocationAbridgedText(venueAnchor),
         day: "fri",
         startTime: "TBD",
         endTime: "TBD",
@@ -806,8 +843,28 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
         airtableProjectNames.has(normalizeText(displayName));
       if (hasAirtableProjectMatch) continue;
 
-      const venueId = venueIdByKey.get(`mapped:${canonicalKey}`);
-      if (!venueId) continue;
+      const locationInternal = getLocationInternalReference(locationRow);
+      const matchedMappedLocation = locationInternal
+        ? findMatchingLocation(locationInternal, byNormalizedName, allLocations)
+        : null;
+      const resolvedLocation = matchedMappedLocation
+        ? resolveLocationCoordinates(matchedMappedLocation, byNormalizedName, allLocations)
+        : resolveLocationCoordinates(locationRow, byNormalizedName, allLocations);
+      if (!resolvedLocation) continue;
+
+      const venueAnchor = resolvedLocation.anchor;
+      const venueName = getLocationDisplayName(venueAnchor, displayName);
+      const venueLocationKey = getLocationCanonicalKey(venueAnchor, venueName);
+      const venueId = ensureVenue({
+        key: `mapped:${venueLocationKey}`,
+        name: venueName,
+        lat: resolvedLocation.lat,
+        lng: resolvedLocation.lng,
+        hasLocation: true,
+        categoryLabel: asString(venueAnchor.Category) || "Venue",
+        mapLabel: getLocationMapLabel(venueAnchor),
+        descriptionSource: getLocationAbridgedText(venueAnchor) || `Mapped from locations.json (${venueName})`,
+      });
 
       const title = canonicalName || displayName;
       const dedupeCandidates = [
@@ -819,11 +876,18 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
       }
 
       const host = getLocationArtist(locationRow) || "";
-      const description = getLocationAbridgedText(locationRow) || "";
+      const description =
+        getLocationAbridgedText(locationRow) ||
+        getLocationAddress(locationRow) ||
+        (locationInternal
+          ? `Mapped to venue "${venueName}" via location_internal (${locationInternal}).`
+          : `Mapped to venue "${venueName}" from locations.json.`);
       const existingVenue = venuesById.get(venueId);
       if (existingVenue) {
         existingVenue.shortDescription = host ? `By ${host}` : existingVenue.shortDescription;
-        existingVenue.description = description;
+        if (description) {
+          existingVenue.description = description;
+        }
       }
 
       events.push({
@@ -837,8 +901,8 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
         endTime: "TBD",
         type: parseEventType(category || "installation"),
         thumbnailUrl: "/map-layers/image_BB_map.jpg",
-        lat: asNumber(locationRow.Lat) ?? undefined,
-        lng: asNumber(locationRow.Long) ?? undefined,
+        lat: resolvedLocation.lat,
+        lng: resolvedLocation.lng,
         hasLocation: true,
         source: "airtable",
         airtableProjectName: title,

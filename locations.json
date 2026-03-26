@@ -165,7 +165,7 @@
     "Name": "Henderson Hall",
     "Label": "Henderson Hall",
     "Address": "Henderson Hall, 2&B, 2184 2nd",
-    "Category": "Venue",
+    "Category": "Community Hub",
     "Lat": 33.353735060939144,
     "Long": -115.73226869554519
   },
@@ -839,5 +839,208 @@
     "Artist": "Janenne Willis",
     "Lat": 33.35297428642218,
     "Long": -115.72669907314031
+  },
+  {
+    "Name": "The Playground",
+    "Address": "2194 3rd Street, Niland",
+    "Category": "Venue",
+    "Lat": 33.35261111111111,
+    "Long": -115.73344444444444
+  },
+  {
+    "Name": "Jackson's Corner",
+    "Address": "9592 Ave A, Niland",
+    "Category": "Venue",
+    "Lat": 33.352833333333336,
+    "Long": -115.73380555555556
+  },
+  {
+    "Name": "Muzik's AMuZe",
+    "Address": "9566 Ave A, Niland",
+    "Category": "Venue",
+    "Lat": 33.351,
+    "Long": -115.73366666666666
+  },
+  {
+    "Name": "2DEy",
+    "Address": "2158 2nd Street, Niland",
+    "Category": "Venue",
+    "Lat": 33.35377777777778,
+    "Long": -115.73016666666666
+  },
+  {
+    "Name": "Josiah's Playground",
+    "Address": "9572 Ave D, Niland",
+    "Category": "Venue",
+    "Lat": 33.3513485,
+    "Long": -115.73037780555556
+  },
+  {
+    "Name": "Playalotlot",
+    "Address": "9582 Ave D, Niland",
+    "Category": "Venue",
+    "Lat": 33.3519835,
+    "Long": -115.73068769444444
+  },
+  {
+    "Name": "Nona JazmanMan Grove",
+    "Address": "2144B 3rd Street, Niland",
+    "Category": "Venue",
+    "Lat": 33.352743,
+    "Long": -115.729062
+  },
+  {
+    "Name": "Herbstyle",
+    "Address": "9542 F Ave, Niland",
+    "Category": "Venue",
+    "Lat": 33.349672274131386,
+    "Long": -115.7282716
+  },
+  {
+    "Name": "SweetPeas Travel Place",
+    "Address": "9575 Ave G, Niland",
+    "Category": "Venue",
+    "Lat": 33.351706,
+    "Long": -115.727732
+  },
+  {
+    "Name": "The Finish Line",
+    "Address": "1 Ave H, adjacent",
+    "Category": "Venue",
+    "Lat": 33.35186111111111,
+    "Long": -115.72661111111111
+  },
+  {
+    "Name": "BWEE",
+    "Address": "9590 Ave E, Niland",
+    "Category": "Venue",
+    "Lat": 33.352162,
+    "Long": -115.729303
+  },
+  {
+    "Name": "Snow Cones",
+    "Address": "2194 3rd Street, Niland",
+    "Category": "Art Installation",
+    "location_internal": "The Playground"
+  },
+  {
+    "Name": "Silk 60",
+    "Address": "9592 Ave A, Niland",
+    "Category": "Art Installation",
+    "location_internal": "Jackson's Corner"
+  },
+  {
+    "Name": "Moon Talk",
+    "Address": "9566 Ave A, Niland",
+    "Category": "Art Installation",
+    "location_internal": "Muzik's AMuZe"
+  },
+  {
+    "Name": "The 2DEy Show",
+    "Address": "2158 2nd Street, Niland",
+    "Category": "Art Installation",
+    "location_internal": "2DEy"
+  },
+  {
+    "Name": "2Geosspheres",
+    "Address": "9572 Ave D, Niland",
+    "Category": "Art Installation",
+    "location_internal": "Josiah's Playground"
+  },
+  {
+    "Name": "TemetTurtle",
+    "Address": "9572 Ave D, Niland",
+    "Category": "Art Installation",
+    "location_internal": "Josiah's Playground"
+  },
+  {
+    "Name": "MarzoMoto",
+    "Address": "9572 Ave D, Niland",
+    "Category": "Art Installation",
+    "location_internal": "Josiah's Playground"
+  },
+  {
+    "Name": "For-D",
+    "Address": "9572 Ave D, Niland",
+    "Category": "Art Installation",
+    "location_internal": "Josiah's Playground"
+  },
+  {
+    "Name": "NoMamman & PurDoDo",
+    "Address": "9582 Ave D, Niland",
+    "Category": "Art Installation",
+    "location_internal": "Playalotlot"
+  },
+  {
+    "Name": "NoParPe",
+    "Address": "9590 Ave E, Niland",
+    "Category": "Art Installation",
+    "location_internal": "BWEE"
+  },
+  {
+    "Name": "Friendszy",
+    "Address": "9590 Ave E, Niland",
+    "Category": "Art Installation",
+    "location_internal": "BWEE"
+  },
+  {
+    "Name": "ChipKubo & FlashKubo",
+    "Address": "2144B 3rd Street, Niland",
+    "Category": "Art Installation",
+    "location_internal": "Nona JazmanMan Grove"
+  },
+  {
+    "Name": "Courtnay Alexander",
+    "Address": "9542 F Ave, Niland",
+    "Category": "Art Installation",
+    "location_internal": "Herbstyle"
+  },
+  {
+    "Name": "GeeWizz",
+    "Address": "9575 Ave G, Niland",
+    "Category": "Art Installation",
+    "location_internal": "SweetPeas Travel Place"
+  },
+  {
+    "Name": "The Finish Line",
+    "Address": "1 Ave H, adjacent",
+    "Category": "Art Installation",
+    "location_internal": "The Finish Line"
+  },
+  {
+    "Name": "Party of 5",
+    "Address": "9540 Ave B, Niland",
+    "Category": "Art Installation",
+    "location_internal": "PoP"
+  },
+  {
+    "Name": "StarBal",
+    "Address": "9540 Ave B, Niland",
+    "Category": "Art Installation",
+    "location_internal": "PoP"
+  },
+  {
+    "Name": "Fishes and Loaves",
+    "Address": "9540 Ave B, Niland",
+    "Category": "Art Installation",
+    "location_internal": "PoP"
+  },
+  {
+    "Name": "Teamwork",
+    "Address": "9540 Ave B, Niland",
+    "Category": "Art Installation",
+    "location_internal": "PoP"
+  },
+  {
+    "Name": "Bluturns",
+    "Address": "9540 Ave B, Niland",
+    "Category": "Art Installation",
+    "location_internal": "PoP"
+  },
+  {
+    "Name": "Sentinels",
+    "Address": "9540 Ave B, Niland",
+    "Category": "Art Installation",
+    "location_internal": "PoP"
   }
 ]
