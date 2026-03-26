@@ -20,6 +20,7 @@ export type FestivalDataResult = {
 type LocationRow = {
   Name?: unknown;
   Alias?: unknown;
+  Label?: unknown;
   Category?: unknown;
   "Artist Name"?: unknown;
   artist_name?: unknown;
@@ -223,6 +224,10 @@ function getLocationCanonicalKey(locationRow: LocationRow, fallbackName = ""): s
   return normalizeText(asString(locationRow.Name) || aliases[0] || fallbackName);
 }
 
+function getLocationMapLabel(locationRow: LocationRow): string {
+  return asString(locationRow.Label);
+}
+
 function getLocationArtist(locationRow: LocationRow): string {
   const direct = asString(locationRow["Artist Name"]) || asString(locationRow.artist_name);
   if (direct) return direct;
@@ -331,6 +336,7 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
       lng?: number;
       hasLocation: boolean;
       categoryLabel?: string;
+      mapLabel?: string;
       descriptionSource?: string;
       serviceType?: Venue["serviceType"];
     }): string {
@@ -352,6 +358,7 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
           id: venueId,
           name: params.name,
           label: params.categoryLabel || "Venue",
+          mapLabel: params.mapLabel,
           shortDescription: params.hasLocation
             ? "Lookup from locations.json"
             : "No coordinates found in locations.json",
@@ -366,6 +373,11 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
           accent: params.hasLocation ? "#8b5cf6" : "#6b7280",
         });
         venues.push(venuesById.get(venueId)!);
+      } else if (params.mapLabel) {
+        const existingVenue = venuesById.get(venueId);
+        if (existingVenue) {
+          existingVenue.mapLabel = params.mapLabel;
+        }
       }
 
       return venueId;
@@ -387,6 +399,7 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
         lng,
         hasLocation: true,
         categoryLabel: category,
+        mapLabel: getLocationMapLabel(locationRow),
         descriptionSource: locationAbridgedText || `Mapped from locations.json (${venueName})`,
       });
       const seededVenue = venuesById.get(venueIdByKey.get(`mapped:${getLocationCanonicalKey(locationRow, venueName)}`) ?? "");
@@ -456,6 +469,7 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
           lng: eventLng,
           hasLocation,
           categoryLabel: category,
+          mapLabel: matchedLocation ? getLocationMapLabel(matchedLocation) : undefined,
           descriptionSource: abridgedFromLocation || `Mapped from schedule: ${resolvedLocationName}`,
         });
         const matchedVenue = venuesById.get(venueId);

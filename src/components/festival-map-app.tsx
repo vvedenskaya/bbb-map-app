@@ -128,6 +128,40 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
+function hashString(value: string): number {
+  let hash = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(index);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+function getMapLabelPlacement(venue: Venue, mapLabel: string): { side: "left" | "right"; rowOffset: number } {
+  const normalizedLabel = mapLabel.toLowerCase();
+  // Keep The Institute label clear of the dense Zig Zag cluster.
+  if (normalizedLabel.includes("institute")) {
+    return { side: "right", rowOffset: -20 };
+  }
+  const lng = typeof venue.lng === "number" ? venue.lng : MAP_CENTER.lng;
+  const nearCenterLng = Math.abs(lng - MAP_CENTER.lng) < 0.00055;
+  const hashed = hashString(venue.id || venue.name);
+  const side: "left" | "right" = nearCenterLng
+    ? (hashed % 2 === 0 ? "left" : "right")
+    : lng < MAP_CENTER.lng
+      ? "left"
+      : "right";
+  const offsetLanes = [-14, 0, 14] as const;
+  const rowOffset = offsetLanes[hashed % offsetLanes.length];
+  return { side, rowOffset };
+}
+
+function getMarkerZIndex(mapLabel: string): number | undefined {
+  if (!mapLabel) return undefined;
+  if (mapLabel.toLowerCase().includes("institute")) return 2000;
+  return 800;
+}
+
 function getModalSafeCenter(target: { lat: number; lng: number }, zoom: number): { lat: number; lng: number } {
   if (typeof window === "undefined") return target;
 
@@ -879,6 +913,14 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
             >
               {visibleMappableVenues.slice(0, 300).map((venue) => {
                 const serviceIcon = getServiceIcon(venue.serviceType);
+                const mapLabel = (venue.mapLabel || "").trim();
+                const mapLabelPlacement = mapLabel ? getMapLabelPlacement(venue, mapLabel) : null;
+                const mapLabelStyle = mapLabelPlacement
+                  ? ({
+                      "--label-row-offset": `${mapLabelPlacement.rowOffset}px`,
+                      "--label-gap": serviceIcon ? "14px" : "10px",
+                    } as CSSProperties)
+                  : undefined;
                 const venueSchedulePreview = (eventsByVenueId.get(venue.id) ?? [])
                   .filter((event) => !isUnscheduledEvent(event))
                   .filter((event) => activeDayFilter.includes(event.day) && eventMatchesProjectTypeFilter(event, activeProjectTypes))
@@ -891,20 +933,31 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                     key={venue.id}
                     position={{ lat: venue.lat || 33.351, lng: venue.lng || -115.731 }}
                     anchorPoint={AdvancedMarkerAnchorPoint.CENTER}
+                    zIndex={getMarkerZIndex(mapLabel)}
                   >
                     {serviceIcon ? (
-                      <div
-                        className="legacy-service-pin"
-                        aria-label={venue.name}
-                        style={{ "--pin-color": venueColorById.get(venue.id) || "#4b5563" } as CSSProperties}
-                      >
-                        <span className="legacy-pin-service-icon" aria-hidden="true">
-                          {serviceIcon}
-                        </span>
+                      <div className={`legacy-pin-wrap ${mapLabel ? "has-map-label" : ""}`}>
+                        <div
+                          className="legacy-service-pin"
+                          aria-label={venue.name}
+                          style={{ "--pin-color": venueColorById.get(venue.id) || "#4b5563" } as CSSProperties}
+                        >
+                          <span className="legacy-pin-service-icon" aria-hidden="true">
+                            {serviceIcon}
+                          </span>
+                        </div>
+                        {mapLabel && mapLabelPlacement ? (
+                          <span
+                            className={`legacy-map-label is-${mapLabelPlacement.side}`}
+                            style={mapLabelStyle}
+                          >
+                            {mapLabel}
+                          </span>
+                        ) : null}
                       </div>
                     ) : (
                       <div
-                        className="legacy-pin-wrap"
+                        className={`legacy-pin-wrap ${mapLabel ? "has-map-label" : ""}`}
                         onMouseEnter={() => {
                           if (!supportsHoverRef.current || selectedVenueId) return;
                           setHoveredVenueId(venue.id);
@@ -930,6 +983,14 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                             setSelectedEventId(null);
                           }}
                         />
+                        {mapLabel && mapLabelPlacement ? (
+                          <span
+                            className={`legacy-map-label is-${mapLabelPlacement.side}`}
+                            style={mapLabelStyle}
+                          >
+                            {mapLabel}
+                          </span>
+                        ) : null}
                         {hoveredVenueId === venue.id ? (
                           <div className="legacy-pin-hover-card" role="status" aria-live="polite">
                             <strong>{venue.name}</strong>
