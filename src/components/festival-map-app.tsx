@@ -1882,10 +1882,6 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
         <div className="legacy-timeline-overlay" role="dialog" aria-modal="true" aria-label="Fullscreen schedule timeline">
           <div className="legacy-timeline-shell">
             <div className="legacy-timeline-toolbar">
-              <div>
-                <strong>Schedule Timeline</strong>
-                <p>Simultaneous events shown side-by-side by time block. Pinch to zoom horizontally and vertically.</p>
-              </div>
               <div className="legacy-timeline-toolbar-actions">
                 <div className="legacy-timeline-zoom-controls" role="group" aria-label="Timeline zoom controls">
                   <button
