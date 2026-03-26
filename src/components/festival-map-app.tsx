@@ -638,6 +638,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [mapZoom, setMapZoom] = useState(() => getResponsiveDefaultMapZoom());
   const [responsiveDefaultMapZoom, setResponsiveDefaultMapZoom] = useState(() => getResponsiveDefaultMapZoom());
   const [timelineZoom, setTimelineZoom] = useState(TIMELINE_DEFAULT_ZOOM);
+  const [selectedTimelineEventId, setSelectedTimelineEventId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [hoveredVenueId, setHoveredVenueId] = useState<string | null>(null);
   const [allowOutOfBoundsNavigation, setAllowOutOfBoundsNavigation] = useState(false);
@@ -662,6 +663,10 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
             : "";
 
   const selectedVenue = venues.find((venue) => venue.id === selectedVenueId) ?? null;
+  const selectedEvent = selectedEventId
+    ? events.find((event) => event.id === selectedEventId) ?? null
+    : null;
+  const selectedEventVenueId = selectedEvent?.venueId ?? null;
   const selectedVenueLabelProjectTypes = selectedVenue ? getVenueLabelProjectTypes(selectedVenue) : [];
   const venueById = venues.reduce<globalThis.Map<string, Venue>>((acc, venue) => {
     acc.set(venue.id, venue);
@@ -887,6 +892,15 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     return "sat";
   })();
   const currentMinutesByNow = now ? now.getHours() * 60 + now.getMinutes() : null;
+  const selectedTimelineEvent = selectedTimelineEventId
+    ? scheduleVisibleEvents.find((event) => event.id === selectedTimelineEventId) ?? null
+    : null;
+  const selectedTimelineEventVenue = selectedTimelineEvent
+    ? venueById.get(selectedTimelineEvent.venueId) ?? null
+    : null;
+  const selectedTimelineEventDescription = selectedTimelineEvent
+    ? getVisibleEventDescription(selectedTimelineEvent)
+    : "";
 
   function toggleDay(day: FestivalDay) {
     setActiveDays((current) =>
@@ -922,12 +936,15 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     setMapZoom(zoom);
   }
 
-  function focusEvent(event: FestivalEvent) {
+  function focusEvent(event: FestivalEvent, options?: { openVenueModal?: boolean }) {
+    const openVenueModal = options?.openVenueModal ?? true;
     const venue = venues.find((entry) => entry.id === event.venueId) ?? null;
+    const resolveFocusCenter = (target: { lat: number; lng: number }) =>
+      openVenueModal ? getModalSafeCenter(target, MAP_FOCUS_ZOOM) : target;
     // When selecting from the sidebar, center on the venue location first.
     if (typeof venue?.lat === "number" && typeof venue.lng === "number") {
       setMapZoom(MAP_FOCUS_ZOOM);
-      setMapCenter(getModalSafeCenter({ lat: venue.lat, lng: venue.lng }, MAP_FOCUS_ZOOM));
+      setMapCenter(resolveFocusCenter({ lat: venue.lat, lng: venue.lng }));
     } else if (
       typeof event.lat === "number" &&
       typeof event.lng === "number" &&
@@ -935,16 +952,23 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
       !Number.isNaN(event.lng)
     ) {
       setMapZoom(MAP_FOCUS_ZOOM);
-      setMapCenter(getModalSafeCenter({ lat: event.lat, lng: event.lng }, MAP_FOCUS_ZOOM));
+      setMapCenter(resolveFocusCenter({ lat: event.lat, lng: event.lng }));
     }
 
     if (venue) {
-      setSelectedVenueId(venue.id);
       setLastInteractedVenueId(venue.id);
+      setSelectedVenueId(openVenueModal ? venue.id : null);
       setAllowOutOfBoundsNavigation(false);
+    } else if (!openVenueModal) {
+      setSelectedVenueId(null);
     }
 
     setSelectedEventId(event.id);
+  }
+
+  function closeTimeline() {
+    setIsTimelineOpen(false);
+    setSelectedTimelineEventId(null);
   }
 
   function adjustTimelineZoom(targetZoom: number, anchorClientX?: number) {
@@ -1044,6 +1068,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   useEffect(() => {
     if (!isTimelineOpen) {
       hasAutoScrolledTimelineRef.current = false;
+      setSelectedTimelineEventId(null);
       return;
     }
     if (!timelineScrollRef.current || !now || hasAutoScrolledTimelineRef.current) return;
@@ -1186,7 +1211,8 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                 const isService = Boolean(serviceIcon);
                 const mapLabel = (venue.mapLabel || "").trim();
                 const isHovered = hoveredVenueId === venue.id;
-                const isSelected = selectedVenueId === venue.id;
+                const isSelected =
+                  selectedVenueId === venue.id || (!selectedVenueId && selectedEventVenueId === venue.id);
                 const mapLabelPlacement = mapLabel ? getMapLabelPlacement(venue, mapLabel) : null;
                 const mapLabelStyle = mapLabelPlacement
                   ? ({
@@ -1823,7 +1849,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                 <button
                   type="button"
                   className="legacy-chip"
-                  onClick={() => setIsTimelineOpen(false)}
+                  onClick={closeTimeline}
                 >
                   Close
                 </button>
@@ -1951,8 +1977,8 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                                   borderColor: getProjectTypeColor(block.event.type),
                                 }}
                                 onClick={() => {
-                                  focusEvent(block.event);
-                                  setIsTimelineOpen(false);
+                                  setSelectedTimelineEventId(block.event.id);
+                                  setSelectedEventId(block.event.id);
                                 }}
                               >
                                 <span className="legacy-timeline-event-time">
@@ -1978,6 +2004,85 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
               )}
             </div>
           </div>
+          {selectedTimelineEvent ? (
+            <div
+              className="legacy-timeline-event-modal-overlay"
+              role="presentation"
+              onClick={() => setSelectedTimelineEventId(null)}
+            >
+              <article
+                className="legacy-popup legacy-timeline-event-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-label={`${selectedTimelineEvent.title} event details`}
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className="legacy-popup-head">
+                  <div>
+                    <h3>{selectedTimelineEvent.title}</h3>
+                    <p className="legacy-popup-subtitle">
+                      {dayLabels[selectedTimelineEvent.day]} | {selectedTimelineEvent.startTime} - {selectedTimelineEvent.endTime}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="legacy-popup-close"
+                    aria-label="Close event popup"
+                    onClick={() => setSelectedTimelineEventId(null)}
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="legacy-popup-content">
+                  <div className="legacy-type-chip-group">
+                    {getEventProjectTypes(selectedTimelineEvent).map((type) => (
+                      <span
+                        key={`${selectedTimelineEvent.id}-timeline-modal-type-${type}`}
+                        className={`type-chip type-${type}`}
+                        style={{ backgroundColor: getProjectTypeColor(type) }}
+                      >
+                        {eventTypeLabels[type]}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="legacy-timeline-event-modal-body">
+                    {selectedTimelineEventVenue ? (
+                      <p>
+                        <strong>Venue:</strong> {selectedTimelineEventVenue.name}
+                      </p>
+                    ) : null}
+                    {selectedTimelineEvent.host && selectedTimelineEvent.host !== "TBD" ? (
+                      <p>
+                        <strong>Host:</strong> {selectedTimelineEvent.host}
+                      </p>
+                    ) : null}
+                    {selectedTimelineEventDescription ? (
+                      <p className="legacy-popup-description">{selectedTimelineEventDescription}</p>
+                    ) : null}
+                  </div>
+                  <div className="legacy-timeline-event-modal-actions">
+                    <button
+                      type="button"
+                      className="legacy-chip active"
+                      onClick={() => {
+                        focusEvent(selectedTimelineEvent, { openVenueModal: false });
+                        closeTimeline();
+                      }}
+                    >
+                      Open on map
+                    </button>
+                    <button
+                      type="button"
+                      className="legacy-chip"
+                      onClick={() => setSelectedTimelineEventId(null)}
+                    >
+                      Back to calendar
+                    </button>
+                  </div>
+                </div>
+              </article>
+            </div>
+          ) : null}
         </div>
       ), document.body) : null}
 
