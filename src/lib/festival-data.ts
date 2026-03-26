@@ -186,6 +186,62 @@ function getScheduleDateFromDay(day: FestivalDay | null): string {
   return FESTIVAL_DAY_TO_ISO[day] || "";
 }
 
+function parseAirtableDateTime(raw: string): Date | null {
+  const value = asString(raw);
+  if (!value) return null;
+  const match = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/i);
+  if (!match) return null;
+
+  const month = Number(match[1]);
+  const day = Number(match[2]);
+  const year = Number(match[3]);
+  let hour = Number(match[4]);
+  const minute = Number(match[5] ?? "0");
+  const meridiem = match[6].toLowerCase();
+  if ([month, day, year, hour, minute].some((part) => Number.isNaN(part))) return null;
+  if (hour < 1 || hour > 12 || minute < 0 || minute > 59) return null;
+
+  if (hour === 12) hour = 0;
+  if (meridiem === "pm") hour += 12;
+  return new Date(year, month - 1, day, hour, minute, 0, 0);
+}
+
+function parseDurationMinutes(raw: string): number | null {
+  const value = asString(raw);
+  if (!value) return null;
+  const match = value.match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return null;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (Number.isNaN(hours) || Number.isNaN(minutes) || minutes > 59) return null;
+  return hours * 60 + minutes;
+}
+
+function formatClockLabel(date: Date): string {
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const suffix = hours >= 12 ? "PM" : "AM";
+  const displayHour = hours % 12 === 0 ? 12 : hours % 12;
+  return minutes === 0 ? `${displayHour} ${suffix}` : `${displayHour}:${String(minutes).padStart(2, "0")} ${suffix}`;
+}
+
+function buildAirtableTimeLabel(startRaw: string, endRaw: string, durationRaw: string): string {
+  const start = parseAirtableDateTime(startRaw);
+  if (!start) return "";
+  let end = parseAirtableDateTime(endRaw);
+  if (!end) {
+    const durationMinutes = parseDurationMinutes(durationRaw);
+    if (durationMinutes && durationMinutes > 0) {
+      end = new Date(start.getTime() + durationMinutes * 60_000);
+    }
+  }
+
+  const weekday = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][start.getDay()];
+  const startLabel = formatClockLabel(start);
+  const endLabel = end ? formatClockLabel(end) : "";
+  return endLabel ? `${weekday} | ${startLabel} - ${endLabel}` : `${weekday} | ${startLabel}`;
+}
+
 function extractHostFromScheduleCellText(rawText: string): string {
   const text = asString(rawText);
   if (!text) return "";
@@ -661,8 +717,79 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
       });
     }
 
-    // Treat locations.json-only art installations as listing events when they have no Airtable entry.
+    // Prevent duplicate listings when synthesizing events from multiple data sources.
     const existingEventKeys = new Set(events.map((event) => `${event.venueId}|${normalizeText(event.title)}`));
+
+    // Fallback: include confirmed Airtable venue items even when they are not on schedule.
+    for (const record of airtableRecords) {
+      const fields = record.fields ?? {};
+      const projectName = asString(fields["Project Name"]) || asString(fields.project_name);
+      if (!projectName) continue;
+
+      const projectType = asString(fields["Project Type"]) || asString(fields.project_type);
+      const parsedProjectTypes = parseEventTypes(projectType || "community");
+
+      const status = asString(fields.Status).toLowerCase();
+      if (status && status !== "confirmed") continue;
+
+      const locationInternal = asString(fields["Location (Internal)"]) || asString(fields.location_internal);
+      if (!locationInternal) continue;
+
+      const matchedLocation = findMatchingLocation(locationInternal, byNormalizedName, allLocations);
+      if (!matchedLocation) continue;
+
+      const resolvedLocationName = getLocationDisplayName(matchedLocation, locationInternal);
+      const venueLocationKey = getLocationCanonicalKey(matchedLocation, locationInternal);
+      const lat = asNumber((matchedLocation as { Lat?: unknown }).Lat);
+      const lng = asNumber((matchedLocation as { Long?: unknown }).Long);
+      const hasLocation = lat !== null && lng !== null;
+      const venueId = ensureVenue({
+        key: `mapped:${venueLocationKey}`,
+        name: resolvedLocationName,
+        lat: lat ?? undefined,
+        lng: lng ?? undefined,
+        hasLocation,
+        categoryLabel: asString(matchedLocation.Category) || "Venue",
+        mapLabel: getLocationMapLabel(matchedLocation),
+        descriptionSource: asString(fields["Abridged Project Text"]) || `Mapped from Airtable: ${projectName}`,
+      });
+
+      const dedupeKey = `${venueId}|${normalizeText(projectName)}`;
+      if (existingEventKeys.has(dedupeKey)) continue;
+      existingEventKeys.add(dedupeKey);
+      const airtableTimeLabel = buildAirtableTimeLabel(
+        asString(fields["Start Time"]) || asString(fields.start_time),
+        asString(fields["End Time"]) || asString(fields.end_time),
+        asString(fields.Duration) || asString(fields.duration)
+      );
+
+      events.push({
+        id: `airtable-${asString(record.id) || slugify(`${projectName}-${venueId}`)}`,
+        venueId,
+        title: projectName,
+        host: asString(fields["Artist Name"]),
+        description:
+          asString(fields["Abridged Project Text"]) ||
+          asString(fields["Project Description"]) ||
+          getLocationAbridgedText(matchedLocation),
+        day: "fri",
+        startTime: "TBD",
+        endTime: "TBD",
+        type: parsedProjectTypes[0] ?? "installation",
+        projectTypes: parsedProjectTypes.length > 1 ? parsedProjectTypes : undefined,
+        thumbnailUrl: "/map-layers/image_BB_map.jpg",
+        lat: lat ?? undefined,
+        lng: lng ?? undefined,
+        hasLocation,
+        permanence: asString(fields["Year or Permanent"]) || undefined,
+        source: "airtable",
+        airtableRecordId: asString(record.id) || undefined,
+        airtableProjectName: projectName,
+        airtableTimeLabel: airtableTimeLabel || undefined,
+      });
+    }
+
+    // Treat locations.json-only art installations as listing events when they have no Airtable entry.
     for (const locationRow of allLocations) {
       const category = asString(locationRow.Category);
       if (!normalizeText(category).includes("art installation")) continue;

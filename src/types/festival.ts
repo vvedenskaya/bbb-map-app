@@ -56,4 +56,5 @@ export type FestivalEvent = {
   scheduleCategory?: string;
   airtableRecordId?: string;
   airtableProjectName?: string;
+  airtableTimeLabel?: string;
 };

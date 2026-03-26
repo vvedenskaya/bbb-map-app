@@ -586,7 +586,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
         .filter(
           (event) =>
             event.venueId === selectedVenue.id &&
-            activeDayFilter.includes(event.day) &&
+            (isUnscheduledEvent(event) || activeDayFilter.includes(event.day)) &&
             !getEventProjectTypes(event).includes("services")
         )
         .filter((event) => showPastEvents || !now || !isPastEvent(event, now))
@@ -1148,9 +1148,9 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                     <h3>{selectedVenue.name}</h3>
                     <p className="legacy-popup-subtitle">
                       {selectedVenueScheduledEvents.length > 0
-                        ? `${selectedVenueScheduledEvents.length} scheduled ${selectedVenueScheduledEvents.length === 1 ? "event" : "events"}`
+                        ? `${selectedVenueScheduledEvents.length} scheduled ${selectedVenueScheduledEvents.length === 1 ? "event" : "events"}${selectedVenueUnscheduledEventsWithDetails.length > 0 ? ` + ${selectedVenueUnscheduledEventsWithDetails.length} unscheduled` : ""}`
                         : selectedVenueUnscheduledEventsWithDetails.length > 0
-                          ? "Installation details"
+                          ? `${selectedVenueUnscheduledEventsWithDetails.length} unscheduled ${selectedVenueUnscheduledEventsWithDetails.length === 1 ? "item" : "items"}`
                           : "0 scheduled events"}
                     </p>
                     {selectedVenueLabelProjectTypes.length > 0 ? (
@@ -1233,6 +1233,43 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                         </div>
                       </details>
 
+                      {selectedVenueUnscheduledEventsWithDetails.length > 0 ? (
+                        <details className="legacy-popup-section is-schedule" open>
+                          <summary className="legacy-popup-section-title">Additional Unscheduled</summary>
+                          <div className="legacy-popup-event-list">
+                            {selectedVenueUnscheduledEventsWithDetails.map((event) => {
+                              const visibleDescription = getVisibleEventDescription(event);
+                              const hasVisibleHost = !isPlaceholderHostLabel(event.host);
+                              return (
+                                <div key={event.id} className="legacy-popup-event">
+                                  <div className="legacy-popup-event-head">
+                                    <div className="legacy-type-chip-group">
+                                      {getEventProjectTypes(event).map((type) => (
+                                        <span
+                                          key={`${event.id}-popup-unscheduled-type-with-schedule-${type}`}
+                                          className={`type-chip type-${type}`}
+                                          style={{ backgroundColor: getProjectTypeColor(type) }}
+                                        >
+                                          {eventTypeLabels[type]}
+                                        </span>
+                                      ))}
+                                    </div>
+                                    {event.airtableTimeLabel ? (
+                                      <span className="legacy-popup-meta">{event.airtableTimeLabel}</span>
+                                    ) : null}
+                                  </div>
+                                  <strong>{event.title}</strong>
+                                  {hasVisibleHost ? <p>{event.host}</p> : null}
+                                  {visibleDescription ? (
+                                    <p className="legacy-popup-description">{visibleDescription}</p>
+                                  ) : null}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </details>
+                      ) : null}
+
                     </>
                   ) : selectedVenueUnscheduledEventsWithDetails.length > 0 ? (
                     <div className="legacy-popup-event-list">
@@ -1253,6 +1290,9 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                                   </span>
                                 ))}
                               </div>
+                              {event.airtableTimeLabel ? (
+                                <span className="legacy-popup-meta">{event.airtableTimeLabel}</span>
+                              ) : null}
                             </div>
                             <strong>{event.title}</strong>
                             {hasVisibleHost ? <p>{event.host}</p> : null}
