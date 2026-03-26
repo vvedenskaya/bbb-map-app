@@ -263,8 +263,8 @@
     "Alias": ["Estates", "The Estates"],
     "Address": "",
     "Category": "Venue",
-    "Lat": 33.3489844,
-    "Long": -115.7279718
+    "Lat": 33.3491044,
+    "Long": -115.7279218
   },
   {
     "Name": "The Butterfly Pavillion",
@@ -332,7 +332,7 @@
   },
   {
     "Name": "American Legion",
-    "Label": "American Legion",
+    "Label": "Legion",
     "Address": "",
     "Category": "Local Business",
     "Lat": 33.3547378,
@@ -360,7 +360,7 @@
     "Address": "",
     "Category": "Venue",
     "Lat": 33.3489844,
-    "Long": -115.7279718
+    "Long": -115.728018
   },
   {
     "Name": "No Shoes",
@@ -386,7 +386,13 @@
     "Lat": 33.34965,
     "Long": -115.726501
   },
- 
+  {
+    "Name": "Cafe Bosna",
+    "Address": "",
+    "Category": "Venue",
+    "Lat": 33.34928635,
+    "Long": -115.7280227
+  },
   {
     "Name": "Club 86",
     "Address": "",
@@ -408,13 +414,6 @@
     "Category": "Venue",
     "Lat": 33.35320877,
     "Long": -115.7313477
-  },
-  {
-    "Name": "Seaside Baptist Church",
-    "Address": "",
-    "Category": "Venue",
-    "Lat": 33.35052894750682,
-    "Long": -115.72596366273098
   },
   {
     "Name": "Salton Civilization Archeological Site",
