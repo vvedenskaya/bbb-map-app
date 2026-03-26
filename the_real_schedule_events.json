@@ -31,9 +31,9 @@
     "start_time": "11 AM",
     "end_time": "2 PM",
     "location": "American Legion",
-    "description": "Chicken tortilla soup, Cheese and green chili quesadilla. $15 per plate until supplies run out.",
+    "description": "Minestrone soup/ grilled cheese, $15 per plate until supplies run out.",
     "category": "Food/Beverage",
-    "day": "Thursday"
+    "day": "Wednesday"
   },
   {
     "name": "Legends Coffee Club",
@@ -42,14 +42,14 @@
     "location": "Bombay Beach Community Center",
     "description": "Meet the Legends: our long-term, year-round residents of Bombay Beach",
     "category": "Social Gathering, Food/Beverage",
-    "day": "Tuessday"
+    "day": "Tuesday"
   },
   {
     "name": "Lunch",
     "start_time": "11 AM",
     "end_time": "2 PM",
     "location": "American Legion",
-    "description": "Chicken tortilla soup, Cheese and green chili quesadilla. $15 per plate until supplies run out.",
+    "description": "Baked potato soup & BLT, $15 per plate until supplies run out.",
     "category": "Food/Beverage",
     "day": "Thursday"
   },
@@ -72,15 +72,6 @@
     "day": "Thursday"
   },
   {
-    "name": "Lunch",
-    "start_time": "11 AM",
-    "end_time": "2 PM",
-    "location": "American Legion",
-    "description": "The American Legion",
-    "category": "Food/Beverage",
-    "day": "Thursday"
-  },
-  {
     "name": "The Dulcinée Dialectic",
     "start_time": "4 PM",
     "end_time": "7 PM",
@@ -88,15 +79,6 @@
     "description": "by Tao Ruspoli\nDocumentary Feature\n*Ticketed Event*\nBBIFF x AMDOCS",
     "category": "Film",
     "day": "Wednesday"
-  },
-  {
-    "name": "Lunch",
-    "start_time": "11 AM",
-    "end_time": "2 PM",
-    "location": "American Legion",
-    "description": "The American Legion",
-    "category": "Food/Beverage",
-    "day": "Thursday"
   },
   {
     "name": "3D Therapy in Perspective",
@@ -114,6 +96,15 @@
     "location": "Love Buggin",
     "description": "AV Experience\n“A 6-minute blindfolded journey on a magic carpet. EEG captures how your nervous system responds to surrender, rhythm, mystery, being seen — and translates it into four glyphs sealed in wax. Your frequency fingerprint. The quest: find the others on your wavelength.”",
     "category": "Facilitated Experience",
+    "day": "Thursday"
+  },
+  {
+    "name": "The Last Canter",
+    "start_time": "8 PM",
+    "end_time": "10 PM",
+    "location": "The Bombay Beach Estates",
+    "description": "by Art Machine, Inc.\nBrandon Anderson\nGallery Preview",
+    "category": "Installation/Immersive Environment, Exhibition",
     "day": "Thursday"
   },
   {
@@ -162,15 +153,6 @@
     "day": "Friday"
   },
   {
-    "name": "The Last Canter",
-    "start_time": "10 PM",
-    "end_time": "12 AM",
-    "location": "The Bombay Beach Estates",
-    "description": "by Art Machine, Inc.\nBrandon Anderson\nGallery Preview",
-    "category": "Installation/Immersive Environment",
-    "day": "Friday"
-  },
-  {
     "name": "The Salton Sea Museum & Library",
     "start_time": "8 AM",
     "end_time": "2 PM",
@@ -202,7 +184,7 @@
     "start_time": "11 AM",
     "end_time": "2 PM",
     "location": "American Legion",
-    "description": "The American Legion",
+    "description": "Clam chowder & Tuna melt, $15 per plate until supplies run out.",
     "category": "Food/Beverage",
     "day": "Friday"
   },
@@ -355,7 +337,7 @@
     "start_time": "6 PM",
     "end_time": "6 AM",
     "location": "The Bombay Beach Estates",
-    "description": "",
+    "description": "Immersive Music/Coffee Experience\n“An interdimensional portal to the world of ritual coffee, immersive art and global dance electronica.",
     "category": "DJ, Music, Facilitated Experience",
     "day": "Friday"
   },
@@ -450,11 +432,11 @@
     "day": "Friday"
   },
   {
-    "name": "Glorious Holy Kings:",
+    "name": "Glorious Holy Kings drag show: Queer Heaven in Bombay Beach",
     "start_time": "7:30 PM",
     "end_time": "9:30 PM",
     "location": "Temple to the Scientific Method",
-    "description": "The Temple to the Scientific Method\nDrag Show\n+ Care Club\n7:30-9:30 PM\nTemple to the Scientific Method\n“Glorious Holy Kings is a drag show highlighting Kings uniquely designed for Bombay Beach. The Queer community has faced many judgements through the years, and not one of them has stopped us from celebrating our most authentic selves! Kingdom comes in the land of milk, honey, and drag. “",
+    "description": "Glorious Holy Kings is a drag show highlighting Kings uniquely designed for Bombay Beach. The Queer community has faced many judgements through the years, and not one of them has stopped us from celebrating our most authentic selves! Kingdom comes in the land of milk, honey, and drag. ",
     "category": "Performance",
     "day": "Friday"
   },
@@ -483,24 +465,6 @@
     "location": "Bombay North",
     "description": "by Salton Sea Stellar Sky Society\n“The Salton Sea Stellar Sky Society’s Star Sight Site: a shared sculptural sanctuary supplying stargazing, star-seeking, skyward study, and speculative celestial storytelling for the Bombay Beach community. Styled and supported by The 9-foot Comeback Cube by Gregg Fleishman.”",
     "category": "Facilitated Experience, Installation/Immersive Environment",
-    "day": "Friday"
-  },
-  {
-    "name": "Care Club",
-    "start_time": "10 PM",
-    "end_time": "2 AM",
-    "location": "Club 86",
-    "description": "",
-    "category": "Facilitated Experience",
-    "day": "Friday"
-  },
-  {
-    "name": "The Social Equilibrium Calibration Unit",
-    "start_time": "7 PM",
-    "end_time": "7:30 PM",
-    "location": "The Beach",
-    "description": "by Damon James Duke\n“Time is running.”",
-    "category": "Facilitated Experience",
     "day": "Friday"
   },
   {
@@ -590,7 +554,7 @@
     "end_time": "2 AM",
     "location": "The Bombay Beach Estates",
     "description": "by Art Machine, Inc.\nBrandon Anderson\nSculpture Exhibit",
-    "category": "Installation/Immersive Environment",
+    "category": "Installation/Immersive Environment, Exhibition",
     "day": "Friday"
   },
   {
@@ -625,16 +589,7 @@
     "start_time": "11 PM",
     "end_time": "3 AM",
     "location": "Bombay Bliss Beach Club",
-    "description": "",
-    "category": "DJ",
-    "day": "Saturday"
-  },
-  {
-    "name": "Beats Without Borders:",
-    "start_time": "11 PM",
-    "end_time": "3 AM",
-    "location": "Bombay Beach Yacht Club",
-    "description": "A Live Electric World Journey\n11-11:30 PM: Bárabás Lörinc\n11:30 PM-12 AM: Miles Jay\n12-12:30 AM: Yasmine Azaeiz, Tunisia\n12:30-??: All together fam jam cocktail of sonic deliciousness",
+    "description": "afters at Bliss Club",
     "category": "DJ",
     "day": "Saturday"
   },
@@ -680,7 +635,7 @@
     "end_time": "2 AM",
     "location": "The Bombay Beach Estates",
     "description": "by Art Machine, Inc.\nBrandon Anderson\nSculpture Exhibit",
-    "category": "Installation/Immersive Environment",
+    "category": "Installation/Immersive Environment, Exhibition",
     "day": "Saturday"
   },
   {
@@ -693,47 +648,11 @@
     "day": "Saturday"
   },
   {
-    "name": "The Magic Carpet Ride",
-    "start_time": "6 PM",
-    "end_time": "2 AM",
-    "location": "Love Buggin",
-    "description": "AV Experience",
-    "category": "Facilitated Experience",
-    "day": "Saturday"
-  },
-  {
-    "name": "Late Night Bliss",
-    "start_time": "11 PM",
-    "end_time": "3 AM",
-    "location": "Bombay Bliss Beach Club",
-    "description": "",
-    "category": "DJ",
-    "day": "Saturday"
-  },
-  {
     "name": "Beats Without Borders:",
     "start_time": "11 PM",
     "end_time": "3 AM",
     "location": "Bombay Beach Yacht Club",
     "description": "A Live Electric World Journey\n11-11:30 PM: Bárabás Lörinc\n11:30 PM-12 AM: Miles Jay\n12-12:30 AM: Yasmine Azaeiz, Tunisia\n12:30-??: All together fam jam cocktail of sonic deliciousness",
-    "category": "DJ",
-    "day": "Saturday"
-  },
-  {
-    "name": "Care Club",
-    "start_time": "10 PM",
-    "end_time": "2 AM",
-    "location": "Club 86",
-    "description": "",
-    "category": "Facilitated Experience",
-    "day": "Saturday"
-  },
-  {
-    "name": "Cafe Bosna",
-    "start_time": "6 PM",
-    "end_time": "6 AM",
-    "location": "The Bombay Beach Estates",
-    "description": "",
     "category": "DJ",
     "day": "Saturday"
   },
@@ -1323,15 +1242,6 @@
     "day": "Saturday"
   },
   {
-    "name": "Gaza Cafe",
-    "start_time": "4 PM",
-    "end_time": "10 PM",
-    "location": "Museum of Unwanted Architecture",
-    "description": "Music in the Garden by\nDANNA\nDJ Gevo",
-    "category": "Facilitated Experience, DJ",
-    "day": "Saturday"
-  },
-  {
     "name": "Everything I Desire Is Already Mine",
     "start_time": "9 PM",
     "end_time": "11 PM",
@@ -1422,15 +1332,6 @@
     "day": "Saturday"
   },
   {
-    "name": "The Last Canter",
-    "start_time": "10 PM",
-    "end_time": "2 AM",
-    "location": "The Bombay Beach Estates",
-    "description": "by Art Machine, Inc.\nBrandon Anderson\nSculpture Exhibit",
-    "category": "Installation/Immersive Environment",
-    "day": "Saturday"
-  },
-  {
     "name": "Garbage Futurism: Post Waste",
     "start_time": "10 PM",
     "end_time": "2 AM",
@@ -1482,15 +1383,6 @@
     "location": "The Beach",
     "description": "by TRISTAN RIO / XANDER STEENBRUGGE",
     "category": "Music",
-    "day": "Saturday"
-  },
-  {
-    "name": "Martian Takeover",
-    "start_time": "10 PM",
-    "end_time": "2 AM",
-    "location": "Bombay Bliss Beach Club",
-    "description": "feat. Kiamora, Seamus & Friends",
-    "category": "DJ",
     "day": "Saturday"
   },
   {
@@ -1557,15 +1449,6 @@
     "day": "Sunday"
   },
   {
-    "name": "The Last Canter",
-    "start_time": "10 PM",
-    "end_time": "2 AM",
-    "location": "The Bombay Beach Estates",
-    "description": "by Art Machine, Inc.\nBrandon Anderson\nSculpture Exhibit",
-    "category": "Installation/Immersive Environment",
-    "day": "Sunday"
-  },
-  {
     "name": "My Niland II (Ten Checkpoints)",
     "start_time": "7 PM",
     "end_time": "7 AM",
@@ -1588,7 +1471,7 @@
     "start_time": "6 PM",
     "end_time": "6 AM",
     "location": "The Bombay Beach Estates",
-    "description": "Immersive Music/Coffee Experience",
+    "description": "Immersive Music/Coffee Experience\n“An interdimensional portal to the world of ritual coffee, immersive art and global dance electronica.",
     "category": "DJ, Music, Facilitated Experience",
     "day": "Sunday"
   },
@@ -1887,7 +1770,7 @@
     "end_time": "10 PM",
     "location": "The Bombay Beach Estates",
     "description": "by Art Machine, Inc.\nBrandon Anderson\nSculpture Exhibit",
-    "category": "Installation/Immersive Environment",
+    "category": "Installation/Immersive Environment, Exhibition",
     "day": "Sunday"
   },
   {

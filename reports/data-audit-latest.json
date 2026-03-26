@@ -1,0 +1,216 @@
+{
+  "generatedAt": "2026-03-26T03:41:13.401Z",
+  "files": {
+    "schedule": "the_real_schedule_events.json",
+    "locations": "locations.json",
+    "adminEntries": "admin_entries.json",
+    "airtable": "tmp_airtable_table.json"
+  },
+  "totals": {
+    "scheduleRows": 202,
+    "locationRows": 112,
+    "adminEntries": 16
+  },
+  "hidden": {
+    "mapPinsFromSchedule": {
+      "count": 2,
+      "samples": [
+        "#172 The Dawn of Forever | Sunday | (no location) | missing location",
+        "#197 The First Supper Leftovers | Sunday | (no location) | missing location"
+      ]
+    },
+    "timelineFromSchedule": {
+      "count": 0,
+      "samples": []
+    },
+    "mapPinsFromAdminScheduled": {
+      "count": 0,
+      "samples": []
+    },
+    "timelineFromAdminScheduled": {
+      "count": 0,
+      "samples": []
+    }
+  },
+  "schedule": {
+    "requiredFieldIssues": {
+      "count": 2,
+      "samples": [
+        "#172 The Dawn of Forever | Sunday | (no location) | missing: location",
+        "#197 The First Supper Leftovers | Sunday | (no location) | missing: location"
+      ]
+    },
+    "invalidDays": {
+      "count": 1,
+      "samples": [
+        "#5 Legends Coffee Club | Tuessday | Bombay Beach Community Center | invalid day: \"Tuessday\""
+      ]
+    },
+    "invalidTimes": {
+      "count": 0,
+      "samples": []
+    },
+    "duplicates": {
+      "count": 2,
+      "samples": [
+        "#54 The Social Equilibrium Calibration Unit | Friday | The Beach",
+        "#66 Care Club | Friday | Club 86"
+      ]
+    },
+    "unmatchedLocations": {
+      "count": 2,
+      "samples": [
+        "#172 The Dawn of Forever | Sunday | (no location)",
+        "#197 The First Supper Leftovers | Sunday | (no location)"
+      ]
+    }
+  },
+  "locations": {
+    "missingCoordinates": {
+      "count": 0,
+      "samples": []
+    },
+    "artInstallationsMissingArtist": {
+      "count": 50,
+      "samples": [
+        "#2 San Litio (Saint Lithium) | Art Installation",
+        "#3 3D Therapy in Perspective | Art Installation",
+        "#4 Curl | Art Installation",
+        "#5 Aperion | Art Installation",
+        "#10 Beach: Lemonade Stand | Art Installation",
+        "#11 Beach: Tesseract | Art Installation",
+        "#12 Beach: The Lighthouse | Art Installation",
+        "#32 Star Sight Site | Art Installation",
+        "#41 The Portal | Art Installation",
+        "#55 Salton Civilization Archeological Site | Art Installation",
+        "#56 Angler Grove | Art Installation",
+        "#57 Tesseract | Art Installation",
+        "#58 The Last Resort | Art Installation",
+        "#59 Dead Sea Forest | Art Installation",
+        "#61 Bombay Beach TVs | Art Installation",
+        "#62 Bombay Beach International Space Station (previously Lodestar) | Art Installation",
+        "#63 Bombay Beach Metro Station | Art Installation",
+        "#64 da Vinci Fish | Art Installation",
+        "#65 The Lighthouse | Art Installation",
+        "#66 The Swing | Art Installation"
+      ]
+    },
+    "artInstallationsMissingText": {
+      "count": 50,
+      "samples": [
+        "#2 San Litio (Saint Lithium) | Art Installation",
+        "#3 3D Therapy in Perspective | Art Installation",
+        "#4 Curl | Art Installation",
+        "#5 Aperion | Art Installation",
+        "#10 Beach: Lemonade Stand | Art Installation",
+        "#11 Beach: Tesseract | Art Installation",
+        "#12 Beach: The Lighthouse | Art Installation",
+        "#32 Star Sight Site | Art Installation",
+        "#41 The Portal | Art Installation",
+        "#55 Salton Civilization Archeological Site | Art Installation",
+        "#56 Angler Grove | Art Installation",
+        "#57 Tesseract | Art Installation",
+        "#58 The Last Resort | Art Installation",
+        "#59 Dead Sea Forest | Art Installation",
+        "#61 Bombay Beach TVs | Art Installation",
+        "#62 Bombay Beach International Space Station (previously Lodestar) | Art Installation",
+        "#63 Bombay Beach Metro Station | Art Installation",
+        "#64 da Vinci Fish | Art Installation",
+        "#65 The Lighthouse | Art Installation",
+        "#66 The Swing | Art Installation"
+      ]
+    },
+    "artInstallationsMissingArtistEnrichableFromAirtable": {
+      "count": 16,
+      "samples": [
+        "#2 San Litio (Saint Lithium) | Art Installation | Airtable match: San Litio (Saint Lithium)",
+        "#3 3D Therapy in Perspective | Art Installation | Airtable match: 3D Therapy in Perspective",
+        "#4 Curl | Art Installation | Airtable match: Curl",
+        "#5 Aperion | Art Installation | Airtable match: Aperion",
+        "#32 Star Sight Site | Art Installation | Airtable match: Salton Sea Stellar Sky Society: Star Sight Site",
+        "#74 World's Tallest Ghosts | Art Installation | Airtable match: The World’s Tallest Ghosts Reassessed",
+        "#82 Mapping the Sacrifice Zone | Art Installation | Airtable match: Mapping the Sacrifice Zone",
+        "#83 Westlandia Desert Oasis | Art Installation | Airtable match: Westlandia Desert Oasis",
+        "#84 Grotto Heaven (@bliss club) | Art Installation | Airtable match: Grotto Heaven",
+        "#85 SYZYGY | Art Installation | Airtable match: SYZYGY",
+        "#87 Art Basil Bombay Beach | Art Installation | Airtable match: Art Basil | Bombay",
+        "#89 Mamacita Junior the 3rd | Art Installation | Airtable match: Mamacita Junior the 3rd",
+        "#90 Birth, Life and Becoming | Art Installation | Airtable match: Birth, Life and Becoming",
+        "#92 Derangers Before the Playa | Art Installation | Airtable match: Derangers Before the Playa",
+        "#94 Artemis makes a house call | Art Installation | Airtable match: Artemis makes a house call",
+        "#96 While It Lasts | Art Installation | Airtable match: While It Lasts"
+      ]
+    },
+    "artInstallationsMissingArtistNotFoundInAirtable": {
+      "count": 34,
+      "samples": [
+        "#10 Beach: Lemonade Stand | Art Installation",
+        "#11 Beach: Tesseract | Art Installation",
+        "#12 Beach: The Lighthouse | Art Installation",
+        "#41 The Portal | Art Installation",
+        "#55 Salton Civilization Archeological Site | Art Installation",
+        "#56 Angler Grove | Art Installation",
+        "#57 Tesseract | Art Installation",
+        "#58 The Last Resort | Art Installation",
+        "#59 Dead Sea Forest | Art Installation",
+        "#61 Bombay Beach TVs | Art Installation",
+        "#62 Bombay Beach International Space Station (previously Lodestar) | Art Installation",
+        "#63 Bombay Beach Metro Station | Art Installation",
+        "#64 da Vinci Fish | Art Installation",
+        "#65 The Lighthouse | Art Installation",
+        "#66 The Swing | Art Installation",
+        "#67 HYBYCOZO sculpture | Art Installation",
+        "#68 TOXICON | Art Installation",
+        "#69 Shig Memorial Pyramids | Art Installation",
+        "#70 Venus of Salton | Art Installation",
+        "#71 SOS | Art Installation"
+      ]
+    },
+    "artInstallationsMissingTextEnrichableFromAirtable": {
+      "count": 16,
+      "samples": [
+        "#2 San Litio (Saint Lithium) | Art Installation | Airtable match: San Litio (Saint Lithium)",
+        "#3 3D Therapy in Perspective | Art Installation | Airtable match: 3D Therapy in Perspective",
+        "#4 Curl | Art Installation | Airtable match: Curl",
+        "#5 Aperion | Art Installation | Airtable match: Aperion",
+        "#32 Star Sight Site | Art Installation | Airtable match: Salton Sea Stellar Sky Society: Star Sight Site",
+        "#74 World's Tallest Ghosts | Art Installation | Airtable match: The World’s Tallest Ghosts Reassessed",
+        "#82 Mapping the Sacrifice Zone | Art Installation | Airtable match: Mapping the Sacrifice Zone",
+        "#83 Westlandia Desert Oasis | Art Installation | Airtable match: Westlandia Desert Oasis",
+        "#84 Grotto Heaven (@bliss club) | Art Installation | Airtable match: Grotto Heaven",
+        "#85 SYZYGY | Art Installation | Airtable match: SYZYGY",
+        "#87 Art Basil Bombay Beach | Art Installation | Airtable match: Art Basil | Bombay",
+        "#89 Mamacita Junior the 3rd | Art Installation | Airtable match: Mamacita Junior the 3rd",
+        "#90 Birth, Life and Becoming | Art Installation | Airtable match: Birth, Life and Becoming",
+        "#92 Derangers Before the Playa | Art Installation | Airtable match: Derangers Before the Playa",
+        "#94 Artemis makes a house call | Art Installation | Airtable match: Artemis makes a house call",
+        "#96 While It Lasts | Art Installation | Airtable match: While It Lasts"
+      ]
+    },
+    "artInstallationsMissingTextNotFoundInAirtable": {
+      "count": 34,
+      "samples": [
+        "#10 Beach: Lemonade Stand | Art Installation",
+        "#11 Beach: Tesseract | Art Installation",
+        "#12 Beach: The Lighthouse | Art Installation",
+        "#41 The Portal | Art Installation",
+        "#55 Salton Civilization Archeological Site | Art Installation",
+        "#56 Angler Grove | Art Installation",
+        "#57 Tesseract | Art Installation",
+        "#58 The Last Resort | Art Installation",
+        "#59 Dead Sea Forest | Art Installation",
+        "#61 Bombay Beach TVs | Art Installation",
+        "#62 Bombay Beach International Space Station (previously Lodestar) | Art Installation",
+        "#63 Bombay Beach Metro Station | Art Installation",
+        "#64 da Vinci Fish | Art Installation",
+        "#65 The Lighthouse | Art Installation",
+        "#66 The Swing | Art Installation",
+        "#67 HYBYCOZO sculpture | Art Installation",
+        "#68 TOXICON | Art Installation",
+        "#69 Shig Memorial Pyramids | Art Installation",
+        "#70 Venus of Salton | Art Installation",
+        "#71 SOS | Art Installation"
+      ]
+    }
+  }
+}

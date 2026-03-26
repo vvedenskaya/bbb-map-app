@@ -192,6 +192,16 @@ a {
   max-width: min(90vw, 320px);
 }
 
+.legacy-map-controls .legacy-control-row {
+  display: flex;
+  justify-content: flex-end;
+  grid-template-columns: none;
+}
+
+.legacy-map-controls .legacy-control-row .legacy-chip {
+  width: auto;
+}
+
 .legacy-list-panel {
   width: min(360px, 33vw);
   border-left: 1px solid #ded8c8;

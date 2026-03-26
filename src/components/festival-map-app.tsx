@@ -450,7 +450,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [lastInteractedVenueId, setLastInteractedVenueId] = useState<string | null>(null);
   const [activeDays, setActiveDays] = useState<FestivalDay[]>(() => getDefaultActiveDays(events));
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [listView, setListView] = useState<"venues" | "schedule">("schedule");
+  const [listView, setListView] = useState<"venues" | "schedule">("venues");
   const [isTimelineOpen, setIsTimelineOpen] = useState(false);
   const [showPastEvents, setShowPastEvents] = useState(false);
   const [now, setNow] = useState<Date | null>(null);
@@ -1335,20 +1335,20 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                 />
                 <span>Show past events</span>
               </label>
-              <div className="legacy-control-row">
-                <button
-                  type="button"
-                  className={`legacy-chip ${listView === "schedule" ? "active" : ""}`}
-                  onClick={() => setListView("schedule")}
-                >
-                  Schedule
-                </button>
+              <div className="legacy-control-row legacy-map-control-row">
                 <button
                   type="button"
                   className={`legacy-chip ${listView === "venues" ? "active" : ""}`}
                   onClick={() => setListView("venues")}
                 >
                   Venues
+                </button>
+                <button
+                  type="button"
+                  className={`legacy-chip ${listView === "schedule" ? "active" : ""}`}
+                  onClick={() => setListView("schedule")}
+                >
+                  Schedule
                 </button>
                 <button
                   type="button"
