@@ -284,6 +284,15 @@ function getEventProjectTypes(event: FestivalEvent): EventType[] {
   return [...new Set(merged)];
 }
 
+function shouldHideUnscheduledEventTypeChips(
+  event: FestivalEvent,
+  selectedVenueTypes: EventType[]
+): boolean {
+  if (!event.id.startsWith("locations-only-")) return false;
+  const eventTypes = getEventProjectTypes(event);
+  return eventTypes.length > 0 && eventTypes.every((type) => selectedVenueTypes.includes(type));
+}
+
 function eventMatchesProjectTypeFilter(event: FestivalEvent, activeTypes: EventType[]): boolean {
   return getEventProjectTypes(event).some((type) => activeTypes.includes(type));
 }
@@ -1691,20 +1700,26 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                             {selectedVenueUnscheduledEventsWithDetails.map((event) => {
                               const visibleDescription = getVisibleEventDescription(event);
                               const hasVisibleHost = !isPlaceholderHostLabel(event.host);
+                              const hideTypeChips = shouldHideUnscheduledEventTypeChips(
+                                event,
+                                selectedVenueLabelProjectTypes
+                              );
                               return (
                                 <div key={event.id} className="legacy-popup-event">
                                   <div className="legacy-popup-event-head">
-                                    <div className="legacy-type-chip-group">
-                                      {getEventProjectTypes(event).map((type) => (
-                                        <span
-                                          key={`${event.id}-popup-unscheduled-type-with-schedule-${type}`}
-                                          className={`type-chip type-${type}`}
-                                          style={{ backgroundColor: getProjectTypeColor(type) }}
-                                        >
-                                          {eventTypeLabels[type]}
-                                        </span>
-                                      ))}
-                                    </div>
+                                    {!hideTypeChips ? (
+                                      <div className="legacy-type-chip-group">
+                                        {getEventProjectTypes(event).map((type) => (
+                                          <span
+                                            key={`${event.id}-popup-unscheduled-type-with-schedule-${type}`}
+                                            className={`type-chip type-${type}`}
+                                            style={{ backgroundColor: getProjectTypeColor(type) }}
+                                          >
+                                            {eventTypeLabels[type]}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    ) : null}
                                     {event.airtableTimeLabel ? (
                                       <span className="legacy-popup-meta">{event.airtableTimeLabel}</span>
                                     ) : null}
@@ -1727,20 +1742,26 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                       {selectedVenueUnscheduledEventsWithDetails.map((event) => {
                         const visibleDescription = getVisibleEventDescription(event);
                         const hasVisibleHost = !isPlaceholderHostLabel(event.host);
+                        const hideTypeChips = shouldHideUnscheduledEventTypeChips(
+                          event,
+                          selectedVenueLabelProjectTypes
+                        );
                         return (
                           <div key={event.id} className="legacy-popup-event">
                             <div className="legacy-popup-event-head">
-                              <div className="legacy-type-chip-group">
-                                {getEventProjectTypes(event).map((type) => (
-                                  <span
-                                    key={`${event.id}-popup-unscheduled-type-${type}`}
-                                    className={`type-chip type-${type}`}
-                                    style={{ backgroundColor: getProjectTypeColor(type) }}
-                                  >
-                                    {eventTypeLabels[type]}
-                                  </span>
-                                ))}
-                              </div>
+                              {!hideTypeChips ? (
+                                <div className="legacy-type-chip-group">
+                                  {getEventProjectTypes(event).map((type) => (
+                                    <span
+                                      key={`${event.id}-popup-unscheduled-type-${type}`}
+                                      className={`type-chip type-${type}`}
+                                      style={{ backgroundColor: getProjectTypeColor(type) }}
+                                    >
+                                      {eventTypeLabels[type]}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : null}
                               {event.airtableTimeLabel ? (
                                 <span className="legacy-popup-meta">{event.airtableTimeLabel}</span>
                               ) : null}

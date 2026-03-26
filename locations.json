@@ -831,5 +831,13 @@
     "Category": "Venue",
     "Lat": 33.347656,
     "Long": -115.730933
+  },
+  {
+    "Name": "Sea State",
+    "Address": "2115 2nd st.",
+    "Category": "Art Installation",
+    "Artist": "Janenne Willis",
+    "Lat": 33.35297428642218,
+    "Long": -115.72669907314031
   }
 ]
