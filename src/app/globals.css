@@ -475,6 +475,43 @@ a {
   position: relative;
   display: grid;
   place-items: center;
+  overflow: visible;
+}
+
+.legacy-map-label {
+  position: absolute;
+  top: 50%;
+  transform: translateY(calc(-50% + var(--label-row-offset, 0px)));
+  padding: 4px 11px 5px;
+  border-radius: 999px;
+  border: 2px solid rgba(124, 59, 152, 0.88);
+  background:
+    radial-gradient(circle at 25% 30%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.15) 35%),
+    linear-gradient(135deg, rgba(255, 232, 248, 0.97), rgba(237, 234, 255, 0.97));
+  color: #b011a4;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  text-shadow:
+    -0.8px -0.8px 0 #ffffff,
+    0.8px -0.8px 0 #ffffff,
+    -0.8px 0.8px 0 #ffffff,
+    0.8px 0.8px 0 #ffffff;
+  box-shadow:
+    0 3px 10px rgba(143, 84, 165, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  z-index: 12;
+  pointer-events: none;
+}
+
+.legacy-map-label.is-left {
+  right: calc(100% + var(--label-gap, 10px));
+}
+
+.legacy-map-label.is-right {
+  left: calc(100% + var(--label-gap, 10px));
 }
 
 .legacy-pin-hover-card {
@@ -492,6 +529,17 @@ a {
   pointer-events: none;
   display: grid;
   gap: 6px;
+}
+
+.legacy-pin-wrap.has-map-label .legacy-pin-hover-card {
+  bottom: calc(100% + 16px);
+}
+
+@media (max-width: 720px) {
+  .legacy-map-label {
+    font-size: 0.68rem;
+    padding: 3px 8px;
+  }
 }
 
 .legacy-pin-hover-card::after {

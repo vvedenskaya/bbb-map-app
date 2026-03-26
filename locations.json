@@ -44,6 +44,7 @@
   },
   {
     "Name": "BBAC Center Bombay Beach Arts & Culture Center",
+    "Label": "BBAC",
     "Address": "BBAC",
     "Category": "Community Hub",
     "Lat": 33.3532565,
@@ -58,6 +59,7 @@
   },
   {
     "Name": "Food Court",
+    "Label": "BB Community Center",
     "Address": "9590 Avenue C, Niland, CA 92257",
     "Category": "Services",
     "Lat": 33.35205154941772,
@@ -86,6 +88,7 @@
   },
   {
     "Name": "Beach: The Sub Club",
+    "Label": "Sub Club",
     "Address": "Sub Club",
     "Category": "Venue",
     "Lat": 33.34825936,
@@ -150,6 +153,7 @@
   },
   {
     "Name": "Henderson Hall",
+    "Label": "Henderson Hall",
     "Address": "Henderson Hall, 2&B, 2184 2nd",
     "Category": "Venue",
     "Lat": 33.353735060939144,
@@ -207,6 +211,7 @@
   },
   {
     "Name": "Showtown",
+    "Label": "Show Town",
     "Address": "",
     "Category": "Venue",
     "Lat": 33.34822,
@@ -242,6 +247,7 @@
   },
   {
     "Name": "The Bombay Beach Estates",
+    "Label": "Estates",
     "Alias": "Estates",
     "Address": "",
     "Category": "Venue",
@@ -264,6 +270,7 @@
   },
   {
     "Name": "The Bombay Beach Institute of Particle Physics, Metaphysics & International Relations",
+    "Label": "The Institute",
     "Address": "Robert Stivers Trailer",
     "Category": "Venue",
     "Lat": 33.3491567,
@@ -271,6 +278,7 @@
   },
   {
     "Name": "The Poetry House",
+    "Label": "Poetry House",
     "Address": "The Poetry House",
     "Category": "Venue",
     "Lat": 33.349535,
@@ -292,6 +300,7 @@
   },
   {
     "Name": "The Ski Inn",
+    "Label": "Ski Inn",
     "Address": "",
     "Category": "Local Business",
     "Lat": 33.3535831,
@@ -299,6 +308,7 @@
   },
   {
     "Name": "American Legion",
+    "Label": "Legion",
     "Address": "",
     "Category": "Local Business",
     "Lat": 33.3547378,
@@ -306,6 +316,7 @@
   },
   {
     "Name": "Chow Market",
+    "Label": "Chowmart",
     "Address": "",
     "Category": "Local Business",
     "Lat": 33.3526499,
@@ -313,6 +324,7 @@
   },
   {
     "Name": "Zig Zag Plaza",
+    "Label": "Zig Zag / Medic",
     "Address": "Worlds Tallest Ghosts, ZigZag Plaza",
     "Category": "Community Hub",
     "Lat": 33.34906278,
@@ -334,6 +346,7 @@
   },
   {
     "Name": "The Bombay Beach Drive-In",
+    "Label": "Drive-In",
     "Address": "",
     "Category": "Venue",
     "Lat": 33.3517231,
@@ -681,6 +694,7 @@
   },
   {
     "Name": "GRUB",
+    "Label": "GRUB",
     "Address": "",
     "Category": "Venue",
     "Lat": 33.3536806,
@@ -731,6 +745,7 @@
   },
   {
     "Name": "Food Court",
+    "Label": "BB Community Center",
     "Address": "",
     "Category": "Services",
     "Lat": 33.35236,

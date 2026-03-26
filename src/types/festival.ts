@@ -19,6 +19,7 @@ export type Venue = {
   id: string;
   name: string;
   label: string;
+  mapLabel?: string;
   shortDescription: string;
   description: string;
   x: number;
