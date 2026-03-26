@@ -313,6 +313,12 @@ function parseTimeToMinutes(raw: string): number | null {
   return hour * 60 + minute;
 }
 
+function getNextFestivalDay(day: FestivalDay): FestivalDay {
+  const index = DAY_DISPLAY_ORDER.indexOf(day);
+  if (index === -1) return day;
+  return DAY_DISPLAY_ORDER[(index + 1) % DAY_DISPLAY_ORDER.length];
+}
+
 function parseEventDateTime(scheduleDate: string | undefined, timeLabel: string): Date | null {
   if (!scheduleDate) return null;
   const minutes = parseTimeToMinutes(timeLabel);
@@ -326,9 +332,16 @@ function parseEventDateTime(scheduleDate: string | undefined, timeLabel: string)
 }
 
 function isPastEvent(event: FestivalEvent, now: Date): boolean {
-  const end = parseEventDateTime(event.scheduleDate, event.endTime);
-  if (end) return end.getTime() < now.getTime();
   const start = parseEventDateTime(event.scheduleDate, event.startTime);
+  const end = parseEventDateTime(event.scheduleDate, event.endTime);
+  if (start && end) {
+    // Treat overnight windows (e.g. 8:30 PM -> 12 AM) as ending next day.
+    const normalizedEnd = end.getTime() <= start.getTime()
+      ? new Date(end.getTime() + 24 * 60 * 60 * 1000)
+      : end;
+    return normalizedEnd.getTime() < now.getTime();
+  }
+  if (end) return end.getTime() < now.getTime();
   if (!start) return false;
   const inferredEnd = new Date(start.getTime() + 60 * 60 * 1000);
   return inferredEnd.getTime() < now.getTime();
@@ -340,6 +353,7 @@ type TimelineEventBlock = {
   end: number;
   column: number;
   groupColumns: number;
+  carryoverFromPreviousDay?: boolean;
 };
 
 function getEventMinuteRange(event: FestivalEvent): { start: number; end: number } | null {
@@ -408,6 +422,126 @@ function buildTimelineLayout(events: FestivalEvent[]): { blocks: TimelineEventBl
     groupBlockIndexes.push(blockIndex);
 
     maxColumns = Math.max(maxColumns, concurrentColumns);
+  }
+
+  if (groupBlockIndexes.length > 0) {
+    groupBlockIndexes.forEach((index) => {
+      blocks[index].groupColumns = groupMaxColumns;
+    });
+  }
+
+  return { blocks, columns: maxColumns };
+}
+
+type TimelineDaySegment = {
+  event: FestivalEvent;
+  start: number;
+  end: number;
+  carryoverFromPreviousDay: boolean;
+  carriesIntoNextDay: boolean;
+};
+
+function buildTimelineSegmentsByDay(events: FestivalEvent[]): Map<FestivalDay, TimelineDaySegment[]> {
+  const byDay = new globalThis.Map<FestivalDay, TimelineDaySegment[]>();
+  for (const event of events) {
+    const range = getEventMinuteRange(event);
+    if (!range) continue;
+
+    if (range.end <= 24 * 60) {
+      const existing = byDay.get(event.day) ?? [];
+      existing.push({
+        event,
+        start: range.start,
+        end: range.end,
+        carryoverFromPreviousDay: false,
+        carriesIntoNextDay: false,
+      });
+      byDay.set(event.day, existing);
+      continue;
+    }
+
+    const firstDay = byDay.get(event.day) ?? [];
+    firstDay.push({
+      event,
+      start: range.start,
+      end: 24 * 60,
+      carryoverFromPreviousDay: false,
+      carriesIntoNextDay: true,
+    });
+    byDay.set(event.day, firstDay);
+
+    const nextDay = getNextFestivalDay(event.day);
+    const continuationEnd = range.end - 24 * 60;
+    if (continuationEnd > 0) {
+      const nextDaySegments = byDay.get(nextDay) ?? [];
+      nextDaySegments.push({
+        event,
+        start: 0,
+        end: continuationEnd,
+        carryoverFromPreviousDay: true,
+        carriesIntoNextDay: false,
+      });
+      byDay.set(nextDay, nextDaySegments);
+    }
+  }
+  return byDay;
+}
+
+function buildTimelineLayoutFromSegments(
+  segments: TimelineDaySegment[],
+  preferredColumnsByEventId: Map<string, number>
+): { blocks: TimelineEventBlock[]; columns: number } {
+  const ranged = [...segments].sort((a, b) => a.start - b.start || a.end - b.end);
+  const active: Array<{ end: number; column: number }> = [];
+  const blocks: TimelineEventBlock[] = [];
+  let maxColumns = 1;
+  let groupBlockIndexes: number[] = [];
+  let groupMaxColumns = 1;
+
+  for (const item of ranged) {
+    for (let i = active.length - 1; i >= 0; i -= 1) {
+      if (active[i].end <= item.start) {
+        active.splice(i, 1);
+      }
+    }
+
+    if (active.length === 0 && groupBlockIndexes.length > 0) {
+      groupBlockIndexes.forEach((index) => {
+        blocks[index].groupColumns = groupMaxColumns;
+      });
+      groupBlockIndexes = [];
+      groupMaxColumns = 1;
+    }
+
+    const usedColumns = new Set(active.map((entry) => entry.column));
+    const preferredColumn = preferredColumnsByEventId.get(item.event.id);
+    let column =
+      preferredColumn !== undefined && !usedColumns.has(preferredColumn)
+        ? preferredColumn
+        : 0;
+    if (preferredColumn === undefined || usedColumns.has(preferredColumn)) {
+      while (usedColumns.has(column)) column += 1;
+    }
+
+    active.push({ end: item.end, column });
+    const concurrentColumns = Math.max(...active.map((entry) => entry.column), 0) + 1;
+    groupMaxColumns = Math.max(groupMaxColumns, concurrentColumns);
+    const blockIndex = blocks.push({
+      event: item.event,
+      start: item.start,
+      end: item.end,
+      column,
+      groupColumns: 1,
+      carryoverFromPreviousDay: item.carryoverFromPreviousDay,
+    }) - 1;
+    groupBlockIndexes.push(blockIndex);
+    maxColumns = Math.max(maxColumns, concurrentColumns);
+
+    if (item.carriesIntoNextDay) {
+      preferredColumnsByEventId.set(item.event.id, column);
+    } else if (item.carryoverFromPreviousDay) {
+      preferredColumnsByEventId.delete(item.event.id);
+    }
   }
 
   if (groupBlockIndexes.length > 0) {
@@ -683,17 +817,17 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     };
   }).filter((entry) => entry.count > 0);
 
-  const timelineDays = scheduleByDay.map((entry) => entry.day);
+  const timelineSegmentsByDay = buildTimelineSegmentsByDay(scheduleVisibleEvents);
+  const timelineDays = SCHEDULE_DAY_ORDER.filter((day) => (timelineSegmentsByDay.get(day)?.length ?? 0) > 0);
   const timelineLayoutsByDay = new globalThis.Map<FestivalDay, { blocks: TimelineEventBlock[]; columns: number }>();
+  const preferredTimelineColumnsByEventId = new globalThis.Map<string, number>();
   for (const day of timelineDays) {
-    timelineLayoutsByDay.set(
-      day,
-      buildTimelineLayout(scheduleVisibleEvents.filter((event) => event.day === day))
-    );
+    const daySegments = timelineSegmentsByDay.get(day) ?? [];
+    timelineLayoutsByDay.set(day, buildTimelineLayoutFromSegments(daySegments, preferredTimelineColumnsByEventId));
   }
-  const timelineRanges = scheduleVisibleEvents
-    .map((event) => getEventMinuteRange(event))
-    .filter((entry): entry is { start: number; end: number } => entry !== null);
+  const timelineRanges = Array.from(timelineSegmentsByDay.values())
+    .flat()
+    .map((segment) => ({ start: segment.start, end: segment.end }));
   const timelineStart = timelineRanges.length
     ? Math.max(0, Math.floor(Math.min(...timelineRanges.map((entry) => entry.start)) / 60) * 60)
     : 8 * 60;
@@ -1235,7 +1369,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
 
                       {selectedVenueUnscheduledEventsWithDetails.length > 0 ? (
                         <details className="legacy-popup-section is-schedule" open>
-                          <summary className="legacy-popup-section-title">Additional Unscheduled</summary>
+                          <summary className="legacy-popup-section-title">Additional</summary>
                           <div className="legacy-popup-event-list">
                             {selectedVenueUnscheduledEventsWithDetails.map((event) => {
                               const visibleDescription = getVisibleEventDescription(event);

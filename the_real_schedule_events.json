@@ -60,7 +60,7 @@
     "location": "Little Little Italy",
     "description": "Little Little Italy\nHave an old school italian festival with music food and drink (aperitivo) during sunset and then screen from Rome Italy, Anna Negri's, Venice Film Festival selected, feature Documentary. Toni mio Padre afterwards with Q&A",
     "category": "Film",
-    "day": "Thursday"
+    "day": "Tuesday"
   },
   {
     "name": "\"Toni, Mio Padre\"",
@@ -69,7 +69,7 @@
     "location": "Little Little Italy",
     "description": "by Anna Negri\nDocumentary Feature & Director Q&A\nBBIFF x Little Little Italy Italian Festival",
     "category": "Film",
-    "day": "Thursday"
+    "day": "Tuesday"
   },
   {
     "name": "The Dulcinée Dialectic",
@@ -100,8 +100,8 @@
   },
   {
     "name": "The Last Canter",
-    "start_time": "8 PM",
-    "end_time": "10 PM",
+    "start_time": "10 PM",
+    "end_time": "12 AM",
     "location": "The Bombay Beach Estates",
     "description": "by Art Machine, Inc.\nBrandon Anderson\nGallery Preview",
     "category": "Installation/Immersive Environment, Exhibition",
@@ -126,13 +126,22 @@
     "day": "Thursday"
   },
   {
-    "name": "Artemis makes a housecall",
+    "name": "Salton Sea Stellar Sky Society",
     "start_time": "9 PM",
     "end_time": "10 PM",
+    "location": "Star Sight Site, Bombay North",
+    "description": "Star Sermons feat.\nGregg Fleishman, J. Cole, Scott (Seamus) Kildall, Regina (Pharaoh) Victor, Sarah Larsen, Jamie Dunphy\nMC: Future Eyes Brent Pearson.",
+    "category": "Facilitated Experience",
+    "day": "Thursday"
+  },
+  {
+    "name": "Artemis makes a housecall",
+    "start_time": "8 PM",
+    "end_time": "9 PM",
     "location": "The Bombay Beach Institute of Particle Physics, Metaphysics & International Relations",
     "description": "Gallery Opening by Branwen\n“In my surrealist conceptual offering I'm bringing magic and symbolism to the Salton Sea by inviting Artemis, the lady of the lake, to visit her home away from home, a hollow Redwood tree temple in a trailer, thus shifting shapes and playing with perception.”",
     "category": "Exhibition",
-    "day": "Friday"
+    "day": "Sunday"
   },
   {
     "name": "\"Last Flight Home\"",
@@ -141,13 +150,13 @@
     "location": "Temple to the Scientific Method",
     "description": "by Ondi Timoner\nDocumentary Feature &\nQ&A w/ Director\nBBIFF",
     "category": "Film",
-    "day": "Friday"
+    "day": "Thursday"
   },
   {
     "name": "Salton Sea Stellar Sky Society",
-    "start_time": "9 PM",
-    "end_time": "10 PM",
-    "location": "Star Sight Site",
+    "start_time": "8 PM",
+    "end_time": "9 PM",
+    "location": "Star Sight Site, Bombay North",
     "description": "Star Sermons feat.\nGregg Fleishman, J. Cole, Scott (Seamus) Kildall, Regina (Pharaoh) Victor, Sarah Larsen, Jamie Dunphy\nMC: Future Eyes Brent Pearson.",
     "category": "Facilitated Experience",
     "day": "Friday"
@@ -492,7 +501,7 @@
     "location": "Beach: The Sub Club",
     "description": "",
     "category": "DJ",
-    "day": "Saturday"
+    "day": "Friday"
   },
   {
     "name": "Lescher Martitti Bar",
@@ -591,7 +600,7 @@
     "location": "Bombay Bliss Beach Club",
     "description": "afters at Bliss Club",
     "category": "DJ",
-    "day": "Saturday"
+    "day": "Friday"
   },
   {
     "name": "Heidi Lawden & LoveFingers (B2B)",
@@ -600,7 +609,7 @@
     "location": "Beach: The Sub Club",
     "description": "",
     "category": "DJ",
-    "day": "Saturday"
+    "day": "Friday"
   },
   {
     "name": "Globalschism",
@@ -612,12 +621,12 @@
     "day": "Saturday"
   },
   {
-    "name": "Lescher Martitti Bar",
-    "start_time": "9 PM",
+    "name": "Bar Lescher - Nightclub Edition",
+    "start_time": "11 PM",
     "end_time": "2 AM",
     "location": "The Bombay Beach Estates",
-    "description": "A Martini Bar that stands as a vestige of the glorious heydays of Bombay Beach.\n\"Don’t believe anything you hear and only half of what you see.\"",
-    "category": "Exhibition, Installation/Immersive Environment",
+    "description": "BYOB - Bring Your Own Boobs - Vinyls & Grooves",
+    "category": "DJ",
     "day": "Saturday"
   },
   {
@@ -693,11 +702,11 @@
     "day": "Saturday"
   },
   {
-    "name": "The Eurabia Myth:",
+    "name": "The Eurabia Myth: Countercolonization and Masculine Fragility in France",
     "start_time": "10 AM",
     "end_time": "11 AM",
     "location": "The Bombay Beach Estates",
-    "description": "Countercolonization and Masculine Fragility in France\nMehammed Amadeus Mack\nPhilsophy Conference",
+    "description": "Mehammed Amadeus Mack\nPhilsophy Conference",
     "category": "Lecture/Talk",
     "day": "Saturday"
   },
@@ -819,7 +828,7 @@
     "day": "Saturday"
   },
   {
-    "name": "Pizza & the Pioneers of",
+    "name": "Pizza & the Pioneers of NYC Subway Graffiti",
     "start_time": "12 PM",
     "end_time": "4 PM",
     "location": "Sotheby's",
@@ -846,11 +855,11 @@
     "day": "Saturday"
   },
   {
-    "name": "Community Patchwork/",
+  "name": "Community Patchwork/Quilting Bee of the Damned",
     "start_time": "1 PM",
     "end_time": "2 PM",
     "location": "No Shoes",
-    "description": "Quilting Bee of the Damned\nQuilting Workshop\n“Together we steward cast-aside fibers and create a Biennale tapestry. Sew in community, and merge tattered scraps into something new. Unlike the gods who would condemn and abandon the world they created, we explore the latent potential in each textile.“",
+    "description": "Quilting Workshop\n“Together we steward cast-aside fibers and create a Biennale tapestry. Sew in community, and merge tattered scraps into something new. Unlike the gods who would condemn and abandon the world they created, we explore the latent potential in each textile.“",
     "category": "Facilitated Experience",
     "day": "Saturday"
   },
@@ -931,6 +940,15 @@
     "start_time": "4 PM",
     "end_time": "5 PM",
     "location": "The Bombay Beach Estates",
+    "description": "Mark Wrathall\nPhilosophy Conference",
+    "category": "Lecture/Talk",
+    "day": "Saturday"
+  },
+  {
+    "name": "The Temporality of Decay Redux",
+    "start_time": "4 PM",
+    "end_time": "5 PM",
+    "location": "DORD, Estates",
     "description": "Mark Wrathall\nPhilosophy Conference",
     "category": "Lecture/Talk",
     "day": "Saturday"
@@ -1386,56 +1404,11 @@
     "day": "Saturday"
   },
   {
-    "name": "The Pussycat Lounge w/ Toledo",
-    "start_time": "11 PM",
-    "end_time": "2 AM",
-    "location": "The Bombay Beach Estates",
-    "description": "",
-    "category": "Performance",
-    "day": "Sunday"
-  },
-  {
-    "name": "Adam Freeland",
-    "start_time": "11 PM",
-    "end_time": "1 AM",
-    "location": "Beach: The Sub Club",
-    "description": "",
-    "category": "DJ",
-    "day": "Sunday"
-  },
-  {
     "name": "Globalschism",
     "start_time": "12 AM",
     "end_time": "2 AM",
     "location": "Globalschism",
     "description": "Secret Nightclub",
-    "category": "DJ",
-    "day": "Sunday"
-  },
-  {
-    "name": "Pickle That Up presents THE SACRAMENT OF THE HOLY BRINE",
-    "start_time": "10 PM",
-    "end_time": "2 AM",
-    "location": "The Bombay Beach Estates",
-    "description": "",
-    "category": "Food/Beverage, Facilitated Experience",
-    "day": "Sunday"
-  },
-  {
-    "name": "Martian Takeover",
-    "start_time": "10 PM",
-    "end_time": "2 AM",
-    "location": "Bombay Bliss Beach Club",
-    "description": "feat. Kiamora, Seamus,\nFancyVandals & Friends",
-    "category": "DJ",
-    "day": "Sunday"
-  },
-  {
-    "name": "Party for Peace",
-    "start_time": "10 PM",
-    "end_time": "2 AM",
-    "location": "Atlantis Inn Collective",
-    "description": "Alvaro & Friends on Vinyl",
     "category": "DJ",
     "day": "Sunday"
   },
@@ -1446,33 +1419,6 @@
     "location": "The Tradewinds",
     "description": "The Tradewinds",
     "category": "Music",
-    "day": "Sunday"
-  },
-  {
-    "name": "My Niland II (Ten Checkpoints)",
-    "start_time": "7 PM",
-    "end_time": "7 AM",
-    "location": "Temple to the Scientific Method",
-    "description": "Video Installation by\nAntimony",
-    "category": "Installation/Immersive Environment",
-    "day": "Sunday"
-  },
-  {
-    "name": "Garbage Futurism: Post Waste",
-    "start_time": "10 PM",
-    "end_time": "2 AM",
-    "location": "Sotheby's",
-    "description": "UV Installation by Baer",
-    "category": "Installation/Immersive Environment",
-    "day": "Sunday"
-  },
-  {
-    "name": "Cafe Bosna",
-    "start_time": "6 PM",
-    "end_time": "6 AM",
-    "location": "The Bombay Beach Estates",
-    "description": "Immersive Music/Coffee Experience\n“An interdimensional portal to the world of ritual coffee, immersive art and global dance electronica.",
-    "category": "DJ, Music, Facilitated Experience",
     "day": "Sunday"
   },
   {
@@ -1656,11 +1602,11 @@
     "day": "Sunday"
   },
   {
-    "name": "Writing from the",
+    "name": "Writing from the Heart & Soul: Live Reading",
     "start_time": "5 PM",
     "end_time": "6 PM",
     "location": "Zig Zag Plaza",
-    "description": "Heart & Soul: Live Reading\nWriting Workshop with Eric Kaplan\nLimited to 30 participants",
+    "description": "Writing Workshop with Eric Kaplan\nLimited to 30 participants",
     "category": "Lecture/Talk, Facilitated Experience",
     "day": "Sunday"
   },
