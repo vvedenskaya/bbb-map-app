@@ -229,7 +229,7 @@
     "Long": -115.73305
   },
   {
-    "Name": "Pythia",
+    "Name": "Oracle Booth",
     "Address": "",
     "Category": "Venue",
     "Lat": 33.35293095676242,
@@ -638,6 +638,7 @@
     "Name": "SYZYGY",
     "Address": "",
     "Category": "Art Installation",
+    "Abridged Project Text":"SYZYGY is an ode to the land, an act of reverence, a centering on metabolic co-regulation with the ground itself—with its mineral bodies, its residues, its living and decaying matter.", 
     "Lat": 33.349667,
     "Long": -115.726806
   },

@@ -525,7 +525,7 @@
     "name": "ORACLE BOOTH",
     "start_time": "9 PM",
     "end_time": "12 AM",
-    "location": "Pythia",
+    "location": "Oracle Booth",
     "description": "by Ygor Marotta\nOracle Booth\nbooth construction in collaboration with AJ\nled lights by AH4B",
     "category": "Installation/Immersive Environment",
     "day": "Friday"
@@ -1209,7 +1209,7 @@
     "name": "ORACLE BOOTH",
     "start_time": "8 PM",
     "end_time": "2 AM",
-    "location": "Pythia",
+    "location": "Oracle Booth",
     "description": "by Ygor Marotta\nOracle Booth\nbooth construction in collaboration with AJ\nled lights by AH4B",
     "category": "Installation/Immersive Environment",
     "day": "Saturday"
@@ -1659,7 +1659,7 @@
     "name": "ORACLE BOOTH",
     "start_time": "6 PM",
     "end_time": "10 PM",
-    "location": "Pythia",
+    "location": "Oracle Booth",
     "description": "by Ygor Marotta\nOracle Booth\nbooth construction in collaboration with AJ\nled lights by AH4B",
     "category": "Installation/Immersive Environment",
     "day": "Sunday"
