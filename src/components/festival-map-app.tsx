@@ -1986,7 +1986,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
         className="legacy-mobile-timeline-fab"
         onClick={() => setIsTimelineOpen(true)}
       >
-        Timeline
+        Calendar
       </button>
 
     </main>
