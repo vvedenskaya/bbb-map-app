@@ -21,6 +21,8 @@ const DAY_SORT_ORDER: Record<FestivalDay, number> = {
 };
 const MAP_CENTER = { lat: 33.351508, lng: -115.729625 };
 const MAP_DEFAULT_ZOOM = 16.9;
+const MAP_REFERENCE_DESKTOP_WIDTH = 900;
+const MAP_MAX_MOBILE_ZOOM_DELTA = 1.2;
 const MAP_FOCUS_ZOOM = 17.8;
 const MAP_MIN_ZOOM = 14;
 const MAP_MAX_ZOOM = 19.2;
@@ -129,6 +131,21 @@ function hasCameraChanged(
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
+}
+
+function getResponsiveDefaultMapZoom(mapWidth?: number): number {
+  if (typeof window === "undefined") return MAP_DEFAULT_ZOOM;
+  const isMobileViewport = window.matchMedia("(max-width: 1080px)").matches;
+  const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
+  if (!isMobileViewport && !isCoarsePointer) return MAP_DEFAULT_ZOOM;
+
+  // Match desktop-like horizontal map coverage on narrower mobile viewports.
+  const fallbackMobileWidth = Math.max(Math.min(window.innerWidth, window.innerHeight), 1);
+  const effectiveWidth = Math.max(mapWidth ?? fallbackMobileWidth, 1);
+  const widthRatio = effectiveWidth / MAP_REFERENCE_DESKTOP_WIDTH;
+  const widthBasedDelta = Math.log2(widthRatio);
+  const cappedDelta = Math.max(widthBasedDelta, -MAP_MAX_MOBILE_ZOOM_DELTA);
+  return clamp(MAP_DEFAULT_ZOOM + cappedDelta, MAP_MIN_ZOOM, MAP_MAX_ZOOM);
 }
 
 function hashString(value: string): number {
@@ -618,7 +635,8 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [mapType, setMapType] = useState<"satellite" | "roadmap">("satellite");
   const [searchQuery, setSearchQuery] = useState("");
   const [mapCenter, setMapCenter] = useState(MAP_CENTER);
-  const [mapZoom, setMapZoom] = useState(MAP_DEFAULT_ZOOM);
+  const [mapZoom, setMapZoom] = useState(() => getResponsiveDefaultMapZoom());
+  const [responsiveDefaultMapZoom, setResponsiveDefaultMapZoom] = useState(() => getResponsiveDefaultMapZoom());
   const [timelineZoom, setTimelineZoom] = useState(TIMELINE_DEFAULT_ZOOM);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [hoveredVenueId, setHoveredVenueId] = useState<string | null>(null);
@@ -626,10 +644,11 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [geolocationStatus, setGeolocationStatus] = useState<
     "idle" | "requesting" | "ready" | "denied" | "unavailable" | "error"
   >("idle");
-  const hasCenteredOnUserRef = useRef(false);
   const timelineScrollRef = useRef<HTMLDivElement | null>(null);
+  const mapPanelRef = useRef<HTMLElement | null>(null);
   const hasAutoScrolledTimelineRef = useRef(false);
   const supportsHoverRef = useRef(false);
+  const hasUserInteractedWithMapRef = useRef(false);
 
   const geolocationHint =
     geolocationStatus === "requesting"
@@ -963,12 +982,6 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
         };
         setUserLocation(nextLocation);
         setGeolocationStatus("ready");
-        if (!hasCenteredOnUserRef.current) {
-          setMapCenter(nextLocation);
-          setMapZoom((current) => Math.max(current, 17.2));
-          setAllowOutOfBoundsNavigation(true);
-          hasCenteredOnUserRef.current = true;
-        }
       },
       (error: GeolocationPositionError) => {
         if (error.code === error.PERMISSION_DENIED) {
@@ -1059,6 +1072,58 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     }
   }, [selectedVenueId]);
 
+  useEffect(() => {
+    const mapPanel = mapPanelRef.current;
+    if (!mapPanel) return;
+
+    const markMapInteraction = () => {
+      hasUserInteractedWithMapRef.current = true;
+    };
+
+    mapPanel.addEventListener("pointerdown", markMapInteraction, { passive: true });
+    mapPanel.addEventListener("wheel", markMapInteraction, { passive: true });
+    mapPanel.addEventListener("touchstart", markMapInteraction, { passive: true });
+
+    return () => {
+      mapPanel.removeEventListener("pointerdown", markMapInteraction);
+      mapPanel.removeEventListener("wheel", markMapInteraction);
+      mapPanel.removeEventListener("touchstart", markMapInteraction);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mapPanel = mapPanelRef.current;
+    if (!mapPanel) return;
+
+    const updateZoomFromPanelWidth = (width: number) => {
+      const nextDefault = getResponsiveDefaultMapZoom(width);
+      setResponsiveDefaultMapZoom((prevDefault) => {
+        if (Math.abs(prevDefault - nextDefault) <= ZOOM_EPSILON) return prevDefault;
+        setMapZoom((currentZoom) => {
+          const nearPreviousDefault = Math.abs(currentZoom - prevDefault) <= 0.35;
+          if (!selectedVenueId && nearPreviousDefault) {
+            return nextDefault;
+          }
+          return currentZoom;
+        });
+        return nextDefault;
+      });
+    };
+
+    updateZoomFromPanelWidth(mapPanel.getBoundingClientRect().width);
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      updateZoomFromPanelWidth(entry.contentRect.width);
+    });
+    observer.observe(mapPanel);
+    return () => {
+      observer.disconnect();
+    };
+  }, [selectedVenueId]);
+
   return (
     <main className="legacy-app">
       <header className="legacy-banner">
@@ -1076,7 +1141,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
       </header>
 
       <div className="legacy-shell">
-        <section className="legacy-map-panel">
+        <section className="legacy-map-panel" ref={mapPanelRef}>
           <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""}>
             <Map
               center={mapCenter}
@@ -1092,17 +1157,25 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
               onCameraChanged={(ev) => {
                 const nextCenter = ev.detail.center;
                 const nextZoom = ev.detail.zoom;
+                const shouldHoldInitialMobileCoverage =
+                  !selectedVenueId &&
+                  !allowOutOfBoundsNavigation &&
+                  !hasUserInteractedWithMapRef.current &&
+                  nextZoom > responsiveDefaultMapZoom;
+                const effectiveNextZoom = shouldHoldInitialMobileCoverage
+                  ? responsiveDefaultMapZoom
+                  : nextZoom;
                 const canMoveOutsideFence =
                   allowOutOfBoundsNavigation && userLocation
                     ? distanceMeters(userLocation.lat, userLocation.lng, nextCenter.lat, nextCenter.lng) <= 3000
                     : false;
                 if (
                   (isInsideGeofence(nextCenter.lat, nextCenter.lng) || canMoveOutsideFence) &&
-                  hasCameraChanged(mapCenter, nextCenter, mapZoom, nextZoom)
+                  hasCameraChanged(mapCenter, nextCenter, mapZoom, effectiveNextZoom)
                 ) {
                   setMapCenter(nextCenter);
-                  if (Math.abs(mapZoom - nextZoom) > ZOOM_EPSILON) {
-                    setMapZoom(nextZoom);
+                  if (Math.abs(mapZoom - effectiveNextZoom) > ZOOM_EPSILON) {
+                    setMapZoom(effectiveNextZoom);
                   }
                 }
               }}
@@ -1280,8 +1353,9 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                   setSelectedVenueId(null);
                   setSelectedEventId(null);
                   setAllowOutOfBoundsNavigation(false);
+                  hasUserInteractedWithMapRef.current = false;
                   setMapCenter(MAP_CENTER);
-                  setMapZoom(MAP_DEFAULT_ZOOM);
+                  setMapZoom(responsiveDefaultMapZoom);
                 }}
               >
                 Reset
