@@ -1025,6 +1025,7 @@ a {
   padding: 10px;
   background: #f4efe2;
   overscroll-behavior: contain;
+  touch-action: pan-x pan-y;
 }
 
 .legacy-timeline-stack {

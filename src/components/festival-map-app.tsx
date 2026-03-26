@@ -1188,6 +1188,34 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     };
   }, [selectedVenueId]);
 
+  useEffect(() => {
+    const timelineElement = timelineScrollRef.current;
+    if (!isTimelineOpen || !timelineElement) return;
+
+    const blockNativePinch = (event: TouchEvent) => {
+      if (event.touches.length > 1) {
+        event.preventDefault();
+      }
+    };
+    const blockGestureEvent = (event: Event) => {
+      event.preventDefault();
+    };
+
+    timelineElement.addEventListener("touchstart", blockNativePinch, { passive: false });
+    timelineElement.addEventListener("touchmove", blockNativePinch, { passive: false });
+    timelineElement.addEventListener("gesturestart", blockGestureEvent, { passive: false });
+    timelineElement.addEventListener("gesturechange", blockGestureEvent, { passive: false });
+    timelineElement.addEventListener("gestureend", blockGestureEvent, { passive: false });
+
+    return () => {
+      timelineElement.removeEventListener("touchstart", blockNativePinch);
+      timelineElement.removeEventListener("touchmove", blockNativePinch);
+      timelineElement.removeEventListener("gesturestart", blockGestureEvent);
+      timelineElement.removeEventListener("gesturechange", blockGestureEvent);
+      timelineElement.removeEventListener("gestureend", blockGestureEvent);
+    };
+  }, [isTimelineOpen]);
+
   return (
     <main className="legacy-app">
       <header className="legacy-banner">
