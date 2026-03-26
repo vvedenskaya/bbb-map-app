@@ -34,8 +34,8 @@
     "Name": "Aperion",
     "Address": "9543 Avenue H",
     "Category": "Art Installation",
-    "Lat": 33.34981,
-    "Long": -115.72666
+    "Lat": 33.34964,
+    "Long": -115.72670
   },
   {
     "Name": "Atlantis Inn Collective",
@@ -383,7 +383,7 @@
     "Alias": ["MUWA", "MoUA", "The Museum of Unwanted Architecture"],
     "Address": "",
     "Category": "Venue",
-    "Lat": 33.34965,
+    "Lat": 33.34978,
     "Long": -115.726501
   },
   {
