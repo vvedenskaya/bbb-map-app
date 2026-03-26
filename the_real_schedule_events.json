@@ -23,7 +23,7 @@
     "end_time": "9 PM",
     "location": "Bombay Beach Community Center",
     "description": "",
-    "category": "Social Gathering",
+    "category": "Facilitated Experience",
     "day": "Wednesday"
   },
   {
@@ -31,9 +31,9 @@
     "start_time": "11 AM",
     "end_time": "2 PM",
     "location": "American Legion",
-    "description": "Minestrone soup/ grilled cheese, $15 per plate until supplies run out.",
+    "description": "Chicken tortilla soup, Cheese and green chili quesadilla. $15 per plate until supplies run out.",
     "category": "Food/Beverage",
-    "day": "Wednesday"
+    "day": "Thursday"
   },
   {
     "name": "Legends Coffee Club",
@@ -41,15 +41,15 @@
     "end_time": "12 PM",
     "location": "Bombay Beach Community Center",
     "description": "Meet the Legends: our long-term, year-round residents of Bombay Beach",
-    "category": "Social Gathering, Food/Beverage",
-    "day": "Tuesday"
+    "category": "Food/Beverage",
+    "day": "Thursday"
   },
   {
     "name": "Lunch",
     "start_time": "11 AM",
     "end_time": "2 PM",
     "location": "American Legion",
-    "description": "Baked potato soup & BLT, $15 per plate until supplies run out.",
+    "description": "Chicken tortilla soup, Cheese and green chili quesadilla. $15 per plate until supplies run out.",
     "category": "Food/Beverage",
     "day": "Thursday"
   },
@@ -60,7 +60,7 @@
     "location": "Little Little Italy",
     "description": "Little Little Italy\nHave an old school italian festival with music food and drink (aperitivo) during sunset and then screen from Rome Italy, Anna Negri's, Venice Film Festival selected, feature Documentary. Toni mio Padre afterwards with Q&A",
     "category": "Film",
-    "day": "Tuesday"
+    "day": "Thursday"
   },
   {
     "name": "\"Toni, Mio Padre\"",
@@ -69,16 +69,35 @@
     "location": "Little Little Italy",
     "description": "by Anna Negri\nDocumentary Feature & Director Q&A\nBBIFF x Little Little Italy Italian Festival",
     "category": "Film",
-    "day": "Tuesday"
+    "day": "Thursday"
   },
   {
-    "name": "The Dulcinée Dialectic",
+    "name": "Lunch",
+    "start_time": "11 AM",
+    "end_time": "2 PM",
+    "location": "American Legion",
+    "description": "The American Legion",
+    "category": "Food/Beverage",
+    "day": "Thursday"
+  },
+  {
+    "name": "\"The Dulcinée Dialectic\"",
     "start_time": "4 PM",
     "end_time": "7 PM",
     "location": "Downtown Palm Springs",
     "description": "by Tao Ruspoli\nDocumentary Feature\n*Ticketed Event*\nBBIFF x AMDOCS",
     "category": "Film",
-    "day": "Wednesday"
+    "location_candidate": "Downtown Palm Springs",
+    "day": "Thursday"
+  },
+  {
+    "name": "Lunch",
+    "start_time": "11 AM",
+    "end_time": "2 PM",
+    "location": "American Legion",
+    "description": "The American Legion",
+    "category": "Food/Beverage",
+    "day": "Thursday"
   },
   {
     "name": "3D Therapy in Perspective",
@@ -86,25 +105,17 @@
     "end_time": "7 PM",
     "location": "3D Therapy in Perspective",
     "description": "Gallery Opening by Jimmy Mahafee\n“built of art like legos on 4'x6' panels, the installation is composed of 250 paintings digitized onto coreplast. this habitrail of my imagination is a construction of the places people and art i love so much I had to paint a picture of them and build them a cappella.“",
-    "category": "Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Thursday"
   },
   {
     "name": "The Magic Carpet Ride",
     "start_time": "6 PM",
     "end_time": "10 PM",
-    "location": "Love Buggin",
+    "location": "",
     "description": "AV Experience\n“A 6-minute blindfolded journey on a magic carpet. EEG captures how your nervous system responds to surrender, rhythm, mystery, being seen — and translates it into four glyphs sealed in wax. Your frequency fingerprint. The quest: find the others on your wavelength.”",
     "category": "Facilitated Experience",
-    "day": "Thursday"
-  },
-  {
-    "name": "The Last Canter",
-    "start_time": "10 PM",
-    "end_time": "12 AM",
-    "location": "The Bombay Beach Estates",
-    "description": "by Art Machine, Inc.\nBrandon Anderson\nGallery Preview",
-    "category": "Installation/Immersive Environment, Exhibition",
+    "location_candidate": "Love Buggin",
     "day": "Thursday"
   },
   {
@@ -113,7 +124,7 @@
     "end_time": "9 PM",
     "location": "The Butterfly Pavillion",
     "description": "Gallery Opening by April Leighton\n“The Butterfly Pavilion is an immersive experience created with colorful origami butterflies and flowers and lights creating a fantasy experience”",
-    "category": "Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Thursday"
   },
   {
@@ -122,26 +133,17 @@
     "end_time": "12 AM",
     "location": "Bombay Bliss Beach Club",
     "description": "Disco Vinyl Set starring Montel Spinoza & Pierre Delecto\nDrinks and Hors D’Oeuvres",
-    "category": "DJ, Social Gathering",
-    "day": "Thursday"
-  },
-  {
-    "name": "Salton Sea Stellar Sky Society",
-    "start_time": "9 PM",
-    "end_time": "10 PM",
-    "location": "Star Sight Site, Bombay North",
-    "description": "Star Sermons feat.\nGregg Fleishman, J. Cole, Scott (Seamus) Kildall, Regina (Pharaoh) Victor, Sarah Larsen, Jamie Dunphy\nMC: Future Eyes Brent Pearson.",
-    "category": "Facilitated Experience",
-    "day": "Thursday"
+    "category": "DJ",
+    "day": "Friday"
   },
   {
     "name": "Artemis makes a housecall",
-    "start_time": "8 PM",
-    "end_time": "9 PM",
+    "start_time": "9 PM",
+    "end_time": "10 PM",
     "location": "The Bombay Beach Institute of Particle Physics, Metaphysics & International Relations",
     "description": "Gallery Opening by Branwen\n“In my surrealist conceptual offering I'm bringing magic and symbolism to the Salton Sea by inviting Artemis, the lady of the lake, to visit her home away from home, a hollow Redwood tree temple in a trailer, thus shifting shapes and playing with perception.”",
-    "category": "Exhibition",
-    "day": "Sunday"
+    "category": "Installation/Immersive Environment",
+    "day": "Friday"
   },
   {
     "name": "\"Last Flight Home\"",
@@ -150,15 +152,24 @@
     "location": "Temple to the Scientific Method",
     "description": "by Ondi Timoner\nDocumentary Feature &\nQ&A w/ Director\nBBIFF",
     "category": "Film",
-    "day": "Thursday"
+    "day": "Friday"
   },
   {
     "name": "Salton Sea Stellar Sky Society",
-    "start_time": "8 PM",
-    "end_time": "9 PM",
-    "location": "Star Sight Site, Bombay North",
+    "start_time": "9 PM",
+    "end_time": "10 PM",
+    "location": "Star Sight Site",
     "description": "Star Sermons feat.\nGregg Fleishman, J. Cole, Scott (Seamus) Kildall, Regina (Pharaoh) Victor, Sarah Larsen, Jamie Dunphy\nMC: Future Eyes Brent Pearson.",
     "category": "Facilitated Experience",
+    "day": "Friday"
+  },
+  {
+    "name": "The Last Canter",
+    "start_time": "10 PM",
+    "end_time": "12 AM",
+    "location": "The Bombay Beach Estates",
+    "description": "by Art Machine, Inc.\nBrandon Anderson\nGallery Preview",
+    "category": "Installation/Immersive Environment",
     "day": "Friday"
   },
   {
@@ -167,7 +178,7 @@
     "end_time": "2 PM",
     "location": "BBAC",
     "description": "BBAC\nCurated by Christopher Landis\nAdditionally titles include topics covering Western Water, Deserts and Landscape studies.\"",
-    "category": "Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Friday"
   },
   {
@@ -176,7 +187,7 @@
     "end_time": "11 AM",
     "location": "Bombay Beach Community Center",
     "description": "The People of the Salton Sea\nfacilitated by Uwe H. Martin & IVEJ",
-    "category": "Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Friday"
   },
   {
@@ -193,7 +204,7 @@
     "start_time": "11 AM",
     "end_time": "2 PM",
     "location": "American Legion",
-    "description": "Clam chowder & Tuna melt, $15 per plate until supplies run out.",
+    "description": "The American Legion",
     "category": "Food/Beverage",
     "day": "Friday"
   },
@@ -247,8 +258,8 @@
     "start_time": "3 PM",
     "end_time": "5 PM",
     "location": "BBAC",
-    "description": "Art Auction in the Barn at BBAC",
-    "category": "Facilitated Experience",
+    "description": "",
+    "category": "Installation/Immersive Environment",
     "day": "Friday"
   },
   {
@@ -265,8 +276,8 @@
     "start_time": "4 PM",
     "end_time": "8 PM",
     "location": "Museum of Unwanted Architecture",
-    "description": "Music in the Garden by\nDANNA\nDJ Gevorkian",
-    "category": "DJ",
+    "description": "",
+    "category": "Facilitated Experience",
     "day": "Friday"
   },
   {
@@ -274,7 +285,7 @@
     "start_time": "4 PM",
     "end_time": "5 PM",
     "location": "Horsefly Ranch",
-    "description": "The Silver Tongued Devil: A Speaker-Creature is an interactive sound sculpture constructed out of broken music equipment collected by a recently-deceased San Diego musician. Visit the Creature to hear angels plummeting into the Underworld—and to receive your own flattering fortune!",
+    "description": "“The Silver Tongued Devil: A Speaker-Creature is an interactive sound sculpture constructed out of broken music equipment collected by a recently-deceased San Diego musician. Visit the Creature to hear angels plummeting into the Underworld—and to receive your own flattering fortune!”",
     "category": "Installation/Immersive Environment",
     "day": "Friday"
   },
@@ -311,7 +322,7 @@
     "end_time": "7 PM",
     "location": "Skull Pony",
     "description": "Skull Pony\nMembership has its benefits!",
-    "category": "Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Friday"
   },
   {
@@ -337,8 +348,8 @@
     "start_time": "5:30 PM",
     "end_time": "7 PM",
     "location": "Limbo Lounge Gallery",
-    "description": "Photography Show by Alfonso Paredes, Gina de la Chesnaye, Todd Crawford, TAFKA J. Lighthouse",
-    "category": "Exhibition",
+    "description": "Subject: TAFKA J.\nLimbo Lounge Gallery",
+    "category": "Installation/Immersive Environment",
     "day": "Friday"
   },
   {
@@ -346,8 +357,8 @@
     "start_time": "6 PM",
     "end_time": "6 AM",
     "location": "The Bombay Beach Estates",
-    "description": "Immersive Music/Coffee Experience\n“An interdimensional portal to the world of ritual coffee, immersive art and global dance electronica.",
-    "category": "DJ, Music, Facilitated Experience",
+    "description": "",
+    "category": "DJ",
     "day": "Friday"
   },
   {
@@ -356,7 +367,7 @@
     "end_time": "8 PM",
     "location": "Jaybird Nest",
     "description": "by Cactus Chaos & Kamau\n“The Thread of Life | Act III: Own Your Fate” is an immersive ritual-performance where myth, ancestry, and craft colide. Guided by Nyx and the Moirai, participants are invited to own their fate and weave it into the Loom of Life.”",
-    "category": "Performance",
+    "category": "",
     "day": "Friday"
   },
   {
@@ -383,7 +394,7 @@
     "end_time": "9 PM",
     "location": "PoP",
     "description": "",
-    "category": "DJ",
+    "category": "Facilitated Experience",
     "day": "Friday"
   },
   {
@@ -401,7 +412,7 @@
     "end_time": "11 PM",
     "location": "Foundation Foundation",
     "description": "Open Gallery Hours\nFOUNDATION FOUNDATION\nCurated by Greg Haberny\nfeat. Adam Cullins, Jack Parker, Randy Polumbo, Judith Berndsen, Sean Guerrero, Masha D’yans, Jake Wade, Bunny Valentine, Bill Saylor, Camille Schefter, Nick Fari, Steve Hash, Brett Lindell, Katrina Brown, Bob Swanek, Joe Regan, Tafka J. Lighthouse, Stephanie Caite, Greg Haberny, Heidl Hasenauer\\\n“We will be making a show diverse in personalities and disciplines. The setting will be a smorgasbord of delights for the senses.”",
-    "category": "Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Friday"
   },
   {
@@ -410,7 +421,7 @@
     "end_time": "8 PM",
     "location": "The Tradewinds",
     "description": "",
-    "category": "DJ",
+    "category": "Facilitated Experience",
     "day": "Friday"
   },
   {
@@ -419,7 +430,7 @@
     "end_time": "9 PM",
     "location": "Globalschism",
     "description": "Secret Nightclub\n\"Globalschism\" is a meta look at the environmental and human destruction caused by globalism. Based on the largest ship breaking yard in the world in Alang, India, the very ships that deliver detritus around the world ironically end up being detritus themselves. Inside the ship is an intimate nightclub.",
-    "category": "DJ, Installation/Immersive Environment",
+    "category": "DJ",
     "day": "Friday"
   },
   {
@@ -427,8 +438,8 @@
     "start_time": "7 PM",
     "end_time": "9 PM",
     "location": "Saturn",
-    "description": "Saturn activation featuring selected works from the Mars College 2026 cohort",
-    "category": "Exhibition",
+    "description": "",
+    "category": "Installation/Immersive Environment",
     "day": "Friday"
   },
   {
@@ -437,15 +448,15 @@
     "end_time": "9 PM",
     "location": "Neptune",
     "description": "by Ria Rajan, Sofy Yuditskaya,\nNeptune",
-    "category": "Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Friday"
   },
   {
-    "name": "Glorious Holy Kings drag show: Queer Heaven in Bombay Beach",
+    "name": "Glorious Holy Kings:",
     "start_time": "7:30 PM",
     "end_time": "9:30 PM",
     "location": "Temple to the Scientific Method",
-    "description": "Glorious Holy Kings is a drag show highlighting Kings uniquely designed for Bombay Beach. The Queer community has faced many judgements through the years, and not one of them has stopped us from celebrating our most authentic selves! Kingdom comes in the land of milk, honey, and drag. ",
+    "description": "The Temple to the Scientific Method\nDrag Show\n+ Care Club\n7:30-9:30 PM\nTemple to the Scientific Method\n“Glorious Holy Kings is a drag show highlighting Kings uniquely designed for Bombay Beach. The Queer community has faced many judgements through the years, and not one of them has stopped us from celebrating our most authentic selves! Kingdom comes in the land of milk, honey, and drag. “",
     "category": "Performance",
     "day": "Friday"
   },
@@ -473,7 +484,25 @@
     "end_time": "9 PM",
     "location": "Bombay North",
     "description": "by Salton Sea Stellar Sky Society\n“The Salton Sea Stellar Sky Society’s Star Sight Site: a shared sculptural sanctuary supplying stargazing, star-seeking, skyward study, and speculative celestial storytelling for the Bombay Beach community. Styled and supported by The 9-foot Comeback Cube by Gregg Fleishman.”",
-    "category": "Facilitated Experience, Installation/Immersive Environment",
+    "category": "Facilitated Experience",
+    "day": "Friday"
+  },
+  {
+    "name": "Care Club",
+    "start_time": "10 PM",
+    "end_time": "2 AM",
+    "location": "Club 86",
+    "description": "",
+    "category": "Facilitated Experience",
+    "day": "Friday"
+  },
+  {
+    "name": "The Social Equilibrium Calibration Unit",
+    "start_time": "7 PM",
+    "end_time": "7:30 PM",
+    "location": "The Beach",
+    "description": "by Damon James Duke\n“Time is running.”",
+    "category": "Facilitated Experience",
     "day": "Friday"
   },
   {
@@ -508,8 +537,8 @@
     "start_time": "9 PM",
     "end_time": "2 AM",
     "location": "The Bombay Beach Estates",
-    "description": "A Martini Bar that stands as a vestige of the glorious heydays of Bombay Beach.\n\"Don’t believe anything you hear and only half of what you see.\"",
-    "category": "Exhibition, Installation/Immersive Environment",
+    "description": "Bar Lescher, Estates\n“Don’t believe anything you hear and only half of what you see.”",
+    "category": "DJ",
     "day": "Friday"
   },
   {
@@ -545,7 +574,7 @@
     "end_time": "12 AM",
     "location": "The Tradewinds",
     "description": "The Tradewinds",
-    "category": "Music",
+    "category": "",
     "day": "Friday"
   },
   {
@@ -554,7 +583,7 @@
     "end_time": "12 AM",
     "location": "Get Lost Gallery",
     "description": "by Katana Calderwood\nAlejandro Sanchez-Medina: Audio Engineer\nMartians: Audio Artists\n“Death is inevitable, but the true horror is the infinite return. Inspired by Buddhist earthly hells, Algo(g)rave explores possibilities of disrupting the material-time mesh network of life. To escape the cycle, we move through recursive loops toward white noise—the soul’s final, static resolution.”",
-    "category": "Performance, Music",
+    "category": "Performance",
     "day": "Friday"
   },
   {
@@ -563,7 +592,7 @@
     "end_time": "2 AM",
     "location": "The Bombay Beach Estates",
     "description": "by Art Machine, Inc.\nBrandon Anderson\nSculpture Exhibit",
-    "category": "Installation/Immersive Environment, Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Friday"
   },
   {
@@ -572,7 +601,7 @@
     "end_time": "12 AM",
     "location": "Sotheby's",
     "description": "by SynthCult.Org\nArt & Music",
-    "category": "Music, Performance",
+    "category": "DJ",
     "day": "Friday"
   },
   {
@@ -598,9 +627,18 @@
     "start_time": "11 PM",
     "end_time": "3 AM",
     "location": "Bombay Bliss Beach Club",
-    "description": "afters at Bliss Club",
+    "description": "",
     "category": "DJ",
-    "day": "Friday"
+    "day": "Saturday"
+  },
+  {
+    "name": "Beats Without Borders:",
+    "start_time": "11 PM",
+    "end_time": "3 AM",
+    "location": "Bombay Beach Yacht Club",
+    "description": "A Live Electric World Journey\n11-11:30 PM: Bárabás Lörinc\n11:30 PM-12 AM: Miles Jay\n12-12:30 AM: Yasmine Azaeiz, Tunisia\n12:30-??: All together fam jam cocktail of sonic deliciousness",
+    "category": "DJ",
+    "day": "Saturday"
   },
   {
     "name": "Heidi Lawden & LoveFingers (B2B)",
@@ -609,7 +647,16 @@
     "location": "Beach: The Sub Club",
     "description": "",
     "category": "DJ",
-    "day": "Friday"
+    "day": "Saturday"
+  },
+  {
+    "name": "Heidi Lawden & LoveFingers (B2B)",
+    "start_time": "11:30 PM",
+    "end_time": "3 AM",
+    "location": "Beach: The Sub Club",
+    "description": "",
+    "category": "DJ",
+    "day": "Saturday"
   },
   {
     "name": "Globalschism",
@@ -621,11 +668,11 @@
     "day": "Saturday"
   },
   {
-    "name": "Bar Lescher - Nightclub Edition",
-    "start_time": "11 PM",
+    "name": "Lescher Martitti Bar",
+    "start_time": "9 PM",
     "end_time": "2 AM",
     "location": "The Bombay Beach Estates",
-    "description": "BYOB - Bring Your Own Boobs - Vinyls & Grooves",
+    "description": "Bar Lescher, Estates\n“Don’t believe anything you hear and only half of what you see.”",
     "category": "DJ",
     "day": "Saturday"
   },
@@ -644,7 +691,7 @@
     "end_time": "2 AM",
     "location": "The Bombay Beach Estates",
     "description": "by Art Machine, Inc.\nBrandon Anderson\nSculpture Exhibit",
-    "category": "Installation/Immersive Environment, Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Saturday"
   },
   {
@@ -657,11 +704,47 @@
     "day": "Saturday"
   },
   {
+    "name": "The Magic Carpet Ride",
+    "start_time": "6 PM",
+    "end_time": "2 AM",
+    "location": "Love Buggin",
+    "description": "AV Experience",
+    "category": "Facilitated Experience",
+    "day": "Saturday"
+  },
+  {
+    "name": "Late Night Bliss",
+    "start_time": "11 PM",
+    "end_time": "3 AM",
+    "location": "Bombay Bliss Beach Club",
+    "description": "",
+    "category": "DJ",
+    "day": "Saturday"
+  },
+  {
     "name": "Beats Without Borders:",
     "start_time": "11 PM",
     "end_time": "3 AM",
     "location": "Bombay Beach Yacht Club",
     "description": "A Live Electric World Journey\n11-11:30 PM: Bárabás Lörinc\n11:30 PM-12 AM: Miles Jay\n12-12:30 AM: Yasmine Azaeiz, Tunisia\n12:30-??: All together fam jam cocktail of sonic deliciousness",
+    "category": "DJ",
+    "day": "Saturday"
+  },
+  {
+    "name": "Care Club",
+    "start_time": "10 PM",
+    "end_time": "2 AM",
+    "location": "Club 86",
+    "description": "",
+    "category": "Facilitated Experience",
+    "day": "Saturday"
+  },
+  {
+    "name": "Cafe Bosna",
+    "start_time": "6 PM",
+    "end_time": "6 AM",
+    "location": "The Bombay Beach Estates",
+    "description": "",
     "category": "DJ",
     "day": "Saturday"
   },
@@ -680,7 +763,7 @@
     "end_time": "2 PM",
     "location": "BBAC",
     "description": "Curated by Christopher Landis",
-    "category": "Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Saturday"
   },
   {
@@ -702,11 +785,11 @@
     "day": "Saturday"
   },
   {
-    "name": "The Eurabia Myth: Countercolonization and Masculine Fragility in France",
+    "name": "The Eurabia Myth:",
     "start_time": "10 AM",
     "end_time": "11 AM",
     "location": "The Bombay Beach Estates",
-    "description": "Mehammed Amadeus Mack\nPhilsophy Conference",
+    "description": "Countercolonization and Masculine Fragility in France\nMehammed Amadeus Mack\nPhilsophy Conference",
     "category": "Lecture/Talk",
     "day": "Saturday"
   },
@@ -743,7 +826,7 @@
     "end_time": "11 AM",
     "location": "The Beach",
     "description": "Daytime Fireworks by Jonny",
-    "category": "Performance, Facilitated Experience",
+    "category": "Performance",
     "day": "Saturday"
   },
   {
@@ -761,7 +844,7 @@
     "end_time": "12 PM",
     "location": "Temple to the Scientific Method",
     "description": "by Isaac Taylor\nQueso, Kool-Aid, and Comedy with Rev. Earl E. Gaytes\n“Come to Cheesus” in an Old Time Religion styled tent revival as Rev. Earl E. Gaytes preaches about the one true whey of salvation. Expect a cheesy sermon, boxed wine communion, some food & fellowship to follow.”",
-    "category": "Food/Beverage, Facilitated Experience",
+    "category": "",
     "day": "Saturday"
   },
   {
@@ -779,7 +862,7 @@
     "end_time": "1 PM",
     "location": "The Beach",
     "description": "Westlandia Desert Oasis\n“Tired of wandering through life? Pause and arrive at Westlandia Desert Oasis, where weary feet and restless minds find renewal. Heal in our vibroacoustic dome, sip a last-call drink in the lounge, and leave your mark by gifting found objects to our vibrant peddlers’ paradise.”",
-    "category": "Facilitated Experience, Music",
+    "category": "Facilitated Experience",
     "day": "Saturday"
   },
   {
@@ -788,7 +871,7 @@
     "end_time": "3 PM",
     "location": "American Legion",
     "description": "$15 Burger Specials",
-    "category": "Food/Beverage, Social Gathering",
+    "category": "Food/Beverage",
     "day": "Saturday"
   },
   {
@@ -797,7 +880,7 @@
     "end_time": "12 AM",
     "location": "Foundation Foundation",
     "description": "Open Gallery Hours\nOpen Gallery Hours\nCurated by Greg Haberny\nfeat. Adam Cullins, Jack Parker, Randy Polumbo, Judith Berndsen, Sean Guerrero, Masha D’yans, Jake Wade, Bunny Valentine, Bill Saylor, Camille Schefter, Nick Fari, Steve Hash, Brett Lindell, Katrina Brown, Bob Swanek, Joe Regan, Tafka J. Lighthouse, Stephanie Caite, Greg Haberny, Heidl Hasenauer",
-    "category": "Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Saturday"
   },
   {
@@ -805,7 +888,7 @@
     "start_time": "11:30 AM",
     "end_time": "12:30 PM",
     "location": "Dream Demon",
-    "description": "God Is / Sustenance centers the body and land as sacred sites. A living altar invites offering and reflection on embodied divinity, while immersive stations throughout the landscape guide participants into contemplation, reverence, and renewed relationship with the environment.",
+    "description": "Performance by Courtney Alexander\nDream Demon",
     "category": "Performance",
     "day": "Saturday"
   },
@@ -819,21 +902,21 @@
     "day": "Saturday"
   },
   {
-    "name": "Sunshine Dreams: Legends of Bombay Beach",
+    "name": "Sunshine Dreams:",
     "start_time": "12 PM",
     "end_time": "5 PM",
     "location": "Henderson Hall",
-    "description": "Henderson Hall\n\"An excursion through the essence of Bombay Beach led by the souls of those that lived it.",
-    "category": "Exhibition",
+    "description": "Henderson Hall\n\"An excursion through the essence of Bombay Beach led by the souls of those that lived it.”",
+    "category": "Installation/Immersive Environment",
     "day": "Saturday"
   },
   {
-    "name": "Pizza & the Pioneers of NYC Subway Graffiti",
+    "name": "Pizza & the Pioneers of",
     "start_time": "12 PM",
     "end_time": "4 PM",
     "location": "Sotheby's",
-    "description": "Collective show of America's first ever graffiti artists.",
-    "category": "Exhibition",
+    "description": "Sotheby's\nCollective show of America's first ever graffiti artists.",
+    "category": "Installation/Immersive Environment",
     "day": "Saturday"
   },
   {
@@ -851,15 +934,15 @@
     "end_time": "4 PM",
     "location": "Bombay Soleil",
     "description": "“Reimagined Western Paintings by Jake Wade / Salton Sea Time Capsule Photographs by Sandi Wheaton”",
-    "category": "Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Saturday"
   },
   {
-  "name": "Community Patchwork/Quilting Bee of the Damned",
+    "name": "Community Patchwork/",
     "start_time": "1 PM",
     "end_time": "2 PM",
     "location": "No Shoes",
-    "description": "Quilting Workshop\n“Together we steward cast-aside fibers and create a Biennale tapestry. Sew in community, and merge tattered scraps into something new. Unlike the gods who would condemn and abandon the world they created, we explore the latent potential in each textile.“",
+    "description": "Quilting Bee of the Damned\nQuilting Workshop\n“Together we steward cast-aside fibers and create a Biennale tapestry. Sew in community, and merge tattered scraps into something new. Unlike the gods who would condemn and abandon the world they created, we explore the latent potential in each textile.“",
     "category": "Facilitated Experience",
     "day": "Saturday"
   },
@@ -877,8 +960,8 @@
     "start_time": "2 PM",
     "end_time": "3 PM",
     "location": "Henderson Hall",
-    "description": "The Dedication of Henderson Hall",
-    "category": "Performance, Music, Social Gathering",
+    "description": "Henderson Hall",
+    "category": "Performance",
     "day": "Saturday"
   },
   {
@@ -896,7 +979,7 @@
     "end_time": "4 PM",
     "location": "Showtown",
     "description": "Meet the Artist Joseph Elwell\nAn informal meetup and discussion. Snacks, drinks and Air Conditioner provided.\nAn AR piece that allows you to hear body stories while inhabiting the nude body of the storyteller.",
-    "category": "Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Saturday"
   },
   {
@@ -932,7 +1015,7 @@
     "end_time": "5 PM",
     "location": "drakkar Noir",
     "description": "“The night before was kind of rough, got up around 10:00, started running around looking at art had a taco at 11:00, starting to burn out and getting tired, as I raise my head the sun burning my eyes I see a line, it's affogatos”",
-    "category": "Food/Beverage, Facilitated Experience",
+    "category": "",
     "day": "Saturday"
   },
   {
@@ -945,21 +1028,12 @@
     "day": "Saturday"
   },
   {
-    "name": "The Temporality of Decay Redux",
-    "start_time": "4 PM",
-    "end_time": "5 PM",
-    "location": "DORD, Estates",
-    "description": "Mark Wrathall\nPhilosophy Conference",
-    "category": "Lecture/Talk",
-    "day": "Saturday"
-  },
-  {
     "name": "Art Basil Bombay Beach",
     "start_time": "4 PM",
     "end_time": "5:30 PM",
     "location": "Art Basil Bombay Beach",
     "description": "by Tarcila Neves, Jmill & Daniela\nGet Lost Gallery on Moon Base",
-    "category": "Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Saturday"
   },
   {
@@ -968,7 +1042,7 @@
     "end_time": "10 PM",
     "location": "Museum of Unwanted Architecture",
     "description": "Music in the Garden by\nDANNA\nDJ Gevo",
-    "category": "Facilitated Experience, DJ",
+    "category": "Facilitated Experience",
     "day": "Saturday"
   },
   {
@@ -995,7 +1069,7 @@
     "end_time": "7 PM",
     "location": "The Beach",
     "description": "Westlandia Desert Oasis",
-    "category": "Facilitated Experience, Music",
+    "category": "Facilitated Experience",
     "day": "Saturday"
   },
   {
@@ -1004,7 +1078,7 @@
     "end_time": "8 PM",
     "location": "Bombay Bliss Beach Club",
     "description": "Roll the dice for a cocktail, mocktail, or a nosh! Electro-swing & Disco with DJs Goldify and Sima&Sidu\n“Sima & Sidu are a DJ duo with a love for mixing South Asian rhythms and melodies into music from around the world! They are all about inspiring people to let loose and just be silly on the dance floor.”",
-    "category": "DJ",
+    "category": "",
     "day": "Saturday"
   },
   {
@@ -1013,7 +1087,7 @@
     "end_time": "7 PM",
     "location": "Skull Pony",
     "description": "Skull Pony\nMembership has its benefits!",
-    "category": "Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Saturday"
   },
   {
@@ -1031,7 +1105,7 @@
     "end_time": "7 PM",
     "location": "The Beach",
     "description": "Estates >",
-    "category": "Facilitated Experience",
+    "category": "",
     "day": "Saturday"
   },
   {
@@ -1040,7 +1114,7 @@
     "end_time": "7 PM",
     "location": "Zig Zag Plaza",
     "description": "“A live musical performance using prepared cassette tape loops of various lengths as source material. Old Walkmans and effect pedal chains build layered, melodic sound in real time. The loops drift in and out of sync as hiss and gentle warble become part of the music.”",
-    "category": "Music, Performance",
+    "category": "",
     "day": "Saturday"
   },
   {
@@ -1049,7 +1123,7 @@
     "end_time": "7 PM",
     "location": "The Beach",
     "description": "Controlled Burn\nThe Beach\n\"What is that thing?\nLet's check it out.\nWithin, you see buttons! And pipes and hoses buried inside a writhing snake-like structure.\nWhat is this thing?\nPress button. Fire erupts. Music happens.\n:-D\"",
-    "category": "Facilitated Experience",
+    "category": "Installation/Immersive Environment",
     "day": "Saturday"
   },
   {
@@ -1058,7 +1132,7 @@
     "end_time": "9 PM",
     "location": "The Sandbox",
     "description": "by Charlotte de Cock\nThe Sandbox\nWanderbox Dexter: Stage/Sound Lasers\nAerial Silks & Ropes by Jessie Lewis\nDJ sets -\n6-7 PM: Carson Hotaling\n7-9 PM: Charlotte de Cock",
-    "category": "Performance",
+    "category": "Music",
     "day": "Saturday"
   },
   {
@@ -1076,7 +1150,7 @@
     "end_time": "9 PM",
     "location": "PoP",
     "description": "",
-    "category": "DJ",
+    "category": "Facilitated Experience",
     "day": "Saturday"
   },
   {
@@ -1085,7 +1159,7 @@
     "end_time": "6 AM",
     "location": "The Bombay Beach Estates",
     "description": "Immersive Music/Coffee Experience\n“An interdimensional portal to the world of ritual coffee, immersive art and global dance electronica.”",
-    "category": "DJ, Music, Facilitated Experience",
+    "category": "DJ",
     "day": "Saturday"
   },
   {
@@ -1094,7 +1168,7 @@
     "end_time": "9 PM",
     "location": "BBAC",
     "description": "by Martians\nExperimental Shorts\nBBIFF",
-    "category": "Film",
+    "category": "Lecture/Talk",
     "day": "Saturday"
   },
   {
@@ -1103,7 +1177,7 @@
     "end_time": "7:30 PM",
     "location": "Kevin's Lit Landing",
     "description": "",
-    "category": "Facilitated Experience, Social Gathering",
+    "category": "Facilitated Experience",
     "day": "Saturday"
   },
   {
@@ -1121,7 +1195,7 @@
     "end_time": "8 PM",
     "location": "The Beach",
     "description": "Art Opening by Richard Wilks\n“Emergence is an other-worldly luminous sculpture experience that mysteriously started surfacing at Bombay Beach. The sculptures appear to be intelligent, organic and mechanical in form with spinal columns and finger-like limbs embracing crystal cubes. Not all have surfaced...Will more appear?”",
-    "category": "Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Saturday"
   },
   {
@@ -1130,7 +1204,7 @@
     "end_time": "8 PM",
     "location": "The Beach",
     "description": "Controlled Burn\n\"This is the Last Supper before it goes up in flames. A dining table and chairs to gather around before it becomes the bonfire on which we cook our meal. Sit down, eat and enjoy, before the set itself is consumed.”",
-    "category": "Food/Beverage, Performance",
+    "category": "Installation/Immersive Environment",
     "day": "Saturday"
   },
   {
@@ -1139,7 +1213,7 @@
     "end_time": "9 PM",
     "location": "Neptune",
     "description": "by Ria Rajan, Sofy Yuditskaya,\nNeptune",
-    "category": "Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Saturday"
   },
   {
@@ -1148,7 +1222,7 @@
     "end_time": "8 PM",
     "location": "Zig Zag Plaza",
     "description": "by Scott (Seamus) Kildall\nZig Zag Plaza\nThis will be a performance where I map these into musical notes with 16 different sample jars and LEDs on each.\"",
-    "category": "Performance, Music",
+    "category": "",
     "day": "Saturday"
   },
   {
@@ -1157,7 +1231,7 @@
     "end_time": "9 PM",
     "location": "Zig Zag Plaza",
     "description": "A Rite of Impermanence\n\"Here, judgement is felt, not delivered.\nA sonic ritual using throat singing, ethnic instruments, fire dance, sub-bass and electronic interaction. Rooted in the ancient, oriented toward the future, the performance moves through rupture and collapse, exposing the impermanent nature of mind and matter.\"",
-    "category": "Performance, Music",
+    "category": "",
     "day": "Saturday"
   },
   {
@@ -1200,18 +1274,20 @@
     "name": "The First Supper - An Alchemical Tasting and Tea Ceremony",
     "start_time": "8 PM",
     "end_time": "10 PM",
-    "location": "The Tradewinds",
+    "location": "",
     "description": "by Salina Moore, Resurrectress\nThe First Supper\nA 13 Course tasting menu of culinary bites, tinctures, and teas, guiding participants through an alchemical process of redemption and renewal. All are invited to the table. Bring a chair! (Limited to 75 people)\nEden in The Apocalypse and The Alchemy of Repair\nby Phoenix Goodman, Salina Moore\n8-10 PM\nThe First Supper",
-    "category": "Food/Beverage, Performance",
+    "category": "",
+    "location_candidate": "A philosophical inquiry on the esoteric symbolism of Bombay Beach; Alchemy, Repair and Renewal. Participants and speakers are invited.",
     "day": "Saturday"
   },
   {
     "name": "ORACLE BOOTH",
     "start_time": "8 PM",
     "end_time": "2 AM",
-    "location": "Pythia",
+    "location": "",
     "description": "by Ygor Marotta\nOracle Booth\nbooth construction in collaboration with AJ\nled lights by AH4B",
     "category": "Installation/Immersive Environment",
+    "location_candidate": "Oracle Booth is an interactive synaesthetic engine that translates real-time astrological transits, I Ching hexagrams, and biodynamic cycles into generative ASCII art, concrete poetry, and responsive sound.",
     "day": "Saturday"
   },
   {
@@ -1238,7 +1314,7 @@
     "end_time": "9 PM",
     "location": "Mamacita Junior the 3rd",
     "description": "Minivan Experience with Karin\n“You are invited to experience the performance of love to Mamacita Junior the third, my tiny little minivan, which is my ever evolving home for the last 9 years.”",
-    "category": "Facilitated Experience, Performance",
+    "category": "Facilitated Experience",
     "day": "Saturday"
   },
   {
@@ -1247,7 +1323,7 @@
     "end_time": "10 PM",
     "location": "The Opera House",
     "description": "",
-    "category": "Performance, Music",
+    "category": "Performance",
     "day": "Saturday"
   },
   {
@@ -1256,7 +1332,16 @@
     "end_time": "10 PM",
     "location": "Zig Zag Plaza",
     "description": "“Ambient Atlas is a traveling sound project created by Alan Kahler (chimaksou). He brings his 4-string electric bass and a table-top full of loopers, delays, reverbs, and effects to far out lands to explore the nature of time with what he calls, live and improvised site-specific sonic sculptures.”",
-    "category": "Music, Performance",
+    "category": "",
+    "day": "Saturday"
+  },
+  {
+    "name": "Gaza Cafe",
+    "start_time": "4 PM",
+    "end_time": "10 PM",
+    "location": "Museum of Unwanted Architecture",
+    "description": "Music in the Garden by\nDANNA\nDJ Gevo",
+    "category": "Facilitated Experience",
     "day": "Saturday"
   },
   {
@@ -1292,7 +1377,7 @@
     "end_time": "11 PM",
     "location": "Beach: The Sub Club",
     "description": "by Dulcinée DeGuere\nMidnight Theory\n(Philosophy Conference)",
-    "category": "Lecture/Talk",
+    "category": "DJ",
     "day": "Saturday"
   },
   {
@@ -1301,7 +1386,7 @@
     "end_time": "12 AM",
     "location": "Department of Redundancy Dept. (The Dord)",
     "description": "sponsored by Yarger Projects feat. Tyler Hammond Jazz Experience",
-    "category": "Music",
+    "category": "",
     "day": "Saturday"
   },
   {
@@ -1319,7 +1404,7 @@
     "end_time": "2 AM",
     "location": "The Bombay Beach Estates",
     "description": "The Estates\nWitness the miracle of fermentation!\nVisit our Altar of Acidity, receive the sacrament, and become one the faithful dill-sciples.\nIf the neon pickle is glowing—come and be preserved.\"",
-    "category": "Food/Beverage, Facilitated Experience",
+    "category": "Food/Beverage",
     "day": "Saturday"
   },
   {
@@ -1350,12 +1435,22 @@
     "day": "Saturday"
   },
   {
+    "name": "The Last Canter",
+    "start_time": "10 PM",
+    "end_time": "2 AM",
+    "location": "The Bombay Beach Estates",
+    "description": "by Art Machine, Inc.\nBrandon Anderson\nSculpture Exhibit",
+    "category": "Installation/Immersive Environment",
+    "day": "Saturday"
+  },
+  {
     "name": "Garbage Futurism: Post Waste",
     "start_time": "10 PM",
     "end_time": "2 AM",
-    "location": "Sotheby's",
-    "description": "UV Installation by Baer",
-    "category": "Installation/Immersive Environment",
+    "location": "",
+    "description": "Sotheby's\nArt & Music",
+    "category": "DJ",
+    "location_candidate": "UV Installation by Baer",
     "day": "Saturday"
   },
   {
@@ -1382,7 +1477,7 @@
     "end_time": "11:30 PM",
     "location": "The Beach",
     "description": "Fireworks by Jonny\n“Multiple Firework shows & dazzling effects”",
-    "category": "Performance, Social Gathering, Facilitated Experience",
+    "category": "Performance",
     "day": "Saturday"
   },
   {
@@ -1404,11 +1499,49 @@
     "day": "Saturday"
   },
   {
+    "name": "Martian Takeover",
+    "start_time": "10 PM",
+    "end_time": "2 AM",
+    "location": "Bombay Bliss Beach Club",
+    "description": "feat. Kiamora, Seamus & Friends",
+    "category": "DJ",
+    "day": "Saturday"
+  },
+
+
+  {
     "name": "Globalschism",
     "start_time": "12 AM",
     "end_time": "2 AM",
     "location": "Globalschism",
     "description": "Secret Nightclub",
+    "category": "DJ",
+    "day": "Sunday"
+  },
+  {
+    "name": "Pickle That Up presents THE SACRAMENT OF THE HOLY BRINE",
+    "start_time": "10 PM",
+    "end_time": "2 AM",
+    "location": "The Bombay Beach Estates",
+    "description": "",
+    "category": "Food/Beverage",
+    "day": "Sunday"
+  },
+  {
+    "name": "Martian Takeover",
+    "start_time": "10 PM",
+    "end_time": "2 AM",
+    "location": "Bombay Bliss Beach Club",
+    "description": "feat. Kiamora, Seamus,\nFancyVandals & Friends",
+    "category": "DJ",
+    "day": "Sunday"
+  },
+  {
+    "name": "Party for Peace",
+    "start_time": "10 PM",
+    "end_time": "2 AM",
+    "location": "Atlantis Inn Collective",
+    "description": "Alvaro & Friends on Vinyl",
     "category": "DJ",
     "day": "Sunday"
   },
@@ -1419,6 +1552,43 @@
     "location": "The Tradewinds",
     "description": "The Tradewinds",
     "category": "Music",
+    "day": "Sunday"
+  },
+  {
+    "name": "The Last Canter",
+    "start_time": "10 PM",
+    "end_time": "2 AM",
+    "location": "The Bombay Beach Estates",
+    "description": "by Art Machine, Inc.\nBrandon Anderson\nSculpture Exhibit",
+    "category": "Installation/Immersive Environment",
+    "day": "Sunday"
+  },
+  {
+    "name": "My Niland II (Ten Checkpoints)",
+    "start_time": "7 PM",
+    "end_time": "7 AM",
+    "location": "Temple to the Scientific Method",
+    "description": "Video Installation by\nAntimony",
+    "category": "Installation/Immersive Environment",
+    "day": "Sunday"
+  },
+  {
+    "name": "Garbage Futurism: Post Waste",
+    "start_time": "10 PM",
+    "end_time": "2 AM",
+    "location": "",
+    "description": "Sotheby's\nArt & Music",
+    "category": "DJ",
+    "location_candidate": "UV Installation by Baer",
+    "day": "Sunday"
+  },
+  {
+    "name": "Cafe Bosna",
+    "start_time": "6 PM",
+    "end_time": "6 AM",
+    "location": "The Bombay Beach Estates",
+    "description": "Immersive Music/Coffee Experience",
+    "category": "DJ",
     "day": "Sunday"
   },
   {
@@ -1463,7 +1633,8 @@
     "end_time": "12 PM",
     "location": "",
     "description": "by ⁠CoM - Church of Music",
-    "category": "Music",
+    "category": "Facilitated Experience",
+    "location_candidate": "⁠Sunrise DJ sets with sermons from the beyond.",
     "day": "Sunday"
   },
   {
@@ -1499,7 +1670,17 @@
     "end_time": "11 AM",
     "location": "Neptune",
     "description": "Neptune",
-    "category": "Exhibition",
+    "category": "Facilitated Experience",
+    "day": "Sunday"
+  },
+  {
+    "name": "Light Breakfast",
+    "start_time": "10 AM",
+    "end_time": "12 PM",
+    "location": "",
+    "description": "",
+    "category": "",
+    "location_candidate": "Institute",
     "day": "Sunday"
   },
   {
@@ -1535,7 +1716,17 @@
     "end_time": "2 PM",
     "location": "Foundation Foundation",
     "description": "Open Gallery Hours\nFOUNDATION FOUNDATION\nCurated by Greg Haberny\nfeat. Adam Cullins, Jack Parker, Randy Polumbo, Judith Berndsen, Sean Guerrero, Masha D’yans, Jake Wade, Bunny Valentine, Bill Saylor, Camille Schefter, Nick Fari, Steve Hash, Brett Lindell, Katrina Brown, Bob Swanek, Joe Regan, Tafka J. Lighthouse, Stephanie Caite, Greg Haberny, Heidl Hasenauer",
-    "category": "Exhibition",
+    "category": "Installation/Immersive Environment",
+    "day": "Sunday"
+  },
+  {
+    "name": "Brunch",
+    "start_time": "10 AM",
+    "end_time": "12 PM",
+    "location": "",
+    "description": "",
+    "category": "",
+    "location_candidate": "Institute",
     "day": "Sunday"
   },
   {
@@ -1544,7 +1735,7 @@
     "end_time": "1 PM",
     "location": "KDEZ RADIO TRAILER",
     "description": "Live on the Radio",
-    "category": "Facilitated Experience, Music",
+    "category": "Facilitated Experience",
     "day": "Sunday"
   },
   {
@@ -1553,7 +1744,7 @@
     "end_time": "5 PM",
     "location": "Henderson Hall",
     "description": "",
-    "category": "Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Sunday"
   },
   {
@@ -1584,12 +1775,13 @@
     "day": "Sunday"
   },
   {
-    "name": "The Dulcinée Dialectic",
+    "name": "\"The Dulcinée Dialectic\"",
     "start_time": "2 PM",
     "end_time": "4 PM",
-    "location": "Downtown Palm Springs",
+    "location": "",
     "description": "by Tao Ruspoli\nDocumentary Feature\n*Ticketed Event*\nBBIFF x AMDOCS",
     "category": "Film",
+    "location_candidate": "Downtown Palm Springs",
     "day": "Sunday"
   },
   {
@@ -1602,12 +1794,12 @@
     "day": "Sunday"
   },
   {
-    "name": "Writing from the Heart & Soul: Live Reading",
+    "name": "Writing from the",
     "start_time": "5 PM",
     "end_time": "6 PM",
     "location": "Zig Zag Plaza",
-    "description": "Writing Workshop with Eric Kaplan\nLimited to 30 participants",
-    "category": "Lecture/Talk, Facilitated Experience",
+    "description": "Heart & Soul: Live Reading\nWriting Workshop with Eric Kaplan\nLimited to 30 participants",
+    "category": "Facilitated Experience",
     "day": "Sunday"
   },
   {
@@ -1659,18 +1851,19 @@
     "name": "ORACLE BOOTH",
     "start_time": "6 PM",
     "end_time": "10 PM",
-    "location": "Pythia",
+    "location": "",
     "description": "by Ygor Marotta\nOracle Booth\nbooth construction in collaboration with AJ\nled lights by AH4B",
     "category": "Installation/Immersive Environment",
+    "location_candidate": "Oracle Booth is an interactive synaesthetic engine that translates real-time astrological transits, I Ching hexagrams, and biodynamic cycles into generative ASCII art, concrete poetry, and responsive sound.",
     "day": "Sunday"
   },
   {
     "name": "Lost Chord Divine",
     "start_time": "6:30 PM",
     "end_time": "7:30 PM",
-    "location": "Henderson Hall",
+    "location": "Seaside Baptist Church",
     "description": "Beverly Kitty Green\n\"I sought but to seek it vainly,\nthat one lost chord divine;\nwhich came from the soul of the organ,\nand entered into mine.\nIt may be that death's bright angel\nWill speak in that chord again,\nIt may be that only in Heaven\nI shall hear that grand Amen.”",
-    "category": "Music",
+    "category": "",
     "day": "Sunday"
   },
   {
@@ -1679,7 +1872,7 @@
     "end_time": "8 PM",
     "location": "Zig Zag Plaza",
     "description": "\"Live music. Interruptions. Clown.\nJoy gets thrown away. The desert listens.\"",
-    "category": "Performance, Music",
+    "category": "",
     "day": "Sunday"
   },
   {
@@ -1688,7 +1881,7 @@
     "end_time": "8 PM",
     "location": "",
     "description": "by Salina Moore, Resurrectress\nA second chance at redemption! Perhaps. An alchemical dinner, which may or may not happen, but if The First Supper has leftovers, we’ll have a banquet. Come and find out!",
-    "category": "Food/Beverage, Performance",
+    "category": "",
     "location_candidate": "The First Supper",
     "day": "Sunday"
   },
@@ -1716,7 +1909,7 @@
     "end_time": "10 PM",
     "location": "The Bombay Beach Estates",
     "description": "by Art Machine, Inc.\nBrandon Anderson\nSculpture Exhibit",
-    "category": "Installation/Immersive Environment, Exhibition",
+    "category": "Installation/Immersive Environment",
     "day": "Sunday"
   },
   {
