@@ -123,7 +123,7 @@
     "location": "Bombay Bliss Beach Club",
     "description": "Disco Vinyl Set starring Montel Spinoza & Pierre Delecto\nDrinks and Hors D’Oeuvres",
     "category": "DJ, Social Gathering",
-    "day": "Friday"
+    "day": "Thursday"
   },
   {
     "name": "Artemis makes a housecall",
@@ -238,8 +238,8 @@
     "start_time": "3 PM",
     "end_time": "5 PM",
     "location": "BBAC",
-    "description": "",
-    "category": "Exhibition",
+    "description": "Art Auction in the Barn at BBAC",
+    "category": "Facilitated Experience",
     "day": "Friday"
   },
   {
@@ -265,7 +265,7 @@
     "start_time": "4 PM",
     "end_time": "5 PM",
     "location": "Horsefly Ranch",
-    "description": "The Silver Tongued Devil: A Speaker-Creature is an interactive sound sculpture constructed out of broken music equipment collected by a recently-deceased San Diego musician. Visit the Creature to hear angels plummeting into the Underworld—and to receive your own flattering fortune!”",
+    "description": "The Silver Tongued Devil: A Speaker-Creature is an interactive sound sculpture constructed out of broken music equipment collected by a recently-deceased San Diego musician. Visit the Creature to hear angels plummeting into the Underworld—and to receive your own flattering fortune!",
     "category": "Installation/Immersive Environment",
     "day": "Friday"
   },
@@ -418,7 +418,7 @@
     "start_time": "7 PM",
     "end_time": "9 PM",
     "location": "Saturn",
-    "description": "",
+    "description": "Saturn activation featuring selected works from the Mars College 2026 cohort",
     "category": "Exhibition",
     "day": "Friday"
   },
@@ -492,7 +492,7 @@
     "location": "Beach: The Sub Club",
     "description": "",
     "category": "DJ",
-    "day": "Friday"
+    "day": "Saturday"
   },
   {
     "name": "Lescher Martitti Bar",
@@ -796,7 +796,7 @@
     "start_time": "11:30 AM",
     "end_time": "12:30 PM",
     "location": "Dream Demon",
-    "description": "Performance by Courtney Alexander\nDream Demon",
+    "description": "God Is / Sustenance centers the body and land as sacred sites. A living altar invites offering and reflection on embodied divinity, while immersive stations throughout the landscape guide participants into contemplation, reverence, and renewed relationship with the environment.",
     "category": "Performance",
     "day": "Saturday"
   },
@@ -810,11 +810,11 @@
     "day": "Saturday"
   },
   {
-    "name": "Sunshine Dreams:",
+    "name": "Sunshine Dreams: Legends of Bombay Beach",
     "start_time": "12 PM",
     "end_time": "5 PM",
     "location": "Henderson Hall",
-    "description": "Henderson Hall\n\"An excursion through the essence of Bombay Beach led by the souls of those that lived it.”",
+    "description": "Henderson Hall\n\"An excursion through the essence of Bombay Beach led by the souls of those that lived it.",
     "category": "Exhibition",
     "day": "Saturday"
   },

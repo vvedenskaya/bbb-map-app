@@ -189,10 +189,18 @@ function getScheduleDateFromDay(day: FestivalDay | null): string {
 function extractHostFromScheduleCellText(rawText: string): string {
   const text = asString(rawText);
   if (!text) return "";
-  const byMatch = text.match(/\bby\s+([^|]+?)(?=\s+\d{1,2}(?::\d{2})?\s*(?:AM|PM)\b|$)/i);
-  if (byMatch?.[1]) return asString(byMatch[1]);
-  const hostedMatch = text.match(/\bhosted by\s+([^|]+?)(?=\s+\d{1,2}(?::\d{2})?\s*(?:AM|PM)\b|$)/i);
-  if (hostedMatch?.[1]) return asString(hostedMatch[1]);
+
+  // Ignore invisible joiner/zero-width chars that often appear in copied schedule text.
+  const normalized = text.replace(/[\u200B-\u200D\u2060\uFEFF]/g, "").trim();
+  if (!normalized) return "";
+
+  // Only treat leading "by ..." / "hosted by ..." as host metadata.
+  // This avoids capturing normal prose such as "... collected by a musician ...".
+  const leadingHostMatch = normalized.match(
+    /^(?:by|hosted by)\s+(.+?)(?=(?:\n|["“”]|[|]|\s+\d{1,2}(?::\d{2})?\s*(?:AM|PM)\b|$))/i
+  );
+  if (leadingHostMatch?.[1]) return asString(leadingHostMatch[1]);
+
   return "";
 }
 
@@ -217,7 +225,8 @@ function findMatchingLocation(
 
 function getLocationDisplayName(locationRow: LocationRow, fallbackName = ""): string {
   const aliases = asStringList(locationRow.Alias);
-  return aliases[0] || asString(locationRow.Name) || fallbackName;
+  // Use canonical Name for UI display; aliases are for matching only.
+  return asString(locationRow.Name) || aliases[0] || fallbackName;
 }
 
 function getLocationCanonicalKey(locationRow: LocationRow, fallbackName = ""): string {
@@ -456,7 +465,10 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
       const typeFromAirtable = asString(matchedAirtableFields["Project Type"]);
       const parsedAirtableTypes = typeFromAirtable ? parseEventTypes(typeFromAirtable) : [];
       const parsedScheduleCategoryTypes = scheduleCategory ? parseEventTypes(scheduleCategory) : [];
-      const resolvedProjectTypes = parsedAirtableTypes.length > 0 ? parsedAirtableTypes : parsedScheduleCategoryTypes;
+      // Prefer schedule categories for chips; keep Airtable-derived types as secondary enrichments.
+      const resolvedProjectTypes = parsedScheduleCategoryTypes.length > 0
+        ? [...new Set([...parsedScheduleCategoryTypes, ...parsedAirtableTypes])]
+        : parsedAirtableTypes;
       const abridgedFromAirtable = asString(matchedAirtableFields["Abridged Project Text"]);
       const projectDescriptionFromAirtable = asString(matchedAirtableFields["Project Description"]);
 
@@ -520,8 +532,8 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
           venueId,
           title,
           host: hostFromAirtable || hostFromLocation || hostFromScheduleCell || "",
-          // Prefer Airtable abridged text; then locations.json abridged text; then preserve XLSX cell text.
-          description: abridgedFromAirtable || abridgedFromLocation || rawText || projectDescriptionFromAirtable || "",
+          // Prefer schedule text when present; otherwise fall back to Airtable/location summaries.
+          description: rawText || abridgedFromAirtable || abridgedFromLocation || projectDescriptionFromAirtable || "",
           day,
           startTime,
           endTime,
@@ -573,8 +585,8 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
         venueId,
         title,
         host: hostFromAirtable || hostFromScheduleCell || "",
-        // Prefer Airtable abridged text; otherwise preserve XLSX cell text before long project descriptions.
-        description: abridgedFromAirtable || rawText || projectDescriptionFromAirtable || "",
+        // Prefer schedule text when present; otherwise fall back to Airtable summaries.
+        description: rawText || abridgedFromAirtable || projectDescriptionFromAirtable || "",
         day,
         startTime,
         endTime,

@@ -9,6 +9,7 @@ import banner2560 from "../../assets/banner/biennale-banner2560.jpg";
 import { createPortal } from "react-dom";
 
 const DAY_DISPLAY_ORDER: FestivalDay[] = ["wed", "thu", "fri", "sat", "sun", "mon", "tue"];
+const SCHEDULE_DAY_ORDER: FestivalDay[] = ["thu", "fri", "sat", "sun"];
 const DAY_SORT_ORDER: Record<FestivalDay, number> = {
   wed: 0,
   thu: 1,
@@ -265,6 +266,15 @@ function getVisibleEventDescription(event: FestivalEvent): string {
   return description;
 }
 
+function normalizeDescriptionForComparison(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/["'`“”’]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function isPlaceholderTimeLabel(value: string): boolean {
   const normalized = (value || "").trim().toUpperCase();
   return !normalized || normalized === "TBD";
@@ -287,8 +297,8 @@ function isUnscheduledEvent(event: FestivalEvent): boolean {
 
 function getDefaultActiveDays(events: FestivalEvent[]): FestivalDay[] {
   const available = Array.from(new Set(events.map((event) => event.day)));
-  const sorted = DAY_DISPLAY_ORDER.filter((day) => available.includes(day));
-  return sorted.length > 0 ? sorted : ["fri", "sat", "sun"];
+  const sorted = SCHEDULE_DAY_ORDER.filter((day) => available.includes(day));
+  return sorted.length > 0 ? sorted : [...SCHEDULE_DAY_ORDER];
 }
 
 function parseTimeToMinutes(raw: string): number | null {
@@ -490,7 +500,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     acc.set(venue.id, venue);
     return acc;
   }, new globalThis.Map());
-  const availableDays = DAY_DISPLAY_ORDER.filter((day) => events.some((event) => event.day === day));
+  const availableDays = SCHEDULE_DAY_ORDER.filter((day) => events.some((event) => event.day === day));
   const effectiveActiveDays = activeDays.filter((day) => availableDays.includes(day));
   const activeDayFilter = effectiveActiveDays.length > 0 ? effectiveActiveDays : availableDays;
 
@@ -602,6 +612,18 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
       .find(Boolean);
     return unscheduledFallback || venueDescription;
   })();
+  const selectedVenueHasDuplicateScheduledDescription = (() => {
+    if (!selectedVenueDescription || selectedVenueScheduledEvents.length === 0) return false;
+    const venueText = normalizeDescriptionForComparison(selectedVenueDescription);
+    if (!venueText) return false;
+    return selectedVenueScheduledEvents.some((event) => {
+      const eventDescription = getVisibleEventDescription(event);
+      if (!eventDescription) return false;
+      const eventText = normalizeDescriptionForComparison(eventDescription);
+      if (!eventText) return false;
+      return eventText.includes(venueText) || venueText.includes(eventText);
+    });
+  })();
   const visibleMappableVenues = visibleVenues.filter(
     (venue) => typeof venue.lat === "number" && typeof venue.lng === "number"
   );
@@ -627,7 +649,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const visibleCategorizedVenuesCount = sortedVenueGroups
     .reduce((sum, group) => sum + group.venues.length, 0);
 
-  const scheduleByDay = DAY_DISPLAY_ORDER.map((day) => {
+  const scheduleByDay = SCHEDULE_DAY_ORDER.map((day) => {
     const dayEvents = scheduleVisibleEvents.filter((event) => event.day === day);
     const bySlot = dayEvents.reduce<globalThis.Map<string, FestivalEvent[]>>((acc, event) => {
       const key = `${event.startTime}__${event.endTime}`;
@@ -853,16 +875,25 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   }, []);
 
   useEffect(() => {
+    if (!isTimelineOpen) return;
+    // Refresh "now" when opening timeline so the marker and auto-scroll are accurate.
+    setNow(new Date());
+  }, [isTimelineOpen]);
+
+  useEffect(() => {
     if (!isTimelineOpen) {
       hasAutoScrolledTimelineRef.current = false;
       return;
     }
-    if (!timelineScrollRef.current || !now || hasAutoScrolledTimelineRef.current || !currentDayByNow) return;
-    if (!timelineDays.includes(currentDayByNow)) return;
+    if (!timelineScrollRef.current || !now || hasAutoScrolledTimelineRef.current) return;
+    if (timelineDays.length === 0) return;
     if (currentMinutesByNow === null) return;
 
+    const targetDay = currentDayByNow && timelineDays.includes(currentDayByNow)
+      ? currentDayByNow
+      : timelineDays[0];
     const section = timelineScrollRef.current.querySelector<HTMLElement>(
-      `[data-timeline-day="${currentDayByNow}"]`
+      `[data-timeline-day="${targetDay}"]`
     );
     if (!section) return;
 
@@ -1151,7 +1182,9 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                   </button>
                 </div>
                 <div className="legacy-popup-content">
-                  {selectedVenueDescription && !hasUnscheduledOnlyView ? (
+                  {selectedVenueDescription &&
+                  !hasUnscheduledOnlyView &&
+                  !selectedVenueHasDuplicateScheduledDescription ? (
                     <p className="legacy-popup-description">{selectedVenueDescription}</p>
                   ) : null}
                   {selectedVenueScheduledEvents.length > 0 ? (

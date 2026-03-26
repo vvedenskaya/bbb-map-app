@@ -50,8 +50,8 @@
     "Label": "BBAC",
     "Address": "BBAC",
     "Category": "Community Hub",
-    "Lat": 33.3532565,
-    "Long": -115.7305994
+    "Lat": 33.35322608152683, 
+    "Long": -115.73036710443051
   },
   {
     "Name": "Bombay Beach Community Center",
@@ -683,13 +683,6 @@
     "Category": "Art Installation",
     "Lat": 33.34955605,
     "Long": -115.731857
-  },
-  {
-    "Name": "Derangers Before the Playa",
-    "Address": "",
-    "Category": "Art Installation",
-    "Lat": 33.35376728,
-    "Long": -115.7276156
   },
   {
     "Name": "Grounded: Loss at the Salton Sea",
