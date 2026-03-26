@@ -312,6 +312,47 @@ function normalizeDescriptionForComparison(value: string): string {
     .trim();
 }
 
+function normalizeSearchText(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/["'`“”’]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getFuzzyMatchScore(query: string, target: string): number | null {
+  const normalizedQuery = normalizeSearchText(query);
+  const normalizedTarget = normalizeSearchText(target);
+  if (!normalizedQuery || !normalizedTarget) return null;
+
+  if (normalizedTarget.includes(normalizedQuery)) {
+    const startIndex = normalizedTarget.indexOf(normalizedQuery);
+    return 1000 - startIndex * 2 - (normalizedTarget.length - normalizedQuery.length);
+  }
+
+  let queryIndex = 0;
+  let firstMatchIndex = -1;
+  let lastMatchIndex = -1;
+  for (let i = 0; i < normalizedTarget.length && queryIndex < normalizedQuery.length; i += 1) {
+    if (normalizedTarget[i] !== normalizedQuery[queryIndex]) continue;
+    if (firstMatchIndex === -1) firstMatchIndex = i;
+    lastMatchIndex = i;
+    queryIndex += 1;
+  }
+  if (queryIndex === normalizedQuery.length && firstMatchIndex !== -1 && lastMatchIndex !== -1) {
+    const span = lastMatchIndex - firstMatchIndex + 1;
+    const compactnessPenalty = Math.max(span - normalizedQuery.length, 0);
+    return 550 - firstMatchIndex - compactnessPenalty * 3;
+  }
+
+  const queryTokens = normalizedQuery.split(" ").filter(Boolean);
+  if (queryTokens.length === 0) return null;
+  const tokenHits = queryTokens.filter((token) => normalizedTarget.includes(token)).length;
+  if (tokenHits === 0) return null;
+  return tokenHits * 120 - (queryTokens.length - tokenHits) * 20;
+}
+
 function isPlaceholderTimeLabel(value: string): boolean {
   const normalized = (value || "").trim().toUpperCase();
   return !normalized || normalized === "TBD";
@@ -646,6 +687,9 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [timelineZoom, setTimelineZoom] = useState(TIMELINE_DEFAULT_ZOOM);
   const [timelineVerticalZoom, setTimelineVerticalZoom] = useState(TIMELINE_DEFAULT_VERTICAL_ZOOM);
   const [selectedTimelineEventId, setSelectedTimelineEventId] = useState<string | null>(null);
+  const [timelineSearchQuery, setTimelineSearchQuery] = useState("");
+  const [timelineSearchResultIndex, setTimelineSearchResultIndex] = useState(0);
+  const [highlightedTimelineEventId, setHighlightedTimelineEventId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [hoveredVenueId, setHoveredVenueId] = useState<string | null>(null);
   const [allowOutOfBoundsNavigation, setAllowOutOfBoundsNavigation] = useState(false);
@@ -916,6 +960,24 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const selectedTimelineEventDescription = selectedTimelineEvent
     ? getVisibleEventDescription(selectedTimelineEvent)
     : "";
+  const timelineSearchResults = timelineSearchQuery.trim()
+    ? scheduleVisibleEvents
+        .map((event) => {
+          const venueName = venueById.get(event.venueId)?.name ?? "";
+          const searchableText = [
+            event.title,
+            event.host,
+            venueName,
+            dayLabels[event.day],
+            event.startTime,
+            event.endTime,
+          ].join(" ");
+          const score = getFuzzyMatchScore(timelineSearchQuery, searchableText);
+          return score === null ? null : { event, score };
+        })
+        .filter((entry): entry is { event: FestivalEvent; score: number } => entry !== null)
+        .sort((a, b) => b.score - a.score || sortScheduleEvents(a.event, b.event))
+    : [];
 
   function toggleDay(day: FestivalDay) {
     setActiveDays((current) =>
@@ -984,6 +1046,33 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   function closeTimeline() {
     setIsTimelineOpen(false);
     setSelectedTimelineEventId(null);
+    setTimelineSearchQuery("");
+    setTimelineSearchResultIndex(0);
+    setHighlightedTimelineEventId(null);
+  }
+
+  function centerTimelineOnEvent(eventId: string, behavior: ScrollBehavior = "smooth") {
+    const timelineElement = timelineScrollRef.current;
+    if (!timelineElement) return;
+    const timelineButtons = timelineElement.querySelectorAll<HTMLButtonElement>("[data-timeline-event-id]");
+    const target = Array.from(timelineButtons).find((button) => button.dataset.timelineEventId === eventId);
+    if (!target) return;
+
+    const timelineRect = timelineElement.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const nextScrollLeft =
+      timelineElement.scrollLeft +
+      (targetRect.left - timelineRect.left) -
+      (timelineElement.clientWidth - targetRect.width) / 2;
+    const nextScrollTop =
+      timelineElement.scrollTop +
+      (targetRect.top - timelineRect.top) -
+      (timelineElement.clientHeight - targetRect.height) / 2;
+    timelineElement.scrollTo({
+      left: Math.max(nextScrollLeft, 0),
+      top: Math.max(nextScrollTop, 0),
+      behavior,
+    });
   }
 
   function adjustTimelineZoom(targetZoom: number, anchorClientX?: number) {
@@ -1129,6 +1218,31 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     timelineScrollRef.current.scrollTo({ top: desiredTop, behavior: "smooth" });
     hasAutoScrolledTimelineRef.current = true;
   }, [isTimelineOpen, now, currentDayByNow, currentMinutesByNow, timelineDays, timelineStart, timelinePixelsPerMinute]);
+
+  useEffect(() => {
+    if (!isTimelineOpen || !timelineSearchQuery.trim() || timelineSearchResults.length === 0) {
+      setHighlightedTimelineEventId(null);
+      return;
+    }
+    const clampedIndex = Math.min(timelineSearchResultIndex, timelineSearchResults.length - 1);
+    if (clampedIndex !== timelineSearchResultIndex) {
+      setTimelineSearchResultIndex(clampedIndex);
+      return;
+    }
+    const eventId = timelineSearchResults[clampedIndex].event.id;
+    setHighlightedTimelineEventId(eventId);
+    const rafId = window.requestAnimationFrame(() => {
+      centerTimelineOnEvent(eventId, "smooth");
+    });
+    return () => window.cancelAnimationFrame(rafId);
+  }, [
+    isTimelineOpen,
+    timelineSearchQuery,
+    timelineSearchResults,
+    timelineSearchResultIndex,
+    timelineZoom,
+    timelineVerticalZoom,
+  ]);
 
   useEffect(() => {
     if (selectedVenueId) {
@@ -1883,57 +1997,117 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
           <div className="legacy-timeline-shell">
             <div className="legacy-timeline-toolbar">
               <div className="legacy-timeline-toolbar-actions">
-                <div className="legacy-timeline-zoom-controls" role="group" aria-label="Timeline zoom controls">
+                <div className="legacy-timeline-search" role="search">
+                  <input
+                    type="search"
+                    className="legacy-search legacy-timeline-search-input"
+                    placeholder="Find event in calendar..."
+                    value={timelineSearchQuery}
+                    onChange={(event) => {
+                      setTimelineSearchQuery(event.target.value);
+                      setTimelineSearchResultIndex(0);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key !== "Enter" || timelineSearchResults.length === 0) return;
+                      event.preventDefault();
+                      const step = event.shiftKey ? -1 : 1;
+                      setTimelineSearchResultIndex((current) =>
+                        (current + step + timelineSearchResults.length) % timelineSearchResults.length
+                      );
+                    }}
+                    aria-label="Search timeline events"
+                  />
                   <button
                     type="button"
-                    className="legacy-chip"
-                    onClick={() => adjustTimelineZoom(timelineZoom - TIMELINE_ZOOM_STEP)}
-                    aria-label="Zoom out timeline"
+                    className="legacy-chip legacy-timeline-search-nav"
+                    disabled={timelineSearchResults.length === 0}
+                    onClick={() => {
+                      if (timelineSearchResults.length === 0) return;
+                      setTimelineSearchResultIndex((current) =>
+                        (current - 1 + timelineSearchResults.length) % timelineSearchResults.length
+                      );
+                    }}
+                    aria-label="Previous timeline search result"
+                    title="Previous match"
                   >
-                    -
+                    ←
                   </button>
                   <button
                     type="button"
-                    className="legacy-chip legacy-timeline-zoom-label"
-                    onClick={() => adjustTimelineZoom(TIMELINE_DEFAULT_ZOOM)}
-                    aria-label="Reset horizontal timeline zoom"
+                    className="legacy-chip legacy-timeline-search-nav"
+                    disabled={timelineSearchResults.length === 0}
+                    onClick={() => {
+                      if (timelineSearchResults.length === 0) return;
+                      setTimelineSearchResultIndex((current) =>
+                        (current + 1) % timelineSearchResults.length
+                      );
+                    }}
+                    aria-label="Next timeline search result"
+                    title="Next match"
                   >
-                    H {timelineHorizontalZoomPercentLabel}
+                    →
                   </button>
-                  <button
-                    type="button"
-                    className="legacy-chip"
-                    onClick={() => adjustTimelineZoom(timelineZoom + TIMELINE_ZOOM_STEP)}
-                    aria-label="Zoom in timeline"
-                  >
-                    +
-                  </button>
+                  {timelineSearchQuery.trim() ? (
+                    <span className="legacy-timeline-search-count">
+                      {timelineSearchResults.length > 0
+                        ? `${Math.min(timelineSearchResultIndex + 1, timelineSearchResults.length)}/${timelineSearchResults.length}`
+                        : "0 matches"}
+                    </span>
+                  ) : null}
                 </div>
-                <div className="legacy-timeline-zoom-controls" role="group" aria-label="Timeline vertical zoom controls">
-                  <button
-                    type="button"
-                    className="legacy-chip"
-                    onClick={() => adjustTimelineVerticalZoom(timelineVerticalZoom - TIMELINE_VERTICAL_ZOOM_STEP)}
-                    aria-label="Zoom out timeline vertically"
-                  >
-                    -
-                  </button>
-                  <button
-                    type="button"
-                    className="legacy-chip legacy-timeline-zoom-label"
-                    onClick={() => adjustTimelineVerticalZoom(TIMELINE_DEFAULT_VERTICAL_ZOOM)}
-                    aria-label="Reset vertical timeline zoom"
-                  >
-                    V {timelineVerticalZoomPercentLabel}
-                  </button>
-                  <button
-                    type="button"
-                    className="legacy-chip"
-                    onClick={() => adjustTimelineVerticalZoom(timelineVerticalZoom + TIMELINE_VERTICAL_ZOOM_STEP)}
-                    aria-label="Zoom in timeline vertically"
-                  >
-                    +
-                  </button>
+                <div className="legacy-timeline-toolbar-scale-controls">
+                  <div className="legacy-timeline-zoom-controls" role="group" aria-label="Timeline zoom controls">
+                    <button
+                      type="button"
+                      className="legacy-chip"
+                      onClick={() => adjustTimelineZoom(timelineZoom - TIMELINE_ZOOM_STEP)}
+                      aria-label="Zoom out timeline"
+                    >
+                      -
+                    </button>
+                    <button
+                      type="button"
+                      className="legacy-chip legacy-timeline-zoom-label"
+                      onClick={() => adjustTimelineZoom(TIMELINE_DEFAULT_ZOOM)}
+                      aria-label="Reset horizontal timeline zoom"
+                    >
+                      H {timelineHorizontalZoomPercentLabel}
+                    </button>
+                    <button
+                      type="button"
+                      className="legacy-chip"
+                      onClick={() => adjustTimelineZoom(timelineZoom + TIMELINE_ZOOM_STEP)}
+                      aria-label="Zoom in timeline"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <div className="legacy-timeline-zoom-controls" role="group" aria-label="Timeline vertical zoom controls">
+                    <button
+                      type="button"
+                      className="legacy-chip"
+                      onClick={() => adjustTimelineVerticalZoom(timelineVerticalZoom - TIMELINE_VERTICAL_ZOOM_STEP)}
+                      aria-label="Zoom out timeline vertically"
+                    >
+                      -
+                    </button>
+                    <button
+                      type="button"
+                      className="legacy-chip legacy-timeline-zoom-label"
+                      onClick={() => adjustTimelineVerticalZoom(TIMELINE_DEFAULT_VERTICAL_ZOOM)}
+                      aria-label="Reset vertical timeline zoom"
+                    >
+                      V {timelineVerticalZoomPercentLabel}
+                    </button>
+                    <button
+                      type="button"
+                      className="legacy-chip"
+                      onClick={() => adjustTimelineVerticalZoom(timelineVerticalZoom + TIMELINE_VERTICAL_ZOOM_STEP)}
+                      aria-label="Zoom in timeline vertically"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
                 <button
                   type="button"
@@ -2071,7 +2245,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                               <button
                                 key={block.event.id}
                                 type="button"
-                                className={`legacy-timeline-event ${selectedEventId === block.event.id ? "active" : ""}`}
+                                className={`legacy-timeline-event ${selectedEventId === block.event.id ? "active" : ""} ${highlightedTimelineEventId === block.event.id ? "is-search-highlighted" : ""}`}
                                 style={{
                                   top: `${top}px`,
                                   height: `${height}px`,
@@ -2080,6 +2254,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                                   backgroundColor: getTimelineFillColor(block.event.type),
                                   borderColor: getProjectTypeColor(block.event.type),
                                 }}
+                                data-timeline-event-id={block.event.id}
                                 onClick={() => {
                                   setSelectedTimelineEventId(block.event.id);
                                   setSelectedEventId(block.event.id);
