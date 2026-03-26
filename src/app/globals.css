@@ -362,6 +362,10 @@ a {
   font-size: 0.75rem;
 }
 
+.legacy-list-title-venues {
+  display: none;
+}
+
 .legacy-venue-list,
 .legacy-event-list {
   display: grid;
@@ -470,16 +474,16 @@ a {
 
 .legacy-pin {
   position: relative;
-  width: 18px;
-  height: 18px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
+  width: 20px;
+  height: 20px;
+  display: block;
+  border-radius: 50% 50% 50% 0;
   border: 2px solid #111;
   background: var(--pin-color, #ff2d55);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.98), 0 0 0 4px rgba(0, 0, 0, 0.62);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.98), 0 0 0 4px rgba(0, 0, 0, 0.62), 0 3px 6px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+  transform: rotate(-45deg);
 }
 
 .legacy-pin-wrap {
@@ -493,26 +497,19 @@ a {
   position: absolute;
   top: 50%;
   transform: translateY(calc(-50% + var(--label-row-offset, 0px)));
-  padding: 4px 11px 5px;
-  border-radius: 999px;
-  border: 2px solid rgba(124, 59, 152, 0.88);
-  background:
-    radial-gradient(circle at 25% 30%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.15) 35%),
-    linear-gradient(135deg, rgba(255, 232, 248, 0.97), rgba(237, 234, 255, 0.97));
-  color: #b011a4;
+  padding: 4px 10px 5px;
+  border-radius: 0;
+  border: 2px solid #111111;
+  background: #ffffff;
+  color: #000000;
+  font-family: Consolas, "Lucida Console", Monaco, monospace;
   font-size: 0.78rem;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.08;
-  letter-spacing: 0.01em;
+  letter-spacing: 0;
   white-space: nowrap;
-  text-shadow:
-    -0.8px -0.8px 0 #ffffff,
-    0.8px -0.8px 0 #ffffff,
-    -0.8px 0.8px 0 #ffffff,
-    0.8px 0.8px 0 #ffffff;
-  box-shadow:
-    0 3px 10px rgba(143, 84, 165, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  text-shadow: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   z-index: 12;
   pointer-events: none;
 }
@@ -536,7 +533,7 @@ a {
   border-radius: 10px;
   box-shadow: 0 10px 24px rgba(27, 24, 18, 0.28);
   padding: 8px;
-  z-index: 8;
+  z-index: 30;
   pointer-events: none;
   display: grid;
   gap: 6px;
@@ -581,14 +578,28 @@ a {
 .legacy-pin-service-icon {
   position: relative;
   z-index: 1;
-  font-size: 15px;
+  font-size: 16px;
+  font-weight: 800;
   line-height: 1;
   color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+.legacy-pin-service-icon.is-toilets {
+  font-size: 28px;
+  line-height: 1;
+  text-shadow: none;
+}
+
+.legacy-pin-service-icon.is-water {
+  font-size: 26px;
+  line-height: 1;
+  text-shadow: none;
 }
 
 .legacy-service-pin {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
   border-radius: 999px;
@@ -596,6 +607,22 @@ a {
   border: 3px solid rgba(255, 255, 255, 0.96);
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.7);
   pointer-events: none;
+}
+
+.legacy-service-pin.is-toilets {
+  width: auto;
+  height: auto;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.legacy-service-pin.is-water {
+  width: auto;
+  height: auto;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
 .legacy-pin.is-last-interacted::before {
@@ -613,23 +640,21 @@ a {
   pointer-events: none;
 }
 
-.legacy-pin::after {
+.legacy-pin::before {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: -8px;
-  width: 8px;
-  height: 8px;
-  transform: translateX(-50%) rotate(45deg);
-  background: var(--pin-color, #ff2d55);
-  border-right: 2px solid #111;
-  border-bottom: 2px solid #111;
-  box-shadow: 2px 2px 0 rgba(255, 255, 255, 0.98), 3px 3px 0 rgba(0, 0, 0, 0.52);
-  box-sizing: border-box;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #ffffff;
+  transform: translate(-50%, -50%) rotate(45deg);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.18);
 }
 
 .legacy-pin.is-selected {
-  transform: scale(1.3);
+  transform: rotate(-45deg) scale(1.3);
   filter: saturate(1.35) brightness(1.02);
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 1), 0 0 0 6px rgba(0, 0, 0, 0.75);
 }
@@ -1126,6 +1151,7 @@ a {
 .legacy-timeline-event-description {
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;

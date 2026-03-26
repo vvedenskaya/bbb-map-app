@@ -159,9 +159,16 @@ function getMapLabelPlacement(venue: Venue, mapLabel: string): { side: "left" | 
   return { side, rowOffset };
 }
 
-function getMarkerZIndex(mapLabel: string): number | undefined {
-  if (!mapLabel) return undefined;
-  if (mapLabel.toLowerCase().includes("institute")) return 2000;
+function getMarkerZIndex(
+  mapLabel: string,
+  isService: boolean,
+  isSelected: boolean,
+  isHovered: boolean
+): number {
+  if (isHovered) return 5200;
+  if (isSelected) return 5000;
+  if (isService) return 1500;
+  if (mapLabel && mapLabel.toLowerCase().includes("institute")) return 2000;
   return 800;
 }
 
@@ -196,9 +203,16 @@ function getVenueCategoryKey(venue: Venue): string {
 
 function getServiceIcon(serviceType?: Venue["serviceType"]): string | null {
   if (serviceType === "garbage") return "🗑";
-  if (serviceType === "water") return "💧";
+  if (serviceType === "water") return "💦";
   if (serviceType === "toilets") return "🚻";
   if (serviceType === "medic") return "✚";
+  return null;
+}
+
+function getServiceDisplayName(serviceType?: Venue["serviceType"]): string | null {
+  if (serviceType === "water") return "Water";
+  if (serviceType === "toilets") return "Restroom";
+  if (serviceType === "medic") return "Medic";
   return null;
 }
 
@@ -1096,7 +1110,10 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
             >
               {visibleMappableVenues.slice(0, 300).map((venue) => {
                 const serviceIcon = getServiceIcon(venue.serviceType);
+                const isService = Boolean(serviceIcon);
                 const mapLabel = (venue.mapLabel || "").trim();
+                const isHovered = hoveredVenueId === venue.id;
+                const isSelected = selectedVenueId === venue.id;
                 const mapLabelPlacement = mapLabel ? getMapLabelPlacement(venue, mapLabel) : null;
                 const mapLabelStyle = mapLabelPlacement
                   ? ({
@@ -1116,16 +1133,28 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                     key={venue.id}
                     position={{ lat: venue.lat || 33.351, lng: venue.lng || -115.731 }}
                     anchorPoint={AdvancedMarkerAnchorPoint.CENTER}
-                    zIndex={getMarkerZIndex(mapLabel)}
+                    zIndex={getMarkerZIndex(mapLabel, isService, isSelected, isHovered)}
                   >
                     {serviceIcon ? (
-                      <div className={`legacy-pin-wrap ${mapLabel ? "has-map-label" : ""}`}>
+                      <div
+                        className={`legacy-pin-wrap ${mapLabel ? "has-map-label" : ""}`}
+                        onMouseEnter={() => {
+                          if (!supportsHoverRef.current || selectedVenueId) return;
+                          setHoveredVenueId(venue.id);
+                        }}
+                        onMouseLeave={() => {
+                          setHoveredVenueId((current) => (current === venue.id ? null : current));
+                        }}
+                      >
                         <div
-                          className="legacy-service-pin"
+                          className={`legacy-service-pin ${venue.serviceType === "toilets" ? "is-toilets" : ""} ${venue.serviceType === "water" ? "is-water" : ""}`}
                           aria-label={venue.name}
                           style={{ "--pin-color": venueColorById.get(venue.id) || "#4b5563" } as CSSProperties}
                         >
-                          <span className="legacy-pin-service-icon" aria-hidden="true">
+                          <span
+                            className={`legacy-pin-service-icon ${venue.serviceType === "toilets" ? "is-toilets" : ""} ${venue.serviceType === "water" ? "is-water" : ""}`}
+                            aria-hidden="true"
+                          >
                             {serviceIcon}
                           </span>
                         </div>
@@ -1136,6 +1165,13 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                           >
                             {mapLabel}
                           </span>
+                        ) : null}
+                        {hoveredVenueId === venue.id &&
+                        venue.serviceType &&
+                        ["water", "toilets", "medic"].includes(venue.serviceType) ? (
+                          <div className="legacy-pin-hover-card" role="status" aria-live="polite">
+                            <strong>{getServiceDisplayName(venue.serviceType) || venue.name}</strong>
+                          </div>
                         ) : null}
                       </div>
                     ) : (
@@ -1150,7 +1186,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                         }}
                       >
                         <button
-                          className={`legacy-pin ${selectedVenueId === venue.id ? "is-selected" : ""} ${lastInteractedVenueId === venue.id ? "is-last-interacted" : ""}`}
+                          className={`legacy-pin ${isSelected ? "is-selected" : ""} ${lastInteractedVenueId === venue.id ? "is-last-interacted" : ""}`}
                           type="button"
                           aria-label={venue.name}
                           style={{ "--pin-color": venueColorById.get(venue.id) || venue.accent || "#8b5cf6" } as CSSProperties}
@@ -1562,7 +1598,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                   className={`legacy-chip ${isTimelineOpen ? "active" : ""}`}
                   onClick={() => setIsTimelineOpen(true)}
                 >
-                  Fullscreen timeline
+                  Calendar
                 </button>
               </div>
             </div>
@@ -1570,7 +1606,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
 
           {listView === "venues" ? (
             <section className="legacy-list-block">
-              <div className="legacy-list-title">
+              <div className="legacy-list-title legacy-list-title-venues">
                 <h2>{selectedVenue ? selectedVenue.name : "Venues"}</h2>
                 <span>{visibleCategorizedVenuesCount}</span>
               </div>
