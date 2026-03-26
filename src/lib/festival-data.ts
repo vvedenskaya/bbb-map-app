@@ -38,41 +38,30 @@ type AirtableExport = {
   records?: AirtableExportRecord[];
 };
 
-type ScheduleMappedEvent = {
-  source?: { row?: number; col?: number };
-  date?: unknown;
-  title?: unknown;
-  scheduled_time?: unknown;
+type RealScheduleEvent = {
+  name?: unknown;
+  start_time?: unknown;
+  end_time?: unknown;
+  location?: unknown;
+  location_candidate?: unknown;
+  description?: unknown;
   category?: unknown;
-  location_hint?: unknown;
-  location_match?: {
-    location_name?: unknown;
-    lat?: unknown;
-    long?: unknown;
-    confidence?: unknown;
-  } | null;
-  airtable_match?: {
-    airtable_id?: unknown;
-    project_name?: unknown;
-    project_type?: unknown;
-    artist_name?: unknown;
-  } | null;
-  raw_text?: unknown;
-};
-
-type ScheduleMappedPayload = {
-  summary?: {
-    event_count?: unknown;
-    location_match_counts?: { none?: unknown };
-    unmatched_location_events?: Array<{ title?: unknown; date?: unknown }>;
-  };
-  events?: ScheduleMappedEvent[];
+  day?: unknown;
 };
 
 const LOCATIONS_PATH = path.join(process.cwd(), "locations.json");
 const AIRTABLE_DUMP_PATH = path.join(process.cwd(), "tmp_airtable_table.json");
-const SCHEDULE_MAPPED_PATH = path.join(process.cwd(), "schedule_events_mapped.json");
+const REAL_SCHEDULE_PATH = path.join(process.cwd(), "the_real_schedule_events.json");
 const SCHEDULE_START_DATE = "2026-03-25";
+const FESTIVAL_DAY_TO_ISO: Record<FestivalDay, string> = {
+  wed: "2026-03-25",
+  thu: "2026-03-26",
+  fri: "2026-03-27",
+  sat: "2026-03-28",
+  sun: "2026-03-29",
+  mon: "2026-03-30",
+  tue: "2026-03-31",
+};
 
 function asString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -102,12 +91,6 @@ function asNumber(value: unknown): number | null {
     return Number.isNaN(parsed) ? null : parsed;
   }
   return null;
-}
-
-function asInteger(value: unknown): number | null {
-  const parsed = asNumber(value);
-  if (parsed === null) return null;
-  return Number.isInteger(parsed) ? parsed : null;
 }
 
 function normalizeText(value: string): string {
@@ -196,37 +179,9 @@ function parseDayFromLabel(raw: string): FestivalDay | null {
   return null;
 }
 
-function dayOfWeek(dateIso: string): FestivalDay | null {
-  if (!dateIso) return null;
-  const parsed = new Date(`${dateIso}T12:00:00Z`);
-  if (Number.isNaN(parsed.getTime())) return null;
-  const day = parsed.getUTCDay();
-  if (day === 0) return "sun";
-  if (day === 1) return "mon";
-  if (day === 2) return "tue";
-  if (day === 3) return "wed";
-  if (day === 4) return "thu";
-  if (day === 5) return "fri";
-  return "sat";
-}
-
-function normalizeScheduleDate(rawDate: string, preferredDay: FestivalDay | null): string {
-  if (!rawDate || !preferredDay) return rawDate;
-  const parsed = new Date(`${rawDate}T12:00:00Z`);
-  if (Number.isNaN(parsed.getTime())) return rawDate;
-  let guard = 0;
-  while (guard < 7) {
-    const iso = parsed.toISOString().slice(0, 10);
-    const weekday = dayOfWeek(iso);
-    if (weekday === preferredDay) return iso;
-    parsed.setUTCDate(parsed.getUTCDate() + 1);
-    guard += 1;
-  }
-  return rawDate;
-}
-
-function parseScheduleCategoryToType(category: string): FestivalEvent["type"] {
-  return parseEventType(normalizeText(category));
+function getScheduleDateFromDay(day: FestivalDay | null): string {
+  if (!day) return "";
+  return FESTIVAL_DAY_TO_ISO[day] || "";
 }
 
 function extractHostFromScheduleCellText(rawText: string): string {
@@ -237,24 +192,6 @@ function extractHostFromScheduleCellText(rawText: string): string {
   const hostedMatch = text.match(/\bhosted by\s+([^|]+?)(?=\s+\d{1,2}(?::\d{2})?\s*(?:AM|PM)\b|$)/i);
   if (hostedMatch?.[1]) return asString(hostedMatch[1]);
   return "";
-}
-
-function splitTimeRange(raw: string): { startTime: string; endTime: string } {
-  const normalized = asString(raw);
-  if (!normalized) return { startTime: "TBD", endTime: "TBD" };
-  const match = normalized.match(/^(.+?)\s*-\s*(.+)$/);
-  if (!match) return { startTime: normalized, endTime: "TBD" };
-  let startTime = match[1].trim();
-  const endTime = match[2].trim() || "TBD";
-  const startHasMeridiem = /\b(?:AM|PM)\b/i.test(startTime);
-  const endMeridiem = endTime.match(/\b(AM|PM)\b/i)?.[1]?.toUpperCase();
-  if (!startHasMeridiem && endMeridiem && /^\d{1,2}(?::\d{2})?$/i.test(startTime)) {
-    startTime = `${startTime} ${endMeridiem}`;
-  }
-  return {
-    startTime,
-    endTime,
-  };
 }
 
 function findMatchingLocation(
@@ -327,15 +264,15 @@ function getAdminVenueLabel(projectType: FestivalEvent["type"]): string {
 
 export async function getFestivalData(): Promise<FestivalDataResult> {
   try {
-    const [locationsRaw, airtableRaw, mappedScheduleRaw] = await Promise.all([
+    const [locationsRaw, airtableRaw, realScheduleRaw] = await Promise.all([
       readFile(LOCATIONS_PATH, "utf-8"),
       readFile(AIRTABLE_DUMP_PATH, "utf-8"),
-      readFile(SCHEDULE_MAPPED_PATH, "utf-8"),
+      readFile(REAL_SCHEDULE_PATH, "utf-8"),
     ]);
 
     const parsedLocations = JSON.parse(locationsRaw) as unknown;
     const parsedAirtable = JSON.parse(airtableRaw) as unknown;
-    const parsedSchedule = JSON.parse(mappedScheduleRaw) as unknown;
+    const parsedSchedule = JSON.parse(realScheduleRaw) as unknown;
 
     if (!Array.isArray(parsedLocations)) {
       throw new Error("locations.json must be an array");
@@ -343,27 +280,27 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
     if (!parsedAirtable || typeof parsedAirtable !== "object" || !Array.isArray((parsedAirtable as AirtableExport).records)) {
       throw new Error("tmp_airtable_table.json must include records[]");
     }
-    if (!parsedSchedule || typeof parsedSchedule !== "object" || !Array.isArray((parsedSchedule as ScheduleMappedPayload).events)) {
-      throw new Error("schedule_events_mapped.json must include events[]");
+    if (!Array.isArray(parsedSchedule)) {
+      throw new Error("the_real_schedule_events.json must be an array");
     }
 
     const locationRows = parsedLocations as LocationRow[];
     const airtableRecords = (parsedAirtable as AirtableExport).records ?? [];
-    const mappedEvents = (parsedSchedule as ScheduleMappedPayload).events ?? [];
-    const mappedSummary = (parsedSchedule as ScheduleMappedPayload).summary;
+    const mappedEvents = parsedSchedule as RealScheduleEvent[];
     const byNormalizedName = new Map<string, LocationRow>();
     const allLocations: LocationRow[] = [];
-    const byAirtableId = new Map<string, AirtableExportRecord>();
+    const byAirtableProjectName = new Map<string, AirtableExportRecord>();
     const airtableProjectNames = new Set<string>();
 
     for (const row of airtableRecords) {
-      if (typeof row.id === "string" && row.id) {
-        byAirtableId.set(row.id, row);
-      }
       const fields = row.fields ?? {};
       const projectName = asString(fields["Project Name"]) || asString(fields.project_name);
       if (projectName) {
-        airtableProjectNames.add(normalizeText(projectName));
+        const normalizedProjectName = normalizeText(projectName);
+        airtableProjectNames.add(normalizedProjectName);
+        if (!byAirtableProjectName.has(normalizedProjectName)) {
+          byAirtableProjectName.set(normalizedProjectName, row);
+        }
       }
     }
 
@@ -418,7 +355,7 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
           shortDescription: params.hasLocation
             ? "Lookup from locations.json"
             : "No coordinates found in locations.json",
-          description: params.descriptionSource || "Mapped from schedule_events_mapped.json",
+          description: params.descriptionSource || "Mapped from the_real_schedule_events.json",
           x: 0,
           y: 0,
           lat: params.lat,
@@ -458,31 +395,29 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
       }
     }
 
-    // Primary schedule source from prepared spreadsheet mapping.
-    for (const mapped of mappedEvents) {
-      const title = asString(mapped.title) || "Untitled schedule event";
-      const scheduleDateRaw = asString(mapped.date);
-      const dayFromLabel = parseDayFromLabel(asString((mapped as { day?: unknown }).day));
-      const scheduleDate = normalizeScheduleDate(scheduleDateRaw, dayFromLabel);
+    // Primary schedule source from the_real_schedule_events.json.
+    const unmatchedLocationEvents: string[] = [];
+    for (let idx = 0; idx < mappedEvents.length; idx += 1) {
+      const mapped = mappedEvents[idx];
+      const title = asString(mapped.name) || "Untitled schedule event";
+      const dayFromLabel = parseDayFromLabel(asString(mapped.day));
+      const scheduleDate = getScheduleDateFromDay(dayFromLabel);
       if (scheduleDate && scheduleDate < SCHEDULE_START_DATE) {
         continue;
       }
       const scheduleCategory = asString(mapped.category);
-      const locationName = asString(mapped.location_match?.location_name);
-      const locationHint = asString(mapped.location_hint);
-      const scheduleTime = asString(mapped.scheduled_time);
-      const rawText = asString(mapped.raw_text);
-      const airtableMatch = mapped.airtable_match;
-      const airtableId = asString(airtableMatch?.airtable_id);
-      const row = asInteger(mapped.source?.row);
-      const col = asInteger(mapped.source?.col);
-      const sourceId = row !== null && col !== null ? `${row}-${col}` : slugify(`${scheduleDate}-${title}`);
+      const locationName = asString(mapped.location);
+      const locationHint = asString(mapped.location_candidate);
+      const rawText = asString(mapped.description);
+      const startTimeRaw = asString(mapped.start_time);
+      const endTimeRaw = asString(mapped.end_time);
+      const sourceId = slugify(`${scheduleDate || "unknown-date"}-${title}-${idx}`);
 
-      const matchedAirtableRecord = airtableId ? byAirtableId.get(airtableId) : undefined;
+      const matchedAirtableRecord = byAirtableProjectName.get(normalizeText(title));
       const matchedAirtableFields = matchedAirtableRecord?.fields ?? {};
-      const hostFromAirtable = asString(matchedAirtableFields["Artist Name"]) || asString(airtableMatch?.artist_name);
+      const hostFromAirtable = asString(matchedAirtableFields["Artist Name"]);
       const hostFromScheduleCell = extractHostFromScheduleCellText(rawText);
-      const typeFromAirtable = asString(matchedAirtableFields["Project Type"]) || asString(airtableMatch?.project_type);
+      const typeFromAirtable = asString(matchedAirtableFields["Project Type"]);
       const parsedAirtableTypes = typeFromAirtable ? parseEventTypes(typeFromAirtable) : [];
       const parsedScheduleCategoryTypes = scheduleCategory ? parseEventTypes(scheduleCategory) : [];
       const resolvedProjectTypes = parsedAirtableTypes.length > 0 ? parsedAirtableTypes : parsedScheduleCategoryTypes;
@@ -496,15 +431,18 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
 
       if (locationName) {
         const matchedLocation = findMatchingLocation(locationName, byNormalizedName, allLocations);
+        if (!matchedLocation) {
+          unmatchedLocationEvents.push(`${asString(mapped.day) || "Unknown day"}: ${title} (${locationName})`);
+        }
         const hostFromLocation = matchedLocation ? getLocationArtist(matchedLocation) : "";
         const abridgedFromLocation = matchedLocation ? getLocationAbridgedText(matchedLocation) : "";
         const resolvedLocationName = matchedLocation ? getLocationDisplayName(matchedLocation, locationName) : locationName;
         const venueLocationKey = matchedLocation
           ? getLocationCanonicalKey(matchedLocation, locationName)
           : normalizeText(locationName);
-        const locationSource = matchedLocation || mapped.location_match;
-        const lat = asNumber((locationSource as { Lat?: unknown; lat?: unknown }).Lat ?? (locationSource as { lat?: unknown }).lat);
-        const lng = asNumber((locationSource as { Long?: unknown; long?: unknown }).Long ?? (locationSource as { long?: unknown }).long);
+        const locationSource = matchedLocation;
+        const lat = asNumber((locationSource as { Lat?: unknown })?.Lat);
+        const lng = asNumber((locationSource as { Long?: unknown })?.Long);
         if (lat !== null && lng !== null) {
           hasLocation = true;
           eventLat = lat;
@@ -524,7 +462,8 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
         if (matchedVenue && hostFromLocation && !matchedVenue.shortDescription.startsWith("By ")) {
           matchedVenue.shortDescription = `By ${hostFromLocation}`;
         }
-        const { startTime, endTime } = splitTimeRange(scheduleTime);
+        const startTime = startTimeRaw || "TBD";
+        const endTime = endTimeRaw || "TBD";
         const day = dayFromLabel ?? (scheduleDate ? parseDayFromIsoDate(scheduleDate) : "fri");
         const dedupeKey = [
           scheduleDate || "unknown-date",
@@ -558,12 +497,15 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
           source: "schedule",
           scheduleDate: scheduleDate || undefined,
           scheduleCategory: scheduleCategory || undefined,
-          airtableRecordId: airtableId || undefined,
-          airtableProjectName: asString(airtableMatch?.project_name) || undefined,
+          airtableRecordId: undefined,
+          airtableProjectName: undefined,
         });
         continue;
       } else {
         const fallbackName = locationHint || "Location TBD";
+        if (!locationName) {
+          unmatchedLocationEvents.push(`${asString(mapped.day) || "Unknown day"}: ${title}`);
+        }
         venueId = ensureVenue({
           key: `unmapped:${normalizeText(fallbackName) || sourceId}`,
           name: fallbackName,
@@ -573,7 +515,8 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
         });
       }
 
-      const { startTime, endTime } = splitTimeRange(scheduleTime);
+      const startTime = startTimeRaw || "TBD";
+      const endTime = endTimeRaw || "TBD";
       const day = dayFromLabel ?? (scheduleDate ? parseDayFromIsoDate(scheduleDate) : "fri");
       const dedupeKey = [
         scheduleDate || "unknown-date",
@@ -607,8 +550,8 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
         source: "schedule",
         scheduleDate: scheduleDate || undefined,
         scheduleCategory: scheduleCategory || undefined,
-        airtableRecordId: airtableId || undefined,
-        airtableProjectName: asString(airtableMatch?.project_name) || undefined,
+        airtableRecordId: undefined,
+        airtableProjectName: undefined,
       });
     }
 
@@ -727,22 +670,13 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
       dedupeCandidates.forEach((candidate) => existingEventKeys.add(candidate));
     }
 
-    const unmatchedLocationEvents = (mappedSummary?.unmatched_location_events ?? [])
-      .map((item) => {
-        const title = asString(item.title);
-        const date = asString(item.date);
-        if (!title) return "";
-        return date ? `${date}: ${title}` : title;
-      })
-      .filter(Boolean);
-
-    const totalRows = asInteger(mappedSummary?.event_count) ?? events.length;
-    const locationNoneCount = asInteger(mappedSummary?.location_match_counts?.none) ?? unmatchedLocationEvents.length;
+    const totalRows = mappedEvents.length;
+    const locationNoneCount = unmatchedLocationEvents.length;
 
     return {
       venues,
       events,
-      sourceLabel: "schedule_events_mapped.json + locations.json + tmp_airtable_table.json + admin_entries.json",
+      sourceLabel: "the_real_schedule_events.json + locations.json + tmp_airtable_table.json + admin_entries.json",
       debug: {
         totalRows,
         confirmedRows: totalRows,
@@ -757,7 +691,7 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
   return {
     venues: [],
     events: [],
-    sourceLabel: "schedule_events_mapped.json/locations.json/tmp_airtable_table.json unavailable",
+    sourceLabel: "the_real_schedule_events.json/locations.json/tmp_airtable_table.json unavailable",
     debug: {
       totalRows: 0,
       confirmedRows: 0,
