@@ -33,7 +33,13 @@ const TIMELINE_ZOOM_MIN = 0.75;
 const TIMELINE_ZOOM_MAX = 2.4;
 const TIMELINE_ZOOM_STEP = 0.15;
 const TIMELINE_DEFAULT_ZOOM = 1.5;
+const TIMELINE_VERTICAL_ZOOM_MIN = 0.85;
+const TIMELINE_VERTICAL_ZOOM_MAX = 2.2;
+const TIMELINE_VERTICAL_ZOOM_STEP = 0.1;
+const TIMELINE_DEFAULT_VERTICAL_ZOOM = 1.55;
 const TIMELINE_BASE_LANE_WIDTH = 124;
+const TIMELINE_BASE_PIXELS_PER_MINUTE = 1.2;
+const TIMELINE_MIN_EVENT_HEIGHT = 26;
 const TIMELINE_EVENT_GAP = 6;
 const TIMELINE_TIME_COLUMN_WIDTH = 42;
 
@@ -638,6 +644,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [mapZoom, setMapZoom] = useState(() => getResponsiveDefaultMapZoom());
   const [responsiveDefaultMapZoom, setResponsiveDefaultMapZoom] = useState(() => getResponsiveDefaultMapZoom());
   const [timelineZoom, setTimelineZoom] = useState(TIMELINE_DEFAULT_ZOOM);
+  const [timelineVerticalZoom, setTimelineVerticalZoom] = useState(TIMELINE_DEFAULT_VERTICAL_ZOOM);
   const [selectedTimelineEventId, setSelectedTimelineEventId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [hoveredVenueId, setHoveredVenueId] = useState<string | null>(null);
@@ -646,6 +653,13 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     "idle" | "requesting" | "ready" | "denied" | "unavailable" | "error"
   >("idle");
   const timelineScrollRef = useRef<HTMLDivElement | null>(null);
+  const timelinePinchRef = useRef<{
+    startDistance: number;
+    startDx: number;
+    startDy: number;
+    startHorizontalZoom: number;
+    startVerticalZoom: number;
+  } | null>(null);
   const mapPanelRef = useRef<HTMLElement | null>(null);
   const hasAutoScrolledTimelineRef = useRef(false);
   const supportsHoverRef = useRef(false);
@@ -876,10 +890,11 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     { length: Math.max(Math.floor((timelineEnd - timelineStart) / 60) + 1, 1) },
     (_, idx) => timelineStart + idx * 60
   );
-  const timelinePixelsPerMinute = 1.2;
+  const timelinePixelsPerMinute = TIMELINE_BASE_PIXELS_PER_MINUTE * timelineVerticalZoom;
   const timelineHeight = Math.max((timelineEnd - timelineStart) * timelinePixelsPerMinute, 360);
   const timelineLaneWidth = Math.round(TIMELINE_BASE_LANE_WIDTH * timelineZoom);
-  const timelineZoomPercentLabel = `${Math.round(timelineZoom * 100)}%`;
+  const timelineHorizontalZoomPercentLabel = `${Math.round(timelineZoom * 100)}%`;
+  const timelineVerticalZoomPercentLabel = `${Math.round(timelineVerticalZoom * 100)}%`;
   const currentDayByNow: FestivalDay | null = (() => {
     if (!now) return null;
     const day = now.getDay();
@@ -992,6 +1007,30 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     window.requestAnimationFrame(() => {
       if (!timelineScrollRef.current) return;
       timelineScrollRef.current.scrollLeft = Math.max(contentX * zoomScale - viewportX, 0);
+    });
+  }
+
+  function adjustTimelineVerticalZoom(targetZoom: number, anchorClientY?: number) {
+    const clampedZoom = clamp(targetZoom, TIMELINE_VERTICAL_ZOOM_MIN, TIMELINE_VERTICAL_ZOOM_MAX);
+    if (Math.abs(clampedZoom - timelineVerticalZoom) < 0.001) return;
+
+    const scrollElement = timelineScrollRef.current;
+    if (!scrollElement) {
+      setTimelineVerticalZoom(clampedZoom);
+      return;
+    }
+
+    const rect = scrollElement.getBoundingClientRect();
+    const viewportY = anchorClientY !== undefined
+      ? clamp(anchorClientY - rect.top, 0, scrollElement.clientHeight)
+      : scrollElement.clientHeight / 2;
+    const contentY = scrollElement.scrollTop + viewportY;
+    const zoomScale = clampedZoom / timelineVerticalZoom;
+    setTimelineVerticalZoom(clampedZoom);
+
+    window.requestAnimationFrame(() => {
+      if (!timelineScrollRef.current) return;
+      timelineScrollRef.current.scrollTop = Math.max(contentY * zoomScale - viewportY, 0);
     });
   }
 
@@ -1817,7 +1856,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
             <div className="legacy-timeline-toolbar">
               <div>
                 <strong>Schedule Timeline</strong>
-                <p>Simultaneous events shown side-by-side by time block.</p>
+                <p>Simultaneous events shown side-by-side by time block. Pinch to zoom horizontally and vertically.</p>
               </div>
               <div className="legacy-timeline-toolbar-actions">
                 <div className="legacy-timeline-zoom-controls" role="group" aria-label="Timeline zoom controls">
@@ -1833,15 +1872,41 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                     type="button"
                     className="legacy-chip legacy-timeline-zoom-label"
                     onClick={() => adjustTimelineZoom(TIMELINE_DEFAULT_ZOOM)}
-                    aria-label="Reset timeline zoom"
+                    aria-label="Reset horizontal timeline zoom"
                   >
-                    {timelineZoomPercentLabel}
+                    H {timelineHorizontalZoomPercentLabel}
                   </button>
                   <button
                     type="button"
                     className="legacy-chip"
                     onClick={() => adjustTimelineZoom(timelineZoom + TIMELINE_ZOOM_STEP)}
                     aria-label="Zoom in timeline"
+                  >
+                    +
+                  </button>
+                </div>
+                <div className="legacy-timeline-zoom-controls" role="group" aria-label="Timeline vertical zoom controls">
+                  <button
+                    type="button"
+                    className="legacy-chip"
+                    onClick={() => adjustTimelineVerticalZoom(timelineVerticalZoom - TIMELINE_VERTICAL_ZOOM_STEP)}
+                    aria-label="Zoom out timeline vertically"
+                  >
+                    -
+                  </button>
+                  <button
+                    type="button"
+                    className="legacy-chip legacy-timeline-zoom-label"
+                    onClick={() => adjustTimelineVerticalZoom(TIMELINE_DEFAULT_VERTICAL_ZOOM)}
+                    aria-label="Reset vertical timeline zoom"
+                  >
+                    V {timelineVerticalZoomPercentLabel}
+                  </button>
+                  <button
+                    type="button"
+                    className="legacy-chip"
+                    onClick={() => adjustTimelineVerticalZoom(timelineVerticalZoom + TIMELINE_VERTICAL_ZOOM_STEP)}
+                    aria-label="Zoom in timeline vertically"
                   >
                     +
                   </button>
@@ -1869,19 +1934,24 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                 const [firstTouch, secondTouch] = [event.touches[0], event.touches[1]];
                 const dx = secondTouch.clientX - firstTouch.clientX;
                 const dy = secondTouch.clientY - firstTouch.clientY;
+                const horizontalDistance = Math.abs(dx);
+                const verticalDistance = Math.abs(dy);
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 if (!Number.isFinite(distance) || distance <= 0) return;
 
-                const currentDistanceRef = (event.currentTarget as HTMLDivElement).dataset.pinchStartDistance;
-                const currentZoomRef = (event.currentTarget as HTMLDivElement).dataset.pinchStartZoom;
-                if (!currentDistanceRef || !currentZoomRef) return;
+                const pinchStart = timelinePinchRef.current;
+                if (!pinchStart) return;
 
                 event.preventDefault();
-                const startDistance = Number(currentDistanceRef);
-                const startZoom = Number(currentZoomRef);
-                if (!Number.isFinite(startDistance) || startDistance <= 0 || !Number.isFinite(startZoom)) return;
+                const startDistance = pinchStart.startDistance;
+                if (!Number.isFinite(startDistance) || startDistance <= 0) return;
                 const midpointX = (firstTouch.clientX + secondTouch.clientX) / 2;
-                adjustTimelineZoom(startZoom * (distance / startDistance), midpointX);
+                const midpointY = (firstTouch.clientY + secondTouch.clientY) / 2;
+                const ratioByDistance = distance / startDistance;
+                const ratioX = pinchStart.startDx >= 12 ? horizontalDistance / pinchStart.startDx : ratioByDistance;
+                const ratioY = pinchStart.startDy >= 12 ? verticalDistance / pinchStart.startDy : ratioByDistance;
+                adjustTimelineZoom(pinchStart.startHorizontalZoom * ratioX, midpointX);
+                adjustTimelineVerticalZoom(pinchStart.startVerticalZoom * ratioY, midpointY);
               }}
               onTouchStart={(event) => {
                 if (event.touches.length !== 2) return;
@@ -1890,14 +1960,21 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                 const dy = secondTouch.clientY - firstTouch.clientY;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 if (!Number.isFinite(distance) || distance <= 0) return;
-                (event.currentTarget as HTMLDivElement).dataset.pinchStartDistance = String(distance);
-                (event.currentTarget as HTMLDivElement).dataset.pinchStartZoom = String(timelineZoom);
+                timelinePinchRef.current = {
+                  startDistance: distance,
+                  startDx: Math.abs(dx),
+                  startDy: Math.abs(dy),
+                  startHorizontalZoom: timelineZoom,
+                  startVerticalZoom: timelineVerticalZoom,
+                };
               }}
               onTouchEnd={(event) => {
                 if (event.touches.length < 2) {
-                  delete (event.currentTarget as HTMLDivElement).dataset.pinchStartDistance;
-                  delete (event.currentTarget as HTMLDivElement).dataset.pinchStartZoom;
+                  timelinePinchRef.current = null;
                 }
+              }}
+              onTouchCancel={() => {
+                timelinePinchRef.current = null;
               }}
             >
               {timelineDays.length === 0 ? (
@@ -1958,7 +2035,10 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                           ) : null}
                           {layout.blocks.map((block) => {
                             const top = (block.start - timelineStart) * timelinePixelsPerMinute;
-                            const height = Math.max((block.end - block.start) * timelinePixelsPerMinute, 26);
+                            const height = Math.max(
+                              (block.end - block.start) * timelinePixelsPerMinute,
+                              TIMELINE_MIN_EVENT_HEIGHT * timelineVerticalZoom
+                            );
                             const width = Math.max(timelineLaneWidth - TIMELINE_EVENT_GAP, 42);
                             const left = block.column * timelineLaneWidth + TIMELINE_EVENT_GAP / 2;
                             const venue = venueById.get(block.event.venueId);
