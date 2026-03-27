@@ -55,14 +55,15 @@
   },
   {
     "Name": "Bombay Beach Community Center",
+    "Label": "BB Community Center",
     "Address": "",
     "Category": "Community Hub",
-    "Lat": 33.35253,
+    "Lat": 33.3524,
     "Long": -115.73127
   },
   {
     "Name": "Food Court",
-    "Label": "BB Community Center",
+    "Label": "Food Court",
     "Address": "9590 Avenue C, Niland, CA 92257",
     "Category": "Services",
     "Lat": 33.35205154941772,
@@ -119,6 +120,7 @@
   {
     "Name": "Bombay Bliss Beach Club",
     "Alias": "Bliss Club",
+    "Label": "Bliss Club",
     "Address": "Near Bliss Beach Club",
     "Category": "Venue",
     "Lat": 33.34735,
@@ -780,6 +782,7 @@
   {
     "Name": "Sothebys",
     "Alias": "Sotheby's Real Estate Office",
+    "Label": "Sotheby's",
     "Address": "",
     "Category": "Venue",
     "Lat": 33.349629,
@@ -787,7 +790,7 @@
   },
   {
     "Name": "Food Court",
-    "Label": "BB Community Center",
+    "Label": "Food Court",
     "Address": "",
     "Category": "Services",
     "Lat": 33.35236,
@@ -817,6 +820,7 @@
   },
   {
     "Name": "The Tradewinds",
+    "Label": "Tradewinds",
     "Address": "",
     "Category": "Venue",
     "Lat": 33.349064,
@@ -874,6 +878,7 @@
   },
   {
     "Name": "Mz.Aqua's Musik Museum",
+    "Label": "Musik Museum",
     "Category": "Venue",
     "Lat": 33.35177984793379,
     "Long": -115.73371974211096
