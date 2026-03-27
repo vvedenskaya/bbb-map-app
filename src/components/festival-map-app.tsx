@@ -682,7 +682,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [activeDays, setActiveDays] = useState<FestivalDay[]>(() => getDefaultActiveDays(events));
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [listView, setListView] = useState<"venues" | "schedule">("venues");
-  const [isTimelineOpen, setIsTimelineOpen] = useState(false);
+  const [isTimelineOpen, setIsTimelineOpen] = useState(true);
   const [showPastEvents, setShowPastEvents] = useState(false);
   const [now, setNow] = useState<Date | null>(null);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
@@ -2132,10 +2132,10 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                 </div>
                 <button
                   type="button"
-                  className="legacy-chip"
+                  className="legacy-chip legacy-switch-map-chip"
                   onClick={closeTimeline}
                 >
-                  Close
+                  Switch to map
                 </button>
               </div>
             </div>

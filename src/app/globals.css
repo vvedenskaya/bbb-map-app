@@ -157,6 +157,13 @@ a {
   color: #ffffff;
 }
 
+.legacy-chip.legacy-switch-map-chip {
+  border-color: #1f1a16;
+  background: #1f1a16;
+  color: #ffffff;
+  font-weight: 700;
+}
+
 .legacy-geo-status {
   display: inline-flex;
   align-items: center;
