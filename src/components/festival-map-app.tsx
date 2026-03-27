@@ -681,7 +681,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [lastInteractedVenueId, setLastInteractedVenueId] = useState<string | null>(null);
   const [activeDays, setActiveDays] = useState<FestivalDay[]>(() => getDefaultActiveDays(events));
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [listView, setListView] = useState<"venues" | "schedule">("venues");
+  const [listView, setListView] = useState<"venues" | "schedule">("schedule");
   const [isTimelineOpen, setIsTimelineOpen] = useState(false);
   const [showPastEvents, setShowPastEvents] = useState(false);
   const [now, setNow] = useState<Date | null>(null);

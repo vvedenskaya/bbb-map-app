@@ -1990,8 +1990,8 @@ a {
     justify-content: center;
     align-items: center;
     width: 100%;
-    font-size: 0.8rem;
-    font-weight: 700;
+    font-size: 0.95rem;
+    font-weight: 800;
   }
 
   .legacy-mobile-filter-body {
@@ -2008,6 +2008,61 @@ a {
 
   .legacy-control-row {
     grid-template-columns: 1fr;
+  }
+
+  .legacy-search {
+    font-size: 0.96rem;
+    padding: 10px 12px;
+  }
+
+  .legacy-filter-option {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #262626;
+  }
+
+  .legacy-filter-option input {
+    width: 18px;
+    height: 18px;
+  }
+
+  .legacy-control-row .legacy-chip {
+    font-size: 0.98rem;
+    font-weight: 700;
+    padding: 10px 12px;
+  }
+
+  .legacy-list-title h2 {
+    font-size: 1rem;
+  }
+
+  .legacy-list-title span {
+    font-size: 0.9rem;
+    color: #4a4a4a;
+  }
+
+  .legacy-venue-group-header {
+    font-size: 0.8rem;
+    color: #4d493f;
+  }
+
+  .legacy-venue-item {
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .legacy-event-item strong {
+    font-size: 0.98rem;
+  }
+
+  .legacy-event-item small {
+    font-size: 0.9rem;
+    color: #4f4f4f;
+  }
+
+  .legacy-time-slot-header {
+    font-size: 0.9rem;
   }
 
   .legacy-timeline-overlay {
