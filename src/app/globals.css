@@ -1247,7 +1247,25 @@ a {
 }
 
 .legacy-mobile-timeline-fab {
-  display: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  right: 12px;
+  bottom: 18px;
+  z-index: 5000;
+  border: 2px solid #ffffff;
+  background: #1f1a16;
+  color: #fff;
+  border-radius: 999px;
+  min-height: 52px;
+  padding: 12px 20px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42), 0 0 0 2px rgba(255, 255, 255, 0.22);
 }
 
 .legacy-popup-mini-list {
@@ -2027,24 +2045,6 @@ a {
   .legacy-timeline-toolbar-scale-controls {
     order: 2;
     flex-wrap: wrap;
-  }
-
-  .legacy-mobile-timeline-fab {
-    display: inline-flex;
-    position: fixed;
-    right: 12px;
-    bottom: 18px;
-    z-index: 5000;
-    border: 1px solid #1f1a16;
-    background: #1f1a16;
-    color: #fff;
-    border-radius: 999px;
-    padding: 10px 14px;
-    font: inherit;
-    font-size: 0.76rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
   }
 
   .legacy-timeline-day-grid {
