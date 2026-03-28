@@ -877,6 +877,12 @@
     "Long": -115.73366666666666
   },
   {
+    "Name": "Arcos",
+    "Address": "9566 Ave A, Niland",
+    "Category": "Art Installation",
+    "location_internal": "Muzik's AMuZe"
+  },
+  {
     "Name": "Mz.Aqua's Musik Museum",
     "Label": "Musik Museum",
     "Category": "Venue",
@@ -988,7 +994,13 @@
     "location_internal": "Josiah's Playground"
   },
   {
-    "Name": "NoMamman & PurDoDo",
+    "Name": "NoMamman",
+    "Address": "9582 Ave D, Niland",
+    "Category": "Art Installation",
+    "location_internal": "Playalotlot"
+  },
+  {
+    "Name": "PurDoDo",
     "Address": "9582 Ave D, Niland",
     "Category": "Art Installation",
     "location_internal": "Playalotlot"
@@ -1036,7 +1048,7 @@
     "location_internal": "PoP"
   },
   {
-    "Name": "StarBal",
+    "Name": "StarBall",
     "Address": "9540 Ave B, Niland",
     "Category": "Art Installation",
     "location_internal": "PoP"

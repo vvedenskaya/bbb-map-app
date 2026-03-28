@@ -36,7 +36,7 @@ const TIMELINE_DEFAULT_ZOOM = 1.5;
 const TIMELINE_VERTICAL_ZOOM_MIN = 0.85;
 const TIMELINE_VERTICAL_ZOOM_MAX = 2.2;
 const TIMELINE_VERTICAL_ZOOM_STEP = 0.1;
-const TIMELINE_DEFAULT_VERTICAL_ZOOM = 1.55;
+const TIMELINE_DEFAULT_VERTICAL_ZOOM = 1.25;
 const TIMELINE_BASE_LANE_WIDTH = 124;
 const TIMELINE_BASE_PIXELS_PER_MINUTE = 1.2;
 const TIMELINE_MIN_EVENT_HEIGHT = 26;
@@ -78,8 +78,25 @@ const PIN_CATEGORY_ORDER = [
   COMMUNITY_HUB_KEY,
   LOCAL_BUSINESS_KEY,
   VENUE_KEY,
-  EXHIBITIONS_KEY,
   ART_INSTALLATION_KEY,
+];
+const SIDEBAR_CATEGORY_ORDER = [
+  SERVICES_KEY,
+  COMMUNITY_HUB_KEY,
+  LOCAL_BUSINESS_KEY,
+  VENUE_KEY,
+  "community",
+  "music",
+  "performance",
+  EXHIBITIONS_KEY,
+  "experience",
+  "film",
+  ART_INSTALLATION_KEY,
+  "lecture",
+  "social",
+  "dj",
+  "food",
+  UNCATEGORIZED_KEY,
 ];
 const PROJECT_TYPE_FILTER_OPTIONS: Array<{ id: string; label: string; types: EventType[] }> = [
   { id: "music", label: eventTypeLabels.music, types: ["music"] },
@@ -100,7 +117,7 @@ const ALL_PROJECT_TYPES = PROJECT_TYPE_FILTER_OPTIONS.flatMap((option) => option
 const PIN_CATEGORY_COLORS: Record<string, string> = {
   [SERVICES_KEY]: "#f97316",
   [COMMUNITY_HUB_KEY]: "#8b5cf6",
-  [LOCAL_BUSINESS_KEY]: "#0ea5e9",
+  [LOCAL_BUSINESS_KEY]: "#facc15",
   [VENUE_KEY]: "#3b82f6",
   [EXHIBITIONS_KEY]: "#9333ea",
   [ART_INSTALLATION_KEY]: "#ec4899",
@@ -217,11 +234,12 @@ function getVenueCategoryKey(venue: Venue): string {
   if (label.includes("community")) return COMMUNITY_HUB_KEY;
   if (label.includes("local business")) return LOCAL_BUSINESS_KEY;
   if (label.includes("exhibition") || label.includes("gallery")) return EXHIBITIONS_KEY;
+  if (label.includes("facilitated experience")) return "experience";
+  if (label.includes("film")) return "film";
   if (label.includes("object")) return ART_INSTALLATION_KEY;
   if (label.includes("installation/immersive environment")) return ART_INSTALLATION_KEY;
   if (label.includes("installation")) return ART_INSTALLATION_KEY;
   if (label.includes("immersive")) return ART_INSTALLATION_KEY;
-  if (label.includes("facilitated experience")) return ART_INSTALLATION_KEY;
   if (label.includes("venue")) return VENUE_KEY;
   if (label.includes("art installation")) return ART_INSTALLATION_KEY;
   // Keep all mappable pins in a canonical map category bucket.
@@ -244,10 +262,43 @@ function getServiceDisplayName(serviceType?: Venue["serviceType"]): string | nul
 }
 
 function getCategoryDisplayLabel(categoryKey: string): string {
+  if (categoryKey === EXHIBITIONS_KEY) {
+    return "Exhibitions";
+  }
+  if (categoryKey === ART_INSTALLATION_KEY) {
+    return "Art Installation";
+  }
   if (categoryKey === UNCATEGORIZED_KEY) {
     return "Uncategorized";
   }
+  if (categoryKey in eventTypeLabels) {
+    return eventTypeLabels[categoryKey as EventType];
+  }
   return categoryKey.replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function getSidebarCategoryAccentColor(categoryKey: string): string {
+  if (categoryKey in PIN_CATEGORY_COLORS) {
+    return PIN_CATEGORY_COLORS[categoryKey];
+  }
+  if (categoryKey in PROJECT_TYPE_COLORS) {
+    return PROJECT_TYPE_COLORS[categoryKey as EventType];
+  }
+  return "#8b5cf6";
+}
+
+function getSidebarEventCategoryKeys(event: FestivalEvent): string[] {
+  const projectTypes = getEventProjectTypes(event);
+  const keys = projectTypes.map((type) => {
+    if (type === "services") return SERVICES_KEY;
+    if (type === "exhibition") return EXHIBITIONS_KEY;
+    if (type === "community" || type === "social") return "experience";
+    if (type === "installation" || type === "object") {
+      return ART_INSTALLATION_KEY;
+    }
+    return type;
+  });
+  return [...new Set(keys.length > 0 ? keys : [UNCATEGORIZED_KEY])];
 }
 
 function getProjectTypeColor(type: EventType): string {
@@ -685,7 +736,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [lastInteractedVenueId, setLastInteractedVenueId] = useState<string | null>(null);
   const [activeDays, setActiveDays] = useState<FestivalDay[]>(() => getDefaultActiveDays(events));
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [listView, setListView] = useState<"venues" | "schedule">("schedule");
+  const [listView, setListView] = useState<"all" | "schedule">("schedule");
   const [isTimelineOpen, setIsTimelineOpen] = useState(false);
   const [showPastEvents, setShowPastEvents] = useState(false);
   const [now, setNow] = useState<Date | null>(null);
@@ -706,6 +757,10 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [hoveredVenueId, setHoveredVenueId] = useState<string | null>(null);
   const [allowOutOfBoundsNavigation, setAllowOutOfBoundsNavigation] = useState(false);
+  const [mapFocusedVenueId, setMapFocusedVenueId] = useState<string | null>(null);
+  const [isMobileUi, setIsMobileUi] = useState(false);
+  const [mobileDetailVenueId, setMobileDetailVenueId] = useState<string | null>(null);
+  const [mobileDetailEventId, setMobileDetailEventId] = useState<string | null>(null);
   const [geolocationStatus, setGeolocationStatus] = useState<
     "idle" | "requesting" | "ready" | "denied" | "unavailable" | "error"
   >("idle");
@@ -726,11 +781,11 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     geolocationStatus === "requesting"
       ? "Locating..."
       : geolocationStatus === "denied"
-        ? "Location access denied"
+        ? ""
         : geolocationStatus === "unavailable"
-          ? "Geolocation unavailable"
+          ? ""
           : geolocationStatus === "error"
-            ? "Location lookup failed"
+            ? ""
             : "";
 
   const selectedVenue = venues.find((venue) => venue.id === selectedVenueId) ?? null;
@@ -763,25 +818,12 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     return acc;
   }, new globalThis.Map());
 
-  const exhibitionVenueIds = events.reduce<Set<string>>((acc, event) => {
-    if (event.source === "schedule" && getEventProjectTypes(event).includes("exhibition")) {
-      acc.add(event.venueId);
-    }
-    return acc;
-  }, new Set());
-
-  const getSidebarVenueCategoryKey = (venue: Venue): string => {
-    if (venue.serviceType) return SERVICES_KEY;
-    if (exhibitionVenueIds.has(venue.id)) return EXHIBITIONS_KEY;
-    return venueCategoryById.get(venue.id) ?? VENUE_KEY;
-  };
-
   const venueColorById = venues.reduce<globalThis.Map<string, string>>((acc, venue) => {
     if (venue.serviceType) {
       acc.set(venue.id, SERVICE_TYPE_COLORS[venue.serviceType]);
       return acc;
     }
-    const category = getSidebarVenueCategoryKey(venue);
+    const category = venueCategoryById.get(venue.id) ?? VENUE_KEY;
     acc.set(venue.id, PIN_CATEGORY_COLORS[category] ?? PIN_CATEGORY_COLORS[VENUE_KEY]);
     return acc;
   }, new globalThis.Map());
@@ -859,14 +901,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     if (!selectedVenue) return "";
     const venueDescription = (selectedVenue.description || "").trim();
     const hasGenericLocationDescription = /^Mapped from locations\.json\b/i.test(venueDescription);
-    if (venueDescription && !hasGenericLocationDescription) {
-      return venueDescription;
-    }
-    const unscheduledFallback = selectedVenueUnscheduledEvents
-      .filter((event) => isUnscheduledEvent(event))
-      .map((event) => getVisibleEventDescription(event))
-      .find(Boolean);
-    return unscheduledFallback || venueDescription;
+    return venueDescription && !hasGenericLocationDescription ? venueDescription : "";
   })();
   const selectedVenueHasDuplicateScheduledDescription = (() => {
     if (!selectedVenueDescription || selectedVenueScheduledEvents.length === 0) return false;
@@ -880,30 +915,137 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
       return eventText.includes(venueText) || venueText.includes(eventText);
     });
   })();
+  const selectedMobileVenue = mobileDetailVenueId
+    ? venues.find((venue) => venue.id === mobileDetailVenueId) ?? null
+    : null;
+  const selectedMobileVenueLabelProjectTypes = selectedMobileVenue ? getVenueLabelProjectTypes(selectedMobileVenue) : [];
+  const selectedMobileVenueEvents = selectedMobileVenue
+    ? events
+        .filter(
+          (event) =>
+            event.venueId === selectedMobileVenue.id &&
+            (isUnscheduledEvent(event) || activeDayFilter.includes(event.day)) &&
+            !getEventProjectTypes(event).includes("services")
+        )
+        .filter((event) => showPastEvents || !now || !isPastEvent(event, now))
+        .sort(sortScheduleEvents)
+    : [];
+  const selectedMobileVenueScheduledEvents = selectedMobileVenueEvents.filter((event) => !isUnscheduledEvent(event));
+  const selectedMobileVenueUnscheduledEvents = selectedMobileVenueEvents.filter((event) => isUnscheduledEvent(event));
+  const selectedMobileVenueUnscheduledEventsWithDetails = selectedMobileVenue
+    ? selectedMobileVenueUnscheduledEvents.filter((event) => hasUnscheduledEventDetails(event))
+    : [];
+  const selectedMobileVenueDescription = (() => {
+    if (!selectedMobileVenue) return "";
+    const venueDescription = (selectedMobileVenue.description || "").trim();
+    const hasGenericLocationDescription = /^Mapped from locations\.json\b/i.test(venueDescription);
+    return venueDescription && !hasGenericLocationDescription ? venueDescription : "";
+  })();
+  const selectedMobileVenueHasDuplicateScheduledDescription = (() => {
+    if (!selectedMobileVenueDescription || selectedMobileVenueScheduledEvents.length === 0) return false;
+    const venueText = normalizeDescriptionForComparison(selectedMobileVenueDescription);
+    if (!venueText) return false;
+    return selectedMobileVenueScheduledEvents.some((event) => {
+      const eventDescription = getVisibleEventDescription(event);
+      if (!eventDescription) return false;
+      const eventText = normalizeDescriptionForComparison(eventDescription);
+      if (!eventText) return false;
+      return eventText.includes(venueText) || venueText.includes(eventText);
+    });
+  })();
+  const selectedMobileEvent = mobileDetailEventId
+    ? events.find((event) => event.id === mobileDetailEventId) ?? null
+    : null;
+  const selectedMobileEventVenue = selectedMobileEvent
+    ? venueById.get(selectedMobileEvent.venueId) ?? null
+    : null;
+  const selectedMobileEventDescription = selectedMobileEvent
+    ? getVisibleEventDescription(selectedMobileEvent)
+    : "";
   const visibleMappableVenues = visibleVenues.filter(
     (venue) => typeof venue.lat === "number" && typeof venue.lng === "number"
   );
 
-  const venuesByCategory = visibleVenues
-    .filter((venue) => !venue.serviceType)
-    .reduce<globalThis.Map<string, Venue[]>>((acc, venue) => {
-    const category = getSidebarVenueCategoryKey(venue);
-    const existing = acc.get(category);
+  const sidebarVisibleEvents = events
+    .filter((event) => {
+      const venue = venueById.get(event.venueId);
+      if (!eventMatchesProjectTypeFilter(event, activeProjectTypes)) return false;
+      if (!showPastEvents && now && !isUnscheduledEvent(event) && isPastEvent(event, now)) return false;
+      if (!lowerQuery) return true;
+      const searchableText = [
+        event.title,
+        event.host,
+        event.description || "",
+        venue?.name || "",
+      ].join(" ").toLowerCase();
+      return searchableText.includes(lowerQuery);
+    })
+    .filter((event) => !getEventProjectTypes(event).includes("services"));
+
+  const dedupedSidebarVisibleEvents = Array.from(
+    sidebarVisibleEvents
+      .sort(sortScheduleEvents)
+      .reduce<globalThis.Map<string, FestivalEvent>>((acc, event) => {
+        const dedupeKey = `${event.venueId}|${normalizeDescriptionForComparison(event.title)}`;
+        if (!acc.has(dedupeKey)) {
+          acc.set(dedupeKey, event);
+        }
+        return acc;
+      }, new globalThis.Map())
+      .values()
+  );
+
+  const sidebarEntries = [
+    ...visibleMappableVenues
+      .filter((venue) => venue.serviceType !== "toilets")
+      .map((venue) => ({
+      id: `location:${venue.id}`,
+      category: venueCategoryById.get(venue.id) ?? VENUE_KEY,
+      kind: "location" as const,
+      sortLabel: venue.name.toLowerCase(),
+      venue,
+      event: null,
+      })),
+    ...dedupedSidebarVisibleEvents.flatMap((event) =>
+      getSidebarEventCategoryKeys(event).map((category) => ({
+        id: `event:${event.id}:${category}`,
+        category,
+        kind: "event" as const,
+        sortLabel: event.title.toLowerCase(),
+        venue: venueById.get(event.venueId) ?? null,
+        event,
+      }))
+    ),
+  ];
+
+  const sidebarEntriesByCategory = sidebarEntries.reduce<
+    globalThis.Map<string, Array<(typeof sidebarEntries)[number]>>
+  >((acc, entry) => {
+    const existing = acc.get(entry.category);
     if (existing) {
-      existing.push(venue);
+      existing.push(entry);
     } else {
-      acc.set(category, [venue]);
+      acc.set(entry.category, [entry]);
     }
     return acc;
-    }, new globalThis.Map());
+  }, new globalThis.Map());
 
-  const sortedVenueGroups = PIN_CATEGORY_ORDER.map((category) => ({
+  const sidebarCategories = [
+    ...SIDEBAR_CATEGORY_ORDER.filter((category) => sidebarEntriesByCategory.has(category)),
+    ...Array.from(sidebarEntriesByCategory.keys())
+      .filter((category) => !SIDEBAR_CATEGORY_ORDER.includes(category))
+      .sort((a, b) => getCategoryDisplayLabel(a).localeCompare(getCategoryDisplayLabel(b))),
+  ];
+
+  const sortedSidebarGroups = sidebarCategories.map((category) => ({
     category,
     categoryLabel: getCategoryDisplayLabel(category),
-    venues: [...(venuesByCategory.get(category) ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
+    entries: [...(sidebarEntriesByCategory.get(category) ?? [])].sort((a, b) => {
+      if (a.kind !== b.kind) return a.kind === "location" ? -1 : 1;
+      return a.sortLabel.localeCompare(b.sortLabel);
+    }),
   }));
-  const visibleCategorizedVenuesCount = sortedVenueGroups
-    .reduce((sum, group) => sum + group.venues.length, 0);
+  const visibleCategorizedVenuesCount = sortedSidebarGroups.reduce((sum, group) => sum + group.entries.length, 0);
 
   const scheduleByDay = SCHEDULE_DAY_ORDER.map((day) => {
     const dayEvents = scheduleVisibleEvents.filter((event) => event.day === day);
@@ -1034,9 +1176,38 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     setSelectedVenueId(venue.id);
     setLastInteractedVenueId(venue.id);
     setSelectedEventId(null);
+    setMapFocusedVenueId(null);
     setAllowOutOfBoundsNavigation(false);
     setMapCenter(center);
     setMapZoom(zoom);
+  }
+
+  function focusVenueOnMapOnly(venue: Venue, zoom = MAP_FOCUS_ZOOM) {
+    const lat = venue.lat ?? MAP_CENTER.lat;
+    const lng = venue.lng ?? MAP_CENTER.lng;
+    setSelectedVenueId(null);
+    setSelectedEventId(null);
+    setMapFocusedVenueId(venue.id);
+    setLastInteractedVenueId(venue.id);
+    setAllowOutOfBoundsNavigation(false);
+    setMapCenter({ lat, lng });
+    setMapZoom(zoom);
+  }
+
+  function closeMobileDetail() {
+    setMobileDetailVenueId(null);
+    setMobileDetailEventId(null);
+  }
+
+  function openListVenue(venue: Venue) {
+    if (isMobileUi) {
+      setMobileDetailVenueId(venue.id);
+      setMobileDetailEventId(null);
+      setSelectedVenueId(null);
+      setSelectedEventId(null);
+      return;
+    }
+    focusVenue(venue);
   }
 
   function focusEvent(event: FestivalEvent, options?: { openVenueModal?: boolean }) {
@@ -1061,12 +1232,54 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     if (venue) {
       setLastInteractedVenueId(venue.id);
       setSelectedVenueId(openVenueModal ? venue.id : null);
+      setMapFocusedVenueId(openVenueModal ? null : venue.id);
       setAllowOutOfBoundsNavigation(false);
     } else if (!openVenueModal) {
       setSelectedVenueId(null);
+      setMapFocusedVenueId(null);
     }
 
     setSelectedEventId(event.id);
+  }
+
+  function openListEvent(event: FestivalEvent) {
+    if (isMobileUi) {
+      if (listView === "schedule") {
+        focusEvent(event, { openVenueModal: false });
+        scrollToMapPanelTop();
+        return;
+      }
+      setMobileDetailEventId(event.id);
+      setMobileDetailVenueId(null);
+      setSelectedVenueId(null);
+      setSelectedEventId(event.id);
+      return;
+    }
+    focusEvent(event);
+  }
+
+  function scrollToMapPanelTop() {
+    if (typeof window === "undefined") return;
+    const mapPanel = mapPanelRef.current;
+    if (!mapPanel) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    const top = Math.max(mapPanel.getBoundingClientRect().top + window.scrollY, 0);
+    window.scrollTo({ top, behavior: "smooth" });
+  }
+
+  function openSelectedMobileDetailOnMap() {
+    if (selectedMobileEvent) {
+      closeMobileDetail();
+      focusEvent(selectedMobileEvent, { openVenueModal: false });
+    } else if (selectedMobileVenue) {
+      closeMobileDetail();
+      focusVenueOnMapOnly(selectedMobileVenue);
+    } else {
+      return;
+    }
+    scrollToMapPanelTop();
   }
 
   function closeTimeline() {
@@ -1197,6 +1410,24 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     media.addEventListener("change", applySupport);
     return () => {
       media.removeEventListener("change", applySupport);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mobileViewport = window.matchMedia("(max-width: 720px)");
+    const applyMobileUi = () => {
+      const nextIsMobile = mobileViewport.matches;
+      setIsMobileUi(nextIsMobile);
+      if (!nextIsMobile) {
+        setMobileDetailVenueId(null);
+        setMobileDetailEventId(null);
+      }
+    };
+    applyMobileUi();
+    mobileViewport.addEventListener("change", applyMobileUi);
+    return () => {
+      mobileViewport.removeEventListener("change", applyMobileUi);
     };
   }, []);
 
@@ -1419,7 +1650,9 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                 const mapLabel = (venue.mapLabel || "").trim();
                 const isHovered = hoveredVenueId === venue.id;
                 const isSelected =
-                  selectedVenueId === venue.id || (!selectedVenueId && selectedEventVenueId === venue.id);
+                  selectedVenueId === venue.id ||
+                  mapFocusedVenueId === venue.id ||
+                  (!selectedVenueId && selectedEventVenueId === venue.id);
                 const mapLabelPlacement = mapLabel ? getMapLabelPlacement(venue, mapLabel) : null;
                 const mapLabelStyle = mapLabelPlacement
                   ? ({
@@ -1427,13 +1660,17 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                       "--label-gap": serviceIcon ? "14px" : "10px",
                     } as CSSProperties)
                   : undefined;
-                const venueSchedulePreview = (eventsByVenueId.get(venue.id) ?? [])
-                  .filter((event) => !isUnscheduledEvent(event))
-                  .filter((event) => activeDayFilter.includes(event.day) && eventMatchesProjectTypeFilter(event, activeProjectTypes))
-                  .filter((event) => showPastEvents || !now || !isPastEvent(event, now))
+                const venuePreviewItems = (eventsByVenueId.get(venue.id) ?? [])
+                  .filter((event) => !getEventProjectTypes(event).includes("services"))
+                  .filter((event) => {
+                    if (!eventMatchesProjectTypeFilter(event, activeProjectTypes)) return false;
+                    if (isUnscheduledEvent(event)) return hasUnscheduledEventDetails(event);
+                    if (!activeDayFilter.includes(event.day)) return false;
+                    return showPastEvents || !now || !isPastEvent(event, now);
+                  })
                   .sort(sortScheduleEvents);
-                const previewItems = venueSchedulePreview.slice(0, 2);
-                const remainingCount = Math.max(venueSchedulePreview.length - previewItems.length, 0);
+                const previewItems = venuePreviewItems.slice(0, 3);
+                const remainingCount = Math.max(venuePreviewItems.length - previewItems.length, 0);
                 return (
                   <AdvancedMarker
                     key={venue.id}
@@ -1524,12 +1761,16 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                                 {previewItems.map((event) => (
                                   <li key={event.id}>
                                     <strong>{event.title}</strong>
-                                    <span>{dayLabels[event.day]} | {event.startTime} - {event.endTime}</span>
+                                    <span>
+                                      {isUnscheduledEvent(event)
+                                        ? "Additional item"
+                                        : `${dayLabels[event.day]} | ${event.startTime} - ${event.endTime}`}
+                                    </span>
                                   </li>
                                 ))}
                               </ul>
                             ) : (
-                              <span className="legacy-pin-hover-empty">No upcoming scheduled events</span>
+                              <span className="legacy-pin-hover-empty">No visible items here</span>
                             )}
                             {remainingCount > 0 ? (
                               <span className="legacy-pin-hover-more">+{remainingCount} more</span>
@@ -1897,60 +2138,101 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                 />
                 <span>Show past events</span>
               </label>
-              <div className="legacy-control-row legacy-map-control-row">
-                <button
-                  type="button"
-                  className={`legacy-chip ${listView === "venues" ? "active" : ""}`}
-                  onClick={() => setListView("venues")}
-                >
-                  Venues
-                </button>
-                <button
-                  type="button"
-                  className={`legacy-chip ${listView === "schedule" ? "active" : ""}`}
-                  onClick={() => setListView("schedule")}
-                >
-                  Schedule
-                </button>
-                <button
-                  type="button"
-                  className={`legacy-chip ${isTimelineOpen ? "active" : ""}`}
-                  onClick={() => setIsTimelineOpen(true)}
-                >
-                  Calendar
-                </button>
-              </div>
+            </div>
+            <div className="legacy-view-switcher" role="group" aria-label="View switcher">
+              <button
+                type="button"
+                className={`legacy-chip ${listView === "all" ? "active" : ""}`}
+                onClick={() => {
+                  setListView("all");
+                  setIsTimelineOpen(false);
+                }}
+              >
+                All
+              </button>
+              <button
+                type="button"
+                className={`legacy-chip ${listView === "schedule" ? "active" : ""}`}
+                onClick={() => {
+                  setListView("schedule");
+                  setIsTimelineOpen(false);
+                }}
+              >
+                Schedule
+              </button>
+              <button
+                type="button"
+                className={`legacy-chip ${isTimelineOpen ? "active" : ""}`}
+                onClick={() => setIsTimelineOpen(true)}
+              >
+                Calendar
+              </button>
             </div>
           </section>
 
-          {listView === "venues" ? (
+          {listView === "all" ? (
             <section className="legacy-list-block">
               <div className="legacy-list-title legacy-list-title-venues">
-                <h2>{selectedVenue ? selectedVenue.name : "Venues"}</h2>
+                <h2>All</h2>
                 <span>{visibleCategorizedVenuesCount}</span>
               </div>
               <div className="legacy-venue-list">
-                {sortedVenueGroups.map((group) => (
-                  <div key={group.category} className="legacy-venue-group">
-                    <div className="legacy-venue-group-header">
+                {sortedSidebarGroups.map((group) => (
+                  <details key={group.category} className="legacy-venue-group legacy-sidebar-group" open>
+                    <summary className="legacy-venue-group-header legacy-sidebar-group-summary">
                       <span>{group.categoryLabel}</span>
-                      <span>{group.venues.length}</span>
+                      <span>{group.entries.length}</span>
+                    </summary>
+                    <div className="legacy-sidebar-group-items">
+                    {group.entries.map((entry) => {
+                      if (entry.kind === "location") {
+                        const venue = entry.venue;
+                        return (
+                          <button
+                            key={entry.id}
+                            className={`legacy-venue-item ${selectedVenueId === venue.id || mobileDetailVenueId === venue.id ? "active" : ""}`}
+                            type="button"
+                            onClick={() => openListVenue(venue)}
+                          >
+                            <span
+                              className="legacy-venue-dot"
+                              style={{ "--pin-color": venueColorById.get(venue.id) || venue.accent || "#8b5cf6" } as CSSProperties}
+                            />
+                            <span>{getServiceIcon(venue.serviceType) ? `${getServiceIcon(venue.serviceType)} ` : ""}{venue.name}</span>
+                          </button>
+                        );
+                      }
+                      const event = entry.event;
+                      const venue = entry.venue;
+                      if (!event) return null;
+                      return (
+                        <button
+                          key={entry.id}
+                          className={`legacy-all-entry ${selectedEventId === event.id || mobileDetailEventId === event.id ? "active" : ""}`}
+                          type="button"
+                          onClick={() => openListEvent(event)}
+                          onMouseEnter={() => {
+                            if (!supportsHoverRef.current) return;
+                            setHighlightedTimelineEventId(event.id);
+                          }}
+                          onMouseLeave={() => {
+                            if (!supportsHoverRef.current) return;
+                            setHighlightedTimelineEventId((current) => (current === event.id ? null : current));
+                          }}
+                        >
+                          <span
+                            className="legacy-venue-dot"
+                            style={{ "--pin-color": getSidebarCategoryAccentColor(group.category) } as CSSProperties}
+                          />
+                          <span className="legacy-all-entry-copy">
+                            <strong>{event.title}</strong>
+                            <small>{venue?.name ?? "Unknown location"}</small>
+                          </span>
+                        </button>
+                      );
+                    })}
                     </div>
-                    {group.venues.map((venue) => (
-                      <button
-                        key={venue.id}
-                        className={`legacy-venue-item ${selectedVenueId === venue.id ? "active" : ""}`}
-                        type="button"
-                        onClick={() => focusVenue(venue)}
-                      >
-                        <span
-                          className="legacy-venue-dot"
-                          style={{ "--pin-color": venueColorById.get(venue.id) || venue.accent || "#8b5cf6" } as CSSProperties}
-                        />
-                        <span>{getServiceIcon(venue.serviceType) ? `${getServiceIcon(venue.serviceType)} ` : ""}{venue.name}</span>
-                      </button>
-                    ))}
-                  </div>
+                  </details>
                 ))}
               </div>
             </section>
@@ -1981,9 +2263,17 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                             return (
                               <button
                                 key={event.id}
-                                className={`legacy-event-item ${selectedEventId === event.id ? "active" : ""}`}
+                                className={`legacy-event-item ${selectedEventId === event.id || mobileDetailEventId === event.id ? "active" : ""}`}
                                 type="button"
-                                onClick={() => focusEvent(event)}
+                                onClick={() => openListEvent(event)}
+                                onMouseEnter={() => {
+                                  if (!supportsHoverRef.current) return;
+                                  setHighlightedTimelineEventId(event.id);
+                                }}
+                                onMouseLeave={() => {
+                                  if (!supportsHoverRef.current) return;
+                                  setHighlightedTimelineEventId((current) => (current === event.id ? null : current));
+                                }}
                               >
                                 <div className="legacy-type-chip-group">
                                   {getEventProjectTypes(event).map((type) => (
@@ -2231,7 +2521,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                   const dayColumnWidth = Math.max(layout.columns, 1) * timelineLaneWidth;
                   const showHost = timelineLaneWidth >= 130;
                   const showVenue = timelineLaneWidth >= 104;
-                  const showDescription = timelineLaneWidth >= 176;
+                  const showDescription = true;
                   return (
                     <section key={day} className="legacy-timeline-day-section" data-timeline-day={day}>
                       <div className="legacy-timeline-day-section-head">
@@ -2377,39 +2667,243 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
                       <p className="legacy-popup-description">{selectedTimelineEventDescription}</p>
                     ) : null}
                   </div>
-                  <div className="legacy-timeline-event-modal-actions">
-                    <button
-                      type="button"
-                      className="legacy-chip active"
-                      onClick={() => {
-                        focusEvent(selectedTimelineEvent, { openVenueModal: false });
-                        closeTimeline();
-                      }}
-                    >
-                      Open on map
-                    </button>
-                    <button
-                      type="button"
-                      className="legacy-chip"
-                      onClick={() => setSelectedTimelineEventId(null)}
-                    >
-                      Back to calendar
-                    </button>
-                  </div>
+                </div>
+                <div className="legacy-popup-footer-actions legacy-timeline-event-modal-actions">
+                  <button
+                    type="button"
+                    className="legacy-chip active"
+                    onClick={() => {
+                      focusEvent(selectedTimelineEvent, { openVenueModal: !isMobileUi });
+                      closeTimeline();
+                      if (isMobileUi) {
+                        window.requestAnimationFrame(() => {
+                          scrollToMapPanelTop();
+                        });
+                      }
+                    }}
+                  >
+                    Open on map
+                  </button>
+                  <button
+                    type="button"
+                    className="legacy-chip"
+                    onClick={() => setSelectedTimelineEventId(null)}
+                  >
+                    Back to calendar
+                  </button>
                 </div>
               </article>
             </div>
           ) : null}
         </div>
       ), document.body) : null}
+      {(selectedMobileVenue || selectedMobileEvent) && typeof document !== "undefined" ? createPortal((
+        <div className="legacy-mobile-detail-overlay" role="presentation" onClick={closeMobileDetail}>
+          <article
+            className="legacy-popup legacy-timeline-event-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${selectedMobileEvent?.title || selectedMobileVenue?.name || "Item"} details`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            {selectedMobileEvent ? (
+              <>
+                <div className="legacy-popup-head">
+                  <div>
+                    <h3>{selectedMobileEvent.title}</h3>
+                    <p className="legacy-popup-subtitle">
+                      {isUnscheduledEvent(selectedMobileEvent)
+                        ? selectedMobileEvent.airtableTimeLabel || "Unscheduled item"
+                        : `${dayLabels[selectedMobileEvent.day]} | ${selectedMobileEvent.startTime} - ${selectedMobileEvent.endTime}`}
+                    </p>
+                  </div>
+                  <button type="button" className="legacy-popup-close" aria-label="Close item popup" onClick={closeMobileDetail}>
+                    ×
+                  </button>
+                </div>
+                <div className="legacy-popup-content">
+                  <div className="legacy-type-chip-group">
+                    {getEventProjectTypes(selectedMobileEvent).map((type) => (
+                      <span
+                        key={`${selectedMobileEvent.id}-mobile-modal-type-${type}`}
+                        className={`type-chip type-${type}`}
+                        style={{ backgroundColor: getProjectTypeColor(type) }}
+                      >
+                        {eventTypeLabels[type]}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="legacy-timeline-event-modal-body">
+                    {selectedMobileEventVenue ? (
+                      <p>
+                        <strong>Location:</strong> {selectedMobileEventVenue.name}
+                      </p>
+                    ) : null}
+                    {selectedMobileEvent.host && selectedMobileEvent.host !== "TBD" ? (
+                      <p>
+                        <strong>Host:</strong> {selectedMobileEvent.host}
+                      </p>
+                    ) : null}
+                    {selectedMobileEventDescription ? (
+                      <p className="legacy-popup-description">{selectedMobileEventDescription}</p>
+                    ) : null}
+                  </div>
+                </div>
+                <div className="legacy-popup-footer-actions legacy-timeline-event-modal-actions">
+                  <button type="button" className="legacy-chip active" onClick={openSelectedMobileDetailOnMap}>
+                    View on map
+                  </button>
+                  <button type="button" className="legacy-chip" onClick={closeMobileDetail}>
+                    Close
+                  </button>
+                </div>
+              </>
+            ) : selectedMobileVenue ? (
+              <>
+                <div className="legacy-popup-head">
+                  <div>
+                    <h3>{selectedMobileVenue.name}</h3>
+                    <p className="legacy-popup-subtitle">
+                      {selectedMobileVenueScheduledEvents.length > 0
+                        ? `${selectedMobileVenueScheduledEvents.length} scheduled ${selectedMobileVenueScheduledEvents.length === 1 ? "event" : "events"}${selectedMobileVenueUnscheduledEventsWithDetails.length > 0 ? ` + ${selectedMobileVenueUnscheduledEventsWithDetails.length} unscheduled` : ""}`
+                        : selectedMobileVenueUnscheduledEventsWithDetails.length > 0
+                          ? `${selectedMobileVenueUnscheduledEventsWithDetails.length} unscheduled ${selectedMobileVenueUnscheduledEventsWithDetails.length === 1 ? "item" : "items"}`
+                          : "0 scheduled events"}
+                    </p>
+                    {selectedMobileVenueLabelProjectTypes.length > 0 ? (
+                      <div className="legacy-popup-type-tags">
+                        {selectedMobileVenueLabelProjectTypes.map((type) => (
+                          <span
+                            key={`mobile-venue-type-${type}`}
+                            className={`type-chip type-${type}`}
+                            style={{ backgroundColor: getProjectTypeColor(type) }}
+                          >
+                            {eventTypeLabels[type]}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                  <button type="button" className="legacy-popup-close" aria-label="Close location popup" onClick={closeMobileDetail}>
+                    ×
+                  </button>
+                </div>
+                <div className="legacy-popup-content">
+                  {selectedMobileVenueDescription &&
+                  !selectedMobileVenueHasDuplicateScheduledDescription ? (
+                    <p className="legacy-popup-description">{selectedMobileVenueDescription}</p>
+                  ) : null}
+                  {selectedMobileVenueScheduledEvents.length > 0 ? (
+                    <details className="legacy-popup-section is-schedule" open>
+                      <summary className="legacy-popup-section-title">Schedule</summary>
+                      <div className="legacy-popup-event-list">
+                        {selectedMobileVenueScheduledEvents.map((event) => {
+                          const visibleDescription = getVisibleEventDescription(event);
+                          return (
+                            <div key={event.id} className="legacy-popup-event">
+                              <div className="legacy-popup-event-head">
+                                <div className="legacy-type-chip-group">
+                                  {getEventProjectTypes(event).map((type) => (
+                                    <span
+                                      key={`${event.id}-mobile-venue-popup-type-${type}`}
+                                      className={`type-chip type-${type}`}
+                                      style={{ backgroundColor: getProjectTypeColor(type) }}
+                                    >
+                                      {eventTypeLabels[type]}
+                                    </span>
+                                  ))}
+                                </div>
+                                <span className="legacy-popup-meta">
+                                  {dayLabels[event.day]} | {event.startTime} - {event.endTime}
+                                </span>
+                              </div>
+                              <strong>{event.title}</strong>
+                              {event.host ? <p>{event.host}</p> : null}
+                              {visibleDescription ? <p className="legacy-popup-description">{visibleDescription}</p> : null}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </details>
+                  ) : null}
+                  {selectedMobileVenueUnscheduledEventsWithDetails.length > 0 ? (
+                    <details className="legacy-popup-section is-schedule" open>
+                      <summary className="legacy-popup-section-title">Additional</summary>
+                      <div className="legacy-popup-event-list">
+                        {selectedMobileVenueUnscheduledEventsWithDetails.map((event) => {
+                          const visibleDescription = getVisibleEventDescription(event);
+                          const hasVisibleHost = !isPlaceholderHostLabel(event.host);
+                          return (
+                            <div key={event.id} className="legacy-popup-event">
+                              <div className="legacy-popup-event-head">
+                                <div className="legacy-type-chip-group">
+                                  {getEventProjectTypes(event).map((type) => (
+                                    <span
+                                      key={`${event.id}-mobile-venue-unscheduled-type-${type}`}
+                                      className={`type-chip type-${type}`}
+                                      style={{ backgroundColor: getProjectTypeColor(type) }}
+                                    >
+                                      {eventTypeLabels[type]}
+                                    </span>
+                                  ))}
+                                </div>
+                                {event.airtableTimeLabel ? (
+                                  <span className="legacy-popup-meta">{event.airtableTimeLabel}</span>
+                                ) : null}
+                              </div>
+                              <strong>{event.title}</strong>
+                              {hasVisibleHost ? <p>{event.host}</p> : null}
+                              {visibleDescription ? <p className="legacy-popup-description">{visibleDescription}</p> : null}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </details>
+                  ) : null}
+                </div>
+                <div className="legacy-popup-footer-actions legacy-timeline-event-modal-actions">
+                  <button type="button" className="legacy-chip active" onClick={openSelectedMobileDetailOnMap}>
+                    View on map
+                  </button>
+                  <button type="button" className="legacy-chip" onClick={closeMobileDetail}>
+                    Close
+                  </button>
+                </div>
+              </>
+            ) : null}
+          </article>
+        </div>
+      ), document.body) : null}
 
-      <button
-        type="button"
-        className="legacy-mobile-timeline-fab"
-        onClick={() => setIsTimelineOpen(true)}
-      >
-        Calendar
-      </button>
+      <div className="legacy-mobile-view-bar" role="group" aria-label="Mobile view switcher">
+        <button
+          type="button"
+          className={`legacy-chip ${listView === "all" && !isTimelineOpen ? "active" : ""}`}
+          onClick={() => {
+            setListView("all");
+            setIsTimelineOpen(false);
+          }}
+        >
+          All
+        </button>
+        <button
+          type="button"
+          className={`legacy-chip ${listView === "schedule" && !isTimelineOpen ? "active" : ""}`}
+          onClick={() => {
+            setListView("schedule");
+            setIsTimelineOpen(false);
+          }}
+        >
+          Schedule
+        </button>
+        <button
+          type="button"
+          className={`legacy-chip ${isTimelineOpen ? "active" : ""}`}
+          onClick={() => setIsTimelineOpen(true)}
+        >
+          Calendar
+        </button>
+      </div>
 
     </main>
   );

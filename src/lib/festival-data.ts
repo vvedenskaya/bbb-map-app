@@ -850,20 +850,24 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
       const resolvedLocation = matchedMappedLocation
         ? resolveLocationCoordinates(matchedMappedLocation, byNormalizedName, allLocations)
         : resolveLocationCoordinates(locationRow, byNormalizedName, allLocations);
-      if (!resolvedLocation) continue;
-
-      const venueAnchor = resolvedLocation.anchor;
-      const venueName = getLocationDisplayName(venueAnchor, displayName);
-      const venueLocationKey = getLocationCanonicalKey(venueAnchor, venueName);
+      const venueAnchor = resolvedLocation?.anchor ?? null;
+      const venueName = venueAnchor
+        ? getLocationDisplayName(venueAnchor, displayName)
+        : displayName;
+      const venueLocationKey = venueAnchor
+        ? getLocationCanonicalKey(venueAnchor, venueName)
+        : canonicalKey;
       const venueId = ensureVenue({
-        key: `mapped:${venueLocationKey}`,
+        key: venueAnchor ? `mapped:${venueLocationKey}` : `unmapped:locations-installation:${venueLocationKey}`,
         name: venueName,
-        lat: resolvedLocation.lat,
-        lng: resolvedLocation.lng,
-        hasLocation: true,
-        categoryLabel: asString(venueAnchor.Category) || "Venue",
-        mapLabel: getLocationMapLabel(venueAnchor),
-        descriptionSource: getLocationAbridgedText(venueAnchor) || `Mapped from locations.json (${venueName})`,
+        lat: resolvedLocation?.lat,
+        lng: resolvedLocation?.lng,
+        hasLocation: Boolean(resolvedLocation),
+        categoryLabel: asString(locationRow.Category) || "Art Installation",
+        mapLabel: venueAnchor ? getLocationMapLabel(venueAnchor) : undefined,
+        descriptionSource: venueAnchor
+          ? getLocationAbridgedText(venueAnchor) || `Mapped from locations.json (${venueName})`
+          : getLocationAbridgedText(locationRow) || `Mapped from locations.json (${displayName})`,
       });
 
       const title = canonicalName || displayName;
@@ -901,9 +905,9 @@ export async function getFestivalData(): Promise<FestivalDataResult> {
         endTime: "TBD",
         type: parseEventType(category || "installation"),
         thumbnailUrl: "/map-layers/image_BB_map.jpg",
-        lat: resolvedLocation.lat,
-        lng: resolvedLocation.lng,
-        hasLocation: true,
+        lat: resolvedLocation?.lat,
+        lng: resolvedLocation?.lng,
+        hasLocation: Boolean(resolvedLocation),
         source: "airtable",
         airtableProjectName: title,
       });
