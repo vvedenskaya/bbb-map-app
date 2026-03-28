@@ -71,12 +71,14 @@ const SERVICES_KEY = "services";
 const LOCAL_BUSINESS_KEY = "local business";
 const COMMUNITY_HUB_KEY = "community hub";
 const VENUE_KEY = "venue";
+const EXHIBITIONS_KEY = "exhibitions";
 const ART_INSTALLATION_KEY = "art installation";
 const PIN_CATEGORY_ORDER = [
   SERVICES_KEY,
   COMMUNITY_HUB_KEY,
   LOCAL_BUSINESS_KEY,
   VENUE_KEY,
+  EXHIBITIONS_KEY,
   ART_INSTALLATION_KEY,
 ];
 const PROJECT_TYPE_FILTER_OPTIONS: Array<{ id: string; label: string; types: EventType[] }> = [
@@ -100,6 +102,7 @@ const PIN_CATEGORY_COLORS: Record<string, string> = {
   [COMMUNITY_HUB_KEY]: "#8b5cf6",
   [LOCAL_BUSINESS_KEY]: "#0ea5e9",
   [VENUE_KEY]: "#3b82f6",
+  [EXHIBITIONS_KEY]: "#9333ea",
   [ART_INSTALLATION_KEY]: "#ec4899",
   [UNCATEGORIZED_KEY]: "#6b7280",
 };
@@ -213,6 +216,7 @@ function getVenueCategoryKey(venue: Venue): string {
   if (label.includes("service")) return SERVICES_KEY;
   if (label.includes("community")) return COMMUNITY_HUB_KEY;
   if (label.includes("local business")) return LOCAL_BUSINESS_KEY;
+  if (label.includes("exhibition") || label.includes("gallery")) return EXHIBITIONS_KEY;
   if (label.includes("object")) return ART_INSTALLATION_KEY;
   if (label.includes("installation/immersive environment")) return ART_INSTALLATION_KEY;
   if (label.includes("installation")) return ART_INSTALLATION_KEY;
@@ -759,12 +763,25 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     return acc;
   }, new globalThis.Map());
 
+  const exhibitionVenueIds = events.reduce<Set<string>>((acc, event) => {
+    if (event.source === "schedule" && getEventProjectTypes(event).includes("exhibition")) {
+      acc.add(event.venueId);
+    }
+    return acc;
+  }, new Set());
+
+  const getSidebarVenueCategoryKey = (venue: Venue): string => {
+    if (venue.serviceType) return SERVICES_KEY;
+    if (exhibitionVenueIds.has(venue.id)) return EXHIBITIONS_KEY;
+    return venueCategoryById.get(venue.id) ?? VENUE_KEY;
+  };
+
   const venueColorById = venues.reduce<globalThis.Map<string, string>>((acc, venue) => {
     if (venue.serviceType) {
       acc.set(venue.id, SERVICE_TYPE_COLORS[venue.serviceType]);
       return acc;
     }
-    const category = venueCategoryById.get(venue.id) ?? VENUE_KEY;
+    const category = getSidebarVenueCategoryKey(venue);
     acc.set(venue.id, PIN_CATEGORY_COLORS[category] ?? PIN_CATEGORY_COLORS[VENUE_KEY]);
     return acc;
   }, new globalThis.Map());
@@ -870,7 +887,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const venuesByCategory = visibleVenues
     .filter((venue) => !venue.serviceType)
     .reduce<globalThis.Map<string, Venue[]>>((acc, venue) => {
-    const category = venueCategoryById.get(venue.id) ?? VENUE_KEY;
+    const category = getSidebarVenueCategoryKey(venue);
     const existing = acc.get(category);
     if (existing) {
       existing.push(venue);
