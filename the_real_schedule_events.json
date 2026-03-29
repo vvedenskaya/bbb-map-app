@@ -355,7 +355,7 @@
     "start_time": "6 PM",
     "end_time": "8 PM",
     "location": "Jaybird Nest",
-    "description": "by Catus Chaos & Kamau\n“The Thread of Life | Act III: Own Your Fate” is an immersive ritual-performance where myth, ancestry, and craft colide. Guided by Nyx and the Moirai, participants are invited to own their fate and weave it into the Loom of Life.”",
+    "description": "by Cactus Chaos & Kamau\n“The Thread of Life | Act III: Own Your Fate” is an immersive ritual-performance where myth, ancestry, and craft colide. Guided by Nyx and the Moirai, participants are invited to own their fate and weave it into the Loom of Life.”",
     "category": "Performance",
     "day": "Friday"
   },
@@ -423,12 +423,12 @@
     "day": "Friday"
   },
   {
-    "name": "Saturn's Rising",
+    "name": "Martian Takeover",
     "start_time": "7 PM",
-    "end_time": "10 PM",
+    "end_time": "9 PM",
     "location": "Saturn",
     "description": "Saturn activation featuring selected works from the Mars College 2026 cohort",
-    "category": "Exhibition, Music",
+    "category": "Exhibition",
     "day": "Friday"
   },
   {
@@ -656,15 +656,7 @@
     "category": "DJ",
     "day": "Saturday"
   },
-  {
-    "name": "Beats Without Borders:",
-    "start_time": "11 PM",
-    "end_time": "3 AM",
-    "location": "Bombay Beach Yacht Club",
-    "description": "A Live Electric World Journey\n11-11:30 PM: Bárabás Lörinc\n11:30 PM-12 AM: Miles Jay\n12-12:30 AM: Yasmine Azaeiz, Tunisia\n12:30-??: All together fam jam cocktail of sonic deliciousness",
-    "category": "DJ",
-    "day": "Saturday"
-  },
+
   {
     "name": "The Jazz Club",
     "start_time": "12:30 AM",
@@ -1200,7 +1192,7 @@
     "name": "The First Supper - An Alchemical Tasting and Tea Ceremony",
     "start_time": "8 PM",
     "end_time": "10 PM",
-    "location": "Shig Memorial Pyramids",
+    "location": "The Tradewinds",
     "description": "by Salina Moore, Resurrectress\nThe First Supper\nA 13 Course tasting menu of culinary bites, tinctures, and teas, guiding participants through an alchemical process of redemption and renewal. All are invited to the table. Bring a chair! (Limited to 75 people)\nEden in The Apocalypse and The Alchemy of Repair\nby Phoenix Goodman, Salina Moore\n8-10 PM\nThe First Supper",
     "category": "Food/Beverage, Performance",
     "day": "Saturday"
@@ -1400,7 +1392,7 @@
     "end_time": "12 AM",
     "location": "The Beach",
     "description": "by TRISTAN RIO / XANDER STEENBRUGGE",
-    "category": "Music, Performance",
+    "category": "Music",
     "day": "Saturday"
   },
   {
