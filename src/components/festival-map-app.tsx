@@ -762,7 +762,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [mapFocusedVenueId, setMapFocusedVenueId] = useState<string | null>(null);
   const [isMobileUi, setIsMobileUi] = useState(false);
   const [listPanelWidth, setListPanelWidth] = useState<number | null>(null);
-  const [themeMode, setThemeMode] = useState<"light" | "dark">("light");
+  const [themeMode, setThemeMode] = useState<"light" | "dark">("dark");
   const [mobileDetailVenueId, setMobileDetailVenueId] = useState<string | null>(null);
   const [mobileDetailEventId, setMobileDetailEventId] = useState<string | null>(null);
   const [geolocationStatus, setGeolocationStatus] = useState<
@@ -1520,8 +1520,7 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
       setThemeMode(persistedTheme);
       return;
     }
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setThemeMode(prefersDark ? "dark" : "light");
+    setThemeMode("dark");
   }, []);
 
   useEffect(() => {
@@ -2408,7 +2407,13 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
       </div>
 
       {isTimelineOpen && typeof document !== "undefined" ? createPortal((
-        <div className="legacy-timeline-overlay" role="dialog" aria-modal="true" aria-label="Fullscreen schedule timeline">
+        <div
+          className="legacy-timeline-overlay"
+          data-theme={themeMode}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Fullscreen schedule timeline"
+        >
           <div className="legacy-timeline-shell">
             <div className="legacy-timeline-toolbar">
               <div className="legacy-timeline-toolbar-actions">

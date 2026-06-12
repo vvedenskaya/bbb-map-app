@@ -404,6 +404,250 @@ a {
   color: #ddd1c2;
 }
 
+.legacy-app[data-theme="dark"] .legacy-timeline-shell {
+  background: #171411;
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-toolbar {
+  border-bottom-color: rgba(255, 255, 255, 0.14);
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-toolbar p,
+.legacy-app[data-theme="dark"] .legacy-timeline-search-count {
+  color: #cdbfae;
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-grid-wrap {
+  background: #1a1613;
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-day-section {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: #201b17;
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-day-section-head,
+.legacy-app[data-theme="dark"] .legacy-timeline-grid-head {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: #2a241f;
+  color: #e6dacb;
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-time-col-head,
+.legacy-app[data-theme="dark"] .legacy-timeline-day-head,
+.legacy-app[data-theme="dark"] .legacy-timeline-grid-body {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-time-col {
+  border-right-color: rgba(255, 255, 255, 0.14);
+  background: #1b1714;
+  box-shadow: 2px 0 0 rgba(255, 255, 255, 0.06);
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-time-mark {
+  color: #cdbfae;
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-day-col {
+  border-right-color: rgba(255, 255, 255, 0.12);
+  background: #231d18;
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-hour-line {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-event {
+  color: #1f1a16;
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-event-time {
+  color: #3f372e;
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-event small {
+  color: #4f473e;
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-event-host {
+  color: #2f2820 !important;
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-event-description {
+  color: #3f372f !important;
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-event.active {
+  box-shadow: 0 0 0 2px rgba(255, 246, 232, 0.66);
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-event-modal {
+  background: #1e1915;
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #f6efe4;
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-event-modal::after {
+  background: #1e1915;
+  border-left-color: rgba(255, 255, 255, 0.2);
+  border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-event-modal .legacy-popup-head,
+.legacy-app[data-theme="dark"] .legacy-timeline-event-modal .legacy-popup-footer-actions {
+  background: #1e1915;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-event-modal .legacy-popup-subtitle,
+.legacy-app[data-theme="dark"] .legacy-timeline-event-modal .legacy-popup-meta,
+.legacy-app[data-theme="dark"] .legacy-timeline-event-modal .legacy-popup-event p,
+.legacy-app[data-theme="dark"] .legacy-timeline-event-modal .legacy-popup-description {
+  color: #cdbfae;
+}
+
+.legacy-app[data-theme="dark"] .legacy-timeline-event-modal .legacy-popup-section {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: #27211c;
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-search {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: #2a241f;
+  color: #f6efe4;
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-chip {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: #2a241f;
+  color: #efe5d7;
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-chip.active {
+  border-color: #d18357;
+  background: #5a3420;
+  color: #fff4e8;
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-shell {
+  background: #171411;
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-toolbar {
+  border-bottom-color: rgba(255, 255, 255, 0.14);
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-toolbar p,
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-search-count {
+  color: #cdbfae;
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-grid-wrap {
+  background: #1a1613;
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-day-section {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: #201b17;
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-day-section-head,
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-grid-head {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: #2a241f;
+  color: #e6dacb;
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-time-col-head,
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-day-head,
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-grid-body {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-time-col {
+  border-right-color: rgba(255, 255, 255, 0.14);
+  background: #1b1714;
+  box-shadow: 2px 0 0 rgba(255, 255, 255, 0.06);
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-time-mark {
+  color: #cdbfae;
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-day-col {
+  border-right-color: rgba(255, 255, 255, 0.12);
+  background: #231d18;
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-hour-line {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-event {
+  color: #1f1a16;
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-event-time {
+  color: #3f372e;
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-event small {
+  color: #4f473e;
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-event-host {
+  color: #2f2820 !important;
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-event-description {
+  color: #3f372f !important;
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-event.active {
+  box-shadow: 0 0 0 2px rgba(255, 246, 232, 0.66);
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-event-modal {
+  background: #1e1915;
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #f6efe4;
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-event-modal::after {
+  background: #1e1915;
+  border-left-color: rgba(255, 255, 255, 0.2);
+  border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-event-modal .legacy-popup-head,
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-event-modal .legacy-popup-footer-actions {
+  background: #1e1915;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-event-modal .legacy-popup-subtitle,
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-event-modal .legacy-popup-meta,
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-event-modal .legacy-popup-event p,
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-event-modal .legacy-popup-description {
+  color: #cdbfae;
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-timeline-event-modal .legacy-popup-section {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: #27211c;
+}
+
+.legacy-timeline-overlay[data-theme="dark"] .legacy-popup-empty {
+  color: #cdbfae;
+}
+
+.legacy-app[data-theme="dark"] .legacy-popup-empty {
+  color: #cdbfae;
+}
+
 .legacy-list-block {
   border: 1px solid #dcd6c8;
   background: #fffef5;
@@ -802,6 +1046,7 @@ a {
   pointer-events: none;
   display: grid;
   gap: 6px;
+  color: #1f1a16;
 }
 
 .legacy-pin-wrap.has-map-label .legacy-pin-hover-card {
@@ -838,6 +1083,23 @@ a {
   display: block;
   font-size: 0.66rem;
   color: #5f584f;
+}
+
+.legacy-app[data-theme="dark"] .legacy-pin-hover-card {
+  background: rgba(33, 28, 24, 0.98);
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #f6efe4;
+}
+
+.legacy-app[data-theme="dark"] .legacy-pin-hover-card::after {
+  background: rgba(33, 28, 24, 0.98);
+  border-right-color: rgba(255, 255, 255, 0.24);
+  border-bottom-color: rgba(255, 255, 255, 0.24);
+}
+
+.legacy-app[data-theme="dark"] .legacy-pin-hover-empty,
+.legacy-app[data-theme="dark"] .legacy-pin-hover-more {
+  color: #d6c8b6;
 }
 
 .legacy-pin-service-icon {
