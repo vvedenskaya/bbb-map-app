@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { APIProvider, Map, AdvancedMarker, AdvancedMarkerAnchorPoint } from "@vis.gl/react-google-maps";
 import { dayLabels, eventTypeLabels } from "@/data/festival";
 import { EventType, FestivalDay, FestivalEvent, Venue } from "@/types/festival";
@@ -42,6 +42,8 @@ const TIMELINE_BASE_PIXELS_PER_MINUTE = 1.2;
 const TIMELINE_MIN_EVENT_HEIGHT = 26;
 const TIMELINE_EVENT_GAP = 6;
 const TIMELINE_TIME_COLUMN_WIDTH = 42;
+const LEGACY_LIST_PANEL_MIN_WIDTH = 300;
+const LEGACY_LIST_PANEL_MAX_WIDTH = 760;
 
 const PROJECT_TYPE_COLORS: Record<EventType, string> = {
   music: "#3b82f6",
@@ -759,6 +761,8 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   const [allowOutOfBoundsNavigation, setAllowOutOfBoundsNavigation] = useState(false);
   const [mapFocusedVenueId, setMapFocusedVenueId] = useState<string | null>(null);
   const [isMobileUi, setIsMobileUi] = useState(false);
+  const [listPanelWidth, setListPanelWidth] = useState<number | null>(null);
+  const [themeMode, setThemeMode] = useState<"light" | "dark">("light");
   const [mobileDetailVenueId, setMobileDetailVenueId] = useState<string | null>(null);
   const [mobileDetailEventId, setMobileDetailEventId] = useState<string | null>(null);
   const [geolocationStatus, setGeolocationStatus] = useState<
@@ -773,6 +777,8 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
     startVerticalZoom: number;
   } | null>(null);
   const mapPanelRef = useRef<HTMLElement | null>(null);
+  const listPanelRef = useRef<HTMLElement | null>(null);
+  const listPanelResizeRef = useRef<{ startX: number; startWidth: number } | null>(null);
   const hasAutoScrolledTimelineRef = useRef(false);
   const supportsHoverRef = useRef(false);
   const hasUserInteractedWithMapRef = useRef(false);
@@ -1508,6 +1514,69 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   }, [selectedVenueId]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const persistedTheme = window.localStorage.getItem("bbb-map-theme");
+    if (persistedTheme === "light" || persistedTheme === "dark") {
+      setThemeMode(persistedTheme);
+      return;
+    }
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    setThemeMode(prefersDark ? "dark" : "light");
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("bbb-map-theme", themeMode);
+  }, [themeMode]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const endResize = () => {
+      listPanelResizeRef.current = null;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    const handlePointerMove = (event: PointerEvent) => {
+      const drag = listPanelResizeRef.current;
+      if (!drag) return;
+      const viewportCap = Math.max(LEGACY_LIST_PANEL_MIN_WIDTH, Math.floor(window.innerWidth * 0.7));
+      const maxWidth = Math.min(LEGACY_LIST_PANEL_MAX_WIDTH, viewportCap);
+      const deltaX = drag.startX - event.clientX;
+      setListPanelWidth(clamp(drag.startWidth + deltaX, LEGACY_LIST_PANEL_MIN_WIDTH, maxWidth));
+    };
+
+    const handlePointerUp = () => {
+      endResize();
+    };
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerUp);
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
+      endResize();
+    };
+  }, []);
+
+  const handleListPanelResizeStart = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(max-width: 1080px)").matches) return;
+    const panel = listPanelRef.current;
+    if (!panel) return;
+    event.preventDefault();
+    listPanelResizeRef.current = {
+      startX: event.clientX,
+      startWidth: panel.getBoundingClientRect().width,
+    };
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  };
+
+  useEffect(() => {
     const mapPanel = mapPanelRef.current;
     if (!mapPanel) return;
 
@@ -1588,7 +1657,15 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
   }, [isTimelineOpen]);
 
   return (
-    <main className="legacy-app">
+    <main className="legacy-app" data-theme={themeMode}>
+      <button
+        type="button"
+        className="legacy-theme-toggle"
+        onClick={() => setThemeMode((current) => (current === "light" ? "dark" : "light"))}
+        aria-label={`Switch to ${themeMode === "light" ? "dark" : "light"} mode`}
+      >
+        {themeMode === "light" ? "Dark mode" : "Light mode"}
+      </button>
       <header className="legacy-banner">
         <div className="legacy-banner-title">
           <picture className="legacy-banner-art">
@@ -2040,7 +2117,17 @@ export function FestivalMapApp({ venues, events, dataSourceLabel, debug }: Festi
           ) : null}
         </section>
 
-        <aside className="legacy-list-panel">
+        <aside
+          className="legacy-list-panel"
+          ref={listPanelRef}
+          style={listPanelWidth ? { width: `${listPanelWidth}px` } : undefined}
+        >
+          <button
+            type="button"
+            className="legacy-list-panel-resizer"
+            aria-label="Resize info panel"
+            onPointerDown={handleListPanelResizeStart}
+          />
           <section className="legacy-list-block legacy-list-controls">
             <div className="legacy-search-row">
               <input
